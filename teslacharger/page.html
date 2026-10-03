@@ -297,6 +297,7 @@ html.dark,html.dark body{background:#0e0e0e}
     </div>
     <nav class="tabs" aria-label="Sezioni">
       <button class="tab sl on" id="tabR" aria-current="page"><span class="ic f" aria-hidden="true">bolt</span><span class="t-ts">Ricarica</span></button>
+      <button class="tab sl" id="tabC" aria-current="false"><span class="ic" aria-hidden="true">home</span><span class="t-ts">Casa</span></button>
       <button class="tab sl" id="tabA" aria-current="false"><span class="ic" aria-hidden="true">directions_car</span><span class="t-ts">Auto</span></button>
       <span class="tab-ind" id="tabind"></span>
     </nav>
@@ -497,6 +498,49 @@ html.dark,html.dark body{background:#0e0e0e}
     </section>
   </main>
 
+  <!-- ================= CASA ================= -->
+  <main class="page fade-through" id="viewC" hidden>
+    <section class="stag">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Oggi</h2><span class="chip-a t-lm"><span class="ic s18" aria-hidden="true">schedule</span><span id="hometime">Impianto –</span></span></div>
+      <div class="dgrid" id="hometoday"></div>
+    </section>
+
+    <section class="stag" style="animation-delay: 60ms">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Pannelli e inverter adesso</h2></div>
+      <div class="dgrid" id="homelive"></div>
+    </section>
+
+    <section class="stag" style="animation-delay: 100ms">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Batteria di casa</h2></div>
+      <div class="dgrid" id="homebattery"></div>
+    </section>
+
+    <section class="card stag" style="animation-delay: 140ms">
+      <h2 class="t-tm" style="margin: 0">Produzione dei pannelli</h2>
+      <span class="t-bs v">Ultimi 14 giorni, kWh</span>
+      <div class="chart" id="homechart">
+        <div class="gl" style="bottom: 0"><span>0</span></div>
+        <div class="gl" style="bottom: 55px"><span id="hglmid">5</span></div>
+        <div class="gl" style="bottom: 110px"><span id="hglmax">10</span></div>
+      </div>
+      <div class="xlab" id="homexlab"></div>
+      <div class="detail">
+        <span class="t-ts" id="homeseltitle">Nessun dato</span>
+        <span class="t-bs v" id="homeseltext"></span>
+      </div>
+    </section>
+
+    <section class="stag" style="animation-delay: 180ms">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Da quando esiste l'impianto</h2></div>
+      <div class="dgrid" id="homelife"></div>
+    </section>
+
+    <section class="stag" style="animation-delay: 220ms" id="alarmsec" hidden>
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Ultimi avvisi dell'inverter</h2></div>
+      <div class="group" id="alarms"></div>
+    </section>
+  </main>
+
   <!-- ================= AUTO ================= -->
   <main class="page fade-through" id="viewA" hidden>
     <section class="car-hero stag">
@@ -648,24 +692,30 @@ const mq = matchMedia("(prefers-color-scheme: dark)");
 const theme = () => { $("app").classList.toggle("dark", mq.matches); document.documentElement.classList.toggle("dark", mq.matches); };
 theme(); mq.addEventListener("change", theme);
 
+const TABS = { R: "tabR", C: "tabC", A: "tabA" };
 function placeIndicator() {
-  const tab = state.tab === "R" ? $("tabR") : $("tabA");
+  const tab = $(TABS[state.tab]);
   $("tabind").style.transform = "translateX(" + (tab.offsetLeft + tab.offsetWidth / 2 - 52) + "px)";
 }
 function switchTab(t) {
   if (t === state.tab) return;
   state.tab = t;
-  const auto = t === "A";
-  $("viewR").hidden = auto; $("viewA").hidden = !auto; $("fab").hidden = !auto;
-  $("tabR").classList.toggle("on", !auto); $("tabA").classList.toggle("on", auto);
-  $("tabR").querySelector(".ic").classList.toggle("f", !auto); $("tabA").querySelector(".ic").classList.toggle("f", auto);
-  $("tabR").setAttribute("aria-current", auto ? "false" : "page"); $("tabA").setAttribute("aria-current", auto ? "page" : "false");
-  $("snack").classList.toggle("fab-up", auto);
+  for (const key in TABS) {
+    const on = key === t, tab = $(TABS[key]);
+    $("view" + key).hidden = !on;
+    tab.classList.toggle("on", on);
+    tab.querySelector(".ic").classList.toggle("f", on);
+    tab.setAttribute("aria-current", on ? "page" : "false");
+  }
+  $("fab").hidden = t !== "A";
+  $("snack").classList.toggle("fab-up", t === "A");
   window.scrollTo(0, 0);
   placeIndicator();
-  if (auto) refreshHistory();
+  if (t === "A") refreshHistory();
+  if (t === "C") refreshHome();
 }
 $("tabR").addEventListener("click", () => switchTab("R"));
+$("tabC").addEventListener("click", () => switchTab("C"));
 $("tabA").addEventListener("click", () => switchTab("A"));
 window.addEventListener("resize", placeIndicator);
 window.addEventListener("scroll", () => {
@@ -1079,6 +1129,94 @@ function renderHistory(h) {
   }
 }
 
+// ---- sezione Casa ----
+const pctOf = (part, whole) => (whole > 0 ? Math.round(Math.min(1, Math.max(0, part / whole)) * 100) + "%" : "–");
+const val = (v, d = 1) => (v == null ? "–" : fmt(v, d));
+function renderHome(h) {
+  state.home = h;
+  $("hometime").textContent = h.time ? "Impianto " + h.time.slice(11, 16) : "Impianto –";
+  const d = h.days[h.days.length - 1], today = $("hometoday");
+  today.textContent = "";
+  today.append(
+    cell("Prodotta dai pannelli", val(d.pv), "kWh", "Batteria di casa: +" + val(d.battery_in) + " / −" + val(d.battery_out) + " kWh"),
+    cell("Consumata", val(d.load), "kWh", "Casa e auto insieme"),
+    cell("Presa dalla rete", val(d.imported), "kWh", "Energia comprata"),
+    cell("Ceduta alla rete", val(d.exported), "kWh", "Energia non usata in casa"),
+    cell("Autosufficienza", pctOf(d.load - d.imported, d.load), "", "Consumi coperti senza comprare energia"),
+    cell("Autoconsumo", pctOf(d.pv - d.exported, d.pv), "", "Produzione usata in casa, non ceduta"),
+  );
+  const l = h.live, live = $("homelive");
+  live.textContent = "";
+  l.strings.forEach((s, n) => live.append(cell("Stringa " + (n + 1), val(s.w / 1000, 2), "kW", val(s.v, 0) + " V · " + val(s.a) + " A")));
+  live.append(
+    cell("Inverter", l.inverter_temp != null ? Math.round(l.inverter_temp) + "°" : "–", "", "Eroga " + kw(l.inverter_w || 0) + " kW"),
+    cell("Rete", val(l.grid_v, 0), "V", val(l.grid_hz, 2) + " Hz · " + (Math.abs(l.grid_w || 0) < 50 ? "nessuno scambio" : l.grid_w > 0 ? "cedi " + kw(l.grid_w) + " kW" : "prelevi " + kw(l.grid_w) + " kW")),
+  );
+  const b = h.battery, bat = $("homebattery");
+  bat.textContent = "";
+  bat.append(
+    cell("Carica", b.soc != null ? b.soc + "%" : "–", "", val(b.remaining_kwh) + " kWh disponibili"),
+    cell("Potenza", kw(b.power_w || 0), "kW", (b.power_w || 0) > 50 ? "Si sta caricando" : (b.power_w || 0) < -50 ? "Si sta scaricando" : "Ferma"),
+    cell("Salute", b.soh != null ? b.soh + "%" : "–", "", "Capacità rimasta rispetto a nuova"),
+    cell("Cicli", b.cycles != null ? b.cycles.toLocaleString("it-IT") : "–", "", "Cariche e scariche complete"),
+    cell("Temperatura", b.temp != null ? Math.round(b.temp) + "°" : "–", "", val(b.voltage, 0) + " V ai morsetti"),
+    cell("Resa", pctOf(b.discharged_kwh, b.charged_kwh), "", "Energia restituita su " + Math.round(b.charged_kwh || 0).toLocaleString("it-IT") + " kWh immagazzinati"),
+  );
+  renderHomeChart(h);
+  const f = h.lifetime, life = $("homelife");
+  life.textContent = "";
+  const mwh = (k) => (k == null ? "–" : fmt(k / 1000));
+  life.append(
+    cell("Prodotta", mwh(f.pv_kwh), "MWh", "Dai pannelli"),
+    cell("Presa dalla rete", mwh(f.imported_kwh), "MWh", "Energia comprata"),
+    cell("Ceduta alla rete", mwh(f.exported_kwh), "MWh", "Energia non usata in casa"),
+    cell("Batteria", mwh(b.discharged_kwh), "MWh", "Energia restituita dalla batteria"),
+  );
+  $("alarmsec").hidden = !h.alarms.length;
+  $("alarms").textContent = "";
+  for (const a of h.alarms) {
+    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
+    const glyph = el("span", "ic s20", "warning");
+    glyph.setAttribute("aria-hidden", "true");
+    ic.append(glyph);
+    const minutes = a.end ? Math.round((new Date(a.end.replace(" ", "T")) - new Date(a.start.replace(" ", "T"))) / 60000) : null;
+    body.append(el("div", "t-bl", a.name));
+    body.append(el("div", "t-bs v", Number(a.start.slice(8, 10)) + " " + MONTHS[Number(a.start.slice(5, 7)) - 1] + " " + a.start.slice(0, 4) + " alle " + a.start.slice(11, 16) + (minutes != null ? ", durata " + minutes + " min" : ", in corso")));
+    row.append(ic, body);
+    $("alarms").append(row);
+  }
+}
+function renderHomeChart(h) {
+  const days = h.days, today = dayKey(new Date());
+  if (state.homeBar == null || state.homeBar >= days.length) state.homeBar = days.length - 1;
+  const top = Math.max(10, Math.ceil(Math.max(...days.map((d) => d.pv)) / 5) * 5), scale = 110 / top;
+  $("hglmid").textContent = fmt(top / 2, top % 2 ? 1 : 0);
+  $("hglmax").textContent = top;
+  const chart = $("homechart"), xlab = $("homexlab");
+  chart.querySelectorAll(".bcol").forEach((x) => x.remove());
+  xlab.textContent = "";
+  days.forEach((d, i) => {
+    const col = el("button", "bcol" + (i === state.homeBar ? " sel" : ""));
+    col.setAttribute("aria-label", longDay(d.day, today) + ", " + fmt(d.pv) + " kWh prodotti");
+    const seg = el("span", d.pv > 0 ? "bseg sun" : "bseg empty");
+    if (d.pv > 0) { seg.style.height = Math.max(3, Math.round(d.pv * scale)) + "px"; seg.style.animationDelay = i * 35 + "ms"; }
+    col.append(seg);
+    col.addEventListener("click", () => { state.homeBar = i; renderHomeChart(h); });
+    chart.append(col);
+    xlab.append(el("span", i === state.homeBar ? "sel" : "", String(Number(d.day.slice(8, 10)))));
+  });
+  const d = days[state.homeBar];
+  $("homeseltitle").textContent = longDay(d.day, today) + " · " + fmt(d.pv) + " kWh prodotti";
+  $("homeseltext").textContent = "Consumati " + fmt(d.load) + " · dalla rete " + fmt(d.imported) + " · in rete " + fmt(d.exported) + " · autosufficienza " + pctOf(d.load - d.imported, d.load);
+}
+async function refreshHome() {
+  try {
+    const r = await fetch("/api/home", { cache: "no-store" });
+    if (r.ok) renderHome(await r.json());
+    else toast("Dati dell'impianto non disponibili in questo momento");
+  } catch (e) {}
+}
+
 let refreshing = false;
 $("fab").addEventListener("click", async () => {
   if (refreshing) return;
@@ -1191,7 +1329,7 @@ drawRing(0, 100);
 refresh();
 initPush().catch(() => {});
 setInterval(refresh, 30000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(); if (state.tab === "A") refreshHistory(); } });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(); if (state.tab === "A") refreshHistory(); if (state.tab === "C") refreshHome(); } });
 document.fonts && document.fonts.ready.then(placeIndicator);
 </script>
 </body>

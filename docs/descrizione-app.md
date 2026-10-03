@@ -78,7 +78,7 @@ Octopus sceglie in autonomia in quali ore della notte caricare per rispettare li
 
 ## Cosa mostra la webapp
 
-La webapp ha una schermata di accesso e due sezioni, "Ricarica" e "Auto", tra cui si passa con due pulsanti in alto.
+La webapp ha una schermata di accesso e tre sezioni, "Ricarica", "Casa" e "Auto", tra cui si passa con tre pulsanti in alto.
 
 ### Accesso
 
@@ -101,6 +101,19 @@ Alla prima apertura viene chiesta una password. Una volta entrati, il dispositiv
 7. **Ultime manovre**: l'elenco cronologico delle azioni del sistema e dell'utente, con data e ora (avvii, stop, regolazioni, cambi di modalità, consensi, modifiche alla carica notturna).
 
 Due avvisi possono comparire in cima alla sezione: uno quando l'ultimo ciclo del sistema non è riuscito, con il motivo, e uno quando il sistema è in modalità di prova, cioè mostra cosa farebbe senza inviare comandi all'auto.
+
+### Sezione "Casa"
+
+Raccoglie tutto ciò che l'impianto fotovoltaico racconta di sé. È di sola consultazione.
+
+1. **Oggi**: energia prodotta dai pannelli, consumata (casa e auto insieme), presa dalla rete e ceduta alla rete, più due percentuali: l'autosufficienza (quanta parte dei consumi è stata coperta senza comprare energia) e l'autoconsumo (quanta parte della produzione è stata usata in casa).
+2. **Pannelli e inverter adesso**: potenza, tensione e corrente di ciascuna delle due stringhe di pannelli, temperatura e potenza dell'inverter, tensione e frequenza della rete.
+3. **Batteria di casa**: carica ed energia disponibile, potenza in ingresso o uscita, stato di salute, numero di cicli, temperatura, e la resa (energia restituita rispetto a quella immagazzinata).
+4. **Produzione dei pannelli, ultimi 14 giorni**: un grafico con una colonna per giorno. Selezionando un giorno compaiono consumi, scambi con la rete e autosufficienza.
+5. **Da quando esiste l'impianto**: i totali di energia prodotta, comprata, ceduta e passata dalla batteria.
+6. **Ultimi avvisi dell'inverter**: gli ultimi eventi anomali registrati, con data e durata.
+
+I dati si aggiornano ogni 5 minuti.
 
 ### Sezione "Auto"
 
