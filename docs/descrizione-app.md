@@ -106,11 +106,14 @@ Due avvisi possono comparire in cima alla sezione: uno quando l'ultimo ciclo del
 
 Raccoglie le informazioni sull'auto e lo storico delle ricariche.
 
-1. **Intestazione**: nome dell'auto, data e ora dell'ultima lettura, pulsante per aggiornare i dati. Se l'auto è in standby l'aggiornamento non è possibile e viene detto.
+1. **Intestazione**: nome dell'auto, data e ora dell'ultima lettura, pulsante per aggiornare i dati. Se l'auto è in standby il pulsante la sveglia e attende che risponda, cosa che può richiedere fino a un minuto.
 2. **Dati dell'auto**: batteria e limite di carica impostato, autonomia stimata in chilometri, chilometri totali, temperatura interna ed esterna, versione del software e stato di chiusura.
-3. **Ricariche a casa, ultimi 14 giorni**: un grafico con una colonna per giorno. Ogni colonna è divisa in tre parti: energia dal sole, energia caricata di giorno da rete o batteria, energia caricata di notte con Octopus. Sotto, un riepilogo del mese in corso: kWh totali, quota dal sole in percentuale, kWh notturni e kWh diurni non solari. La quota di sole è una stima.
-4. **Consumi di guida**: una stima dei kWh ogni 100 km, calcolata confrontando chilometri percorsi e batteria consumata. Compare dopo che sono stati registrati almeno 50 km. Prima, viene indicato che la stima non è ancora disponibile.
-5. **Esci**: chiude la sessione.
+3. **Batteria e ricarica**: indicatori calcolati dalle letture nel tempo. Capacità stimata della batteria, autonomia che l'auto si attribuisce al 100%, efficienza della ricarica (energia arrivata in batteria rispetto a quella presa dalla presa), tensione della presa sotto carico, consumo da ferma, batteria utilizzabile, numero di cariche consecutive al 100%, corrente offerta dal cavo. Ogni indicatore compare quando ci sono abbastanza dati: prima, indica quanti ne mancano.
+4. **Stato dell'auto**: un elenco di voci con il loro valore, per esempio sportello di ricarica, carica programmata, climatizzatore, modalità Sentinella, dashcam, porte e finestrini, aggiornamenti software.
+5. **Ricariche a casa, ultimi 14 giorni**: un grafico con una colonna per giorno. Ogni colonna è divisa in tre parti: energia dal sole, energia caricata di giorno da rete o batteria, energia caricata di notte con Octopus. Sotto, un riepilogo del mese in corso: kWh totali, quota dal sole in percentuale, kWh notturni e kWh diurni non solari. La quota di sole è una stima.
+6. **Consumi di guida**: una stima dei kWh ogni 100 km, calcolata confrontando chilometri percorsi e batteria consumata. Compare dopo che sono stati registrati almeno 50 km. Prima, viene indicato che la stima non è ancora disponibile.
+7. **Sotto il cofano**: dati tecnici nei codici interni di Tesla (motore, computer di guida, colore, cerchi e simili).
+8. **Esci**: chiude la sessione.
 
 Lo storico parte dal giorno di attivazione del sistema: non esistono dati precedenti.
 

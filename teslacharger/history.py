@@ -7,6 +7,10 @@ from pathlib import Path
 
 # Chilometri registrati oltre i quali la stima dei consumi è attendibile
 MIN_KM = 50
+# Soglie oltre le quali gli altri indicatori sono attendibili
+MIN_POINTS = 10  # punti percentuali di batteria caricati sotto osservazione
+MIN_WALL_KWH = 2  # energia prelevata dalla presa sotto osservazione
+MIN_IDLE_HOURS = 12  # ore di sosta tra due letture
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS plant (
@@ -26,6 +30,12 @@ class History:
         path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(path, check_same_thread=False)
         self._db.executescript(SCHEMA)
+        # Colonne aggiunte dopo la prima versione
+        present = {row[1] for row in self._db.execute("PRAGMA table_info(car)")}
+        for column in ("energy_added REAL", "voltage REAL", "amps REAL"):
+            if column.split()[0] not in present:
+                self._db.execute(f"ALTER TABLE car ADD COLUMN {column}")
+        self._db.commit()
         self._lock = threading.Lock()
 
     def _run(self, sql: str, args=()) -> None:
@@ -45,13 +55,17 @@ class History:
 
     def log_car(self, when: datetime, info: dict) -> None:
         self._run(
-            "INSERT OR REPLACE INTO car VALUES (?, ?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO car (time, level, range_km, odometer_km, charging, energy_added, voltage, amps)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 when.isoformat(timespec="seconds"),
                 info.get("level"),
                 info.get("range_km"),
                 info.get("odometer_km"),
                 int(bool(info.get("charging"))),
+                info.get("energy_added_kwh"),
+                info.get("voltage"),
+                info.get("amps"),
             ),
         )
 
@@ -115,3 +129,48 @@ class History:
                 km += odo_b - odo_a
                 percent += level_a - level_b
         return {"km": round(km), "percent": round(percent), "ready": km >= MIN_KM}
+
+    def insights(self) -> dict:
+        """Indicatori ricavati dalle letture dell'auto. Ogni voce è None finché i dati non bastano."""
+        rows = self._all(
+            "SELECT time, level, range_km, odometer_km, charging, energy_added, voltage, amps"
+            " FROM car WHERE level IS NOT NULL ORDER BY time"
+        )
+        added = gained = wall_kwh = wall_added = 0.0
+        idle_drop = idle_hours = 0.0
+        for a, b in zip(rows, rows[1:]):
+            hours = (datetime.fromisoformat(b[0]) - datetime.fromisoformat(a[0])).total_seconds() / 3600
+            if hours <= 0:
+                continue
+            both_charging = a[4] and b[4] and a[5] is not None and b[5] is not None
+            if both_charging and hours < 0.34 and b[5] >= a[5] and b[1] >= a[1]:
+                # Due letture della stessa carica: energia entrata in batteria e punti guadagnati
+                added += b[5] - a[5]
+                gained += b[1] - a[1]
+                if a[6] and a[7] and b[6] and b[7]:
+                    wall_kwh += (a[6] * a[7] + b[6] * b[7]) / 2 * hours / 1000
+                    wall_added += b[5] - a[5]
+            parked = a[3] is not None and b[3] is not None and abs(b[3] - a[3]) < 0.5
+            if parked and not a[4] and not b[4] and 1 <= hours <= 72 and b[1] <= a[1]:
+                idle_drop += a[1] - b[1]
+                idle_hours += hours
+
+        ranges = [(r[0], r[2] / r[1] * 100) for r in rows if r[2] and r[1] >= 20]
+        last_charge = next((r for r in reversed(rows) if r[4] and r[6] and r[7]), None)
+        return {
+            "capacity_kwh": round(added / gained * 100, 1) if gained >= MIN_POINTS else None,
+            "capacity_points": round(gained),
+            "capacity_points_needed": MIN_POINTS,
+            "full_range_km": round(ranges[-1][1]) if ranges else None,
+            "full_range_first_km": round(ranges[0][1]) if len(ranges) > 1 else None,
+            "full_range_since": ranges[0][0][:10] if len(ranges) > 1 else None,
+            "efficiency": round(wall_added / wall_kwh * 100) if wall_kwh >= MIN_WALL_KWH else None,
+            "efficiency_kwh": round(wall_kwh, 1),
+            "efficiency_kwh_needed": MIN_WALL_KWH,
+            "plug_voltage": round(last_charge[6]) if last_charge else None,
+            "plug_amps": round(last_charge[7]) if last_charge else None,
+            "plug_time": last_charge[0] if last_charge else None,
+            "idle_percent_per_day": round(idle_drop / idle_hours * 24, 1) if idle_hours >= MIN_IDLE_HOURS else None,
+            "idle_hours": round(idle_hours),
+            "idle_hours_needed": MIN_IDLE_HOURS,
+        }

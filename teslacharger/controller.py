@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import threading
+import time
 from dataclasses import asdict, replace
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -20,6 +21,9 @@ log = logging.getLogger("teslacharger")
 MAX_EVENTS = 40
 DISPATCH_SYNC = timedelta(minutes=30)
 ERRORS_BEFORE_ALERT = 3
+# Dopo il risveglio l'auto risponde in genere entro mezzo minuto
+WAKE_ATTEMPTS = 8
+WAKE_PAUSE_SECONDS = 6
 MODE_NAMES = {Mode.BOOST: "Carica subito", Mode.SOLAR: "Carica col sole", Mode.AUTO: "Automatica"}
 ACTION_ICONS = {
     Action.START: "play_circle",
@@ -142,11 +146,20 @@ class Controller:
         self._wakeup.set()
 
     def refresh_car(self) -> bool:
-        """Lettura dell'auto richiesta dall'utente. Non la sveglia: False se è in standby."""
+        """Lettura dell'auto richiesta dall'utente: se dorme la sveglia e aspetta che risponda."""
+        car = self.car.status()
+        if car is None:
+            self.car.wake()
+            for _ in range(WAKE_ATTEMPTS):
+                time.sleep(WAKE_PAUSE_SECONDS)
+                car = self.car.status()
+                if car is not None:
+                    break
         with self._lock:
-            read = self._read_car(datetime.now()) is not None
-            self._save()
-            return read
+            if car is not None:
+                self._store_car(datetime.now(), car)
+                self._save()
+            return car is not None
 
     def snapshot(self) -> dict:
         with self._lock:
@@ -177,6 +190,7 @@ class Controller:
             "month": totals,
             "since": self.history.since(),
             "consumption": self.history.consumption(),
+            "insights": self.history.insights(),
         }
 
     # --- ciclo ----------------------------------------------------------------
@@ -219,12 +233,15 @@ class Controller:
 
     def _read_car(self, now: datetime) -> CarStatus | None:
         car = self.car.status()
+        self._store_car(now, car)
+        return car
+
+    def _store_car(self, now: datetime, car: CarStatus | None) -> None:
         if car is not None and self.car.last_info:
             info = {**self.car.last_info, "time": now.isoformat(timespec="seconds")}
             self.status["car_info"] = info
             self.history.log_car(now, info)
         self.status["car"] = {**asdict(car), "time": now.isoformat(timespec="seconds")} if car else None
-        return car
 
     def _auto_switch(self, now: datetime, ours: bool) -> None:
         """Passaggi automatici: al mattino a "carica col sole", la sera ad "automatica"."""

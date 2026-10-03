@@ -509,7 +509,7 @@ html.dark,html.dark body{background:#0e0e0e}
       </div>
       <div class="banner dry" id="standby" style="align-self: stretch; padding: 12px 16px; align-items: center" hidden>
         <span class="ic s20" style="color: var(--n)" aria-hidden="true">bedtime</span>
-        <span class="t-bm">Auto in standby: i dati sono dell'ultima lettura e non si possono aggiornare ora.</span>
+        <span class="t-bm">L'auto non ha risposto al risveglio: i dati sono dell'ultima lettura.</span>
       </div>
       <div class="ring" id="ring" role="img" aria-label="Batteria dell'auto">
         <svg width="232" height="232" viewBox="0 0 232 232">
@@ -533,6 +533,16 @@ html.dark,html.dark body{background:#0e0e0e}
       <div class="dcell"><span class="t-lm v">Temperatura</span><span class="dval" id="dtemp">–</span><span class="t-bs v" id="dtempsub">dentro</span></div>
       <div class="dcell"><span class="t-lm v">Software</span><span class="dval" style="font-size: 20px" id="dsw">–</span><span class="t-bs v">versione installata</span></div>
       <div class="dcell"><span class="t-lm v">Chiusura</span><span class="dval" style="display: flex; align-items: center; gap: 6px"><span class="ic f" id="dlockic" aria-hidden="true">lock</span><span id="dlock">–</span></span><span class="t-bs v">porte e bagagliai</span></div>
+    </section>
+
+    <section class="stag" style="animation-delay: 90ms">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Batteria e ricarica</h2></div>
+      <div class="dgrid" id="insights"></div>
+    </section>
+
+    <section class="stag" style="animation-delay: 100ms" id="rowssec" hidden>
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Stato dell'auto</h2></div>
+      <div class="group" id="rows"></div>
     </section>
 
     <section class="card stag" style="animation-delay: 120ms">
@@ -579,6 +589,11 @@ html.dark,html.dark body{background:#0e0e0e}
         <div class="lin" id="consbar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="50" aria-label="Chilometri registrati"><i id="consfill" style="width: 0%"></i></div>
         <span class="t-bs v" style="display: block; margin-top: 6px" id="conskm">0 km su 50</span>
       </div>
+    </section>
+
+    <section class="stag" id="specssec" hidden>
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Sotto il cofano</h2><span class="t-bs v">codici interni di Tesla</span></div>
+      <div class="group" id="specs"></div>
     </section>
 
     <button class="btn text sl" style="align-self: center" id="asklogout"><span class="ic s20" aria-hidden="true">logout</span>Esci da questo dispositivo</button>
@@ -937,9 +952,67 @@ function renderCar(s) {
   $("dodo").textContent = i.odometer_km != null ? Math.round(i.odometer_km).toLocaleString("it-IT") : "–";
   $("dtemp").textContent = i.inside_temp != null ? Math.round(i.inside_temp) + "°" : "–";
   $("dtempsub").textContent = "dentro" + (i.outside_temp != null ? " · " + Math.round(i.outside_temp) + "° fuori" : "");
+  renderRows(i);
+  renderInsights();
   $("dsw").textContent = i.software || "–";
   $("dlock").textContent = i.locked == null ? "–" : i.locked ? "Chiusa" : "Aperta";
   $("dlockic").textContent = i.locked === false ? "lock_open" : "lock";
+}
+function cell(label, value, unit, sub) {
+  const c = el("div", "dcell"), v = el("span", "dval", value);
+  c.append(el("span", "t-lm v", label));
+  if (unit) { v.append(" "); v.append(el("small", "t-bs v", unit)); }
+  c.append(v, el("span", "t-bs v", sub));
+  return c;
+}
+function renderInsights() {
+  const box = $("insights"), i = state.status && state.status.car_info, n = (state.hist && state.hist.insights) || {};
+  box.textContent = "";
+  box.append(n.capacity_kwh != null
+    ? cell("Capacità della batteria", fmt(n.capacity_kwh), "kWh", "Stima su " + n.capacity_points + " punti caricati sotto osservazione")
+    : cell("Capacità della batteria", "–", "", "Servono " + (n.capacity_points_needed || 10) + " punti di carica osservati, finora " + (n.capacity_points || 0)));
+  const trend = n.full_range_first_km != null && n.full_range_first_km !== n.full_range_km
+    ? "Erano " + n.full_range_first_km + " km il " + Number(n.full_range_since.slice(8, 10)) + "/" + Number(n.full_range_since.slice(5, 7))
+    : "Quanti km l'auto si attribuisce a batteria piena";
+  box.append(cell("Autonomia al 100%", n.full_range_km != null ? String(n.full_range_km) : "–", n.full_range_km != null ? "km" : "", trend));
+  box.append(n.efficiency != null
+    ? cell("Efficienza di ricarica", n.efficiency + "%", "", "Energia arrivata in batteria su " + fmt(n.efficiency_kwh) + " kWh presi dalla presa")
+    : cell("Efficienza di ricarica", "–", "", "Servono " + (n.efficiency_kwh_needed || 2) + " kWh osservati, finora " + fmt(n.efficiency_kwh || 0)));
+  box.append(n.plug_voltage != null
+    ? cell("Presa sotto carico", String(n.plug_voltage), "V", "A " + n.plug_amps + " A, lettura del " + Number(n.plug_time.slice(8, 10)) + "/" + Number(n.plug_time.slice(5, 7)) + " alle " + hhmm(n.plug_time))
+    : cell("Presa sotto carico", "–", "", "Tensione misurata dall'auto mentre carica"));
+  box.append(n.idle_percent_per_day != null
+    ? cell("Consumo da ferma", fmt(n.idle_percent_per_day) + "%", "al giorno", "Su " + n.idle_hours + " ore di sosta tra due letture")
+    : cell("Consumo da ferma", "–", "", "Servono " + (n.idle_hours_needed || 12) + " ore di sosta osservate, finora " + (n.idle_hours || 0)));
+  if (i && i.usable_level != null) {
+    const locked = i.level - i.usable_level;
+    box.append(cell("Batteria utilizzabile", i.usable_level + "%", "", locked > 0 ? locked + (locked === 1 ? " punto bloccato" : " punti bloccati") + " dalla batteria fredda" : "Tutta la carica è disponibile"));
+  }
+  if (i && i.full_charges_in_a_row != null) box.append(cell("Cariche al 100% di fila", String(i.full_charges_in_a_row), "", "Contatore tenuto dall'auto"));
+  if (i && i.pilot_amps != null) box.append(cell("Corrente offerta dal cavo", String(i.pilot_amps), "A", "Il massimo dichiarato dal caricatore"));
+}
+function renderRows(i) {
+  const rows = (i && i.status_rows) || [], specs = (i && i.specs) || [];
+  $("rowssec").hidden = !rows.length;
+  $("rows").textContent = "";
+  for (const r of rows) {
+    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
+    const glyph = el("span", "ic s20", r.icon);
+    glyph.setAttribute("aria-hidden", "true");
+    ic.append(glyph);
+    body.append(el("div", "t-bl", r.title));
+    if (r.sub) body.append(el("div", "t-bs v", r.sub));
+    row.append(ic, body, el("span", "t-ts", r.value));
+    $("rows").append(row);
+  }
+  $("specssec").hidden = !specs.length;
+  $("specs").textContent = "";
+  for (const sp of specs) {
+    const row = el("div", "li");
+    row.style.minHeight = "52px";
+    row.append(el("div", "li-body t-bm v", sp.label), el("span", "t-ts", sp.value));
+    $("specs").append(row);
+  }
 }
 function drawRingOnce(pct, limit) {
   const key = pct + "/" + limit;
@@ -993,6 +1066,7 @@ function renderHistory(h) {
   $("msun").textContent = mt > 0 ? Math.round(m.sun / mt * 100) + "%" : "–";
   $("mnight").textContent = fmt(m.night);
   $("mday").textContent = fmt(m.day_other);
+  renderInsights();
   const c = h.consumption || { km: 0, percent: 0, ready: false };
   $("consready").hidden = !c.ready; $("conswait").hidden = !!c.ready;
   if (c.ready) {
@@ -1010,14 +1084,16 @@ $("fab").addEventListener("click", async () => {
   if (refreshing) return;
   refreshing = true;
   $("fabspin").hidden = false; $("fabic").hidden = true; $("fablabel").textContent = "Lettura";
+  const slow = setTimeout(() => { $("fablabel").textContent = "Risveglio"; toast("L'auto dormiva: la sveglio, può volerci un minuto"); }, 4000);
   let ok = false;
   try { const r = await post("/api/car/refresh"); ok = r.ok && (await r.json()).ok; } catch (e) {}
+  clearTimeout(slow);
   refreshing = false;
   $("fabspin").hidden = true; $("fabic").hidden = false; $("fablabel").textContent = "Aggiorna";
   $("standby").hidden = ok;
   const i = state.status && state.status.car_info;
-  toast(ok ? "Dati dell'auto aggiornati" : "L'auto è in standby e non risponde." + (i ? " Dati delle " + readAt(i.time) : ""));
-  refresh();
+  toast(ok ? "Dati dell'auto aggiornati" : "L'auto non ha risposto al risveglio." + (i ? " Dati delle " + readAt(i.time) : ""));
+  refresh(); refreshHistory();
 });
 $("asklogout").addEventListener("click", () => { $("dialog").hidden = false; });
 $("dlgcancel").addEventListener("click", () => { $("dialog").hidden = true; });

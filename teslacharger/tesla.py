@@ -121,6 +121,130 @@ def _km(miles) -> float | None:
     return round(miles * 1.609344, 1) if miles is not None else None
 
 
+def _clock(minutes) -> str | None:
+    return f"{minutes // 60:02d}:{minutes % 60:02d}" if isinstance(minutes, int) else None
+
+
+PORT_LIGHTS = {
+    "Blue": "luce blu, in attesa",
+    "Green": "luce verde, carica completata",
+    "FlashingGreen": "luce verde lampeggiante, in carica",
+    "Amber": "luce ambra, cavo non inserito bene",
+    "FlashingAmber": "luce ambra lampeggiante, carica ridotta",
+    "Red": "luce rossa, errore",
+    "White": "luce bianca",
+    "Off": "luce spenta",
+}
+
+
+def _status_rows(cs: dict, vs: dict, climate: dict) -> list[dict]:
+    """Righe di stato per il pannello dell'auto. Compaiono solo i dati che l'auto fornisce."""
+    rows = []
+
+    def add(icon, title, value, sub=""):
+        if value is not None:
+            rows.append({"icon": icon, "title": title, "value": value, "sub": sub})
+
+    if cs.get("charge_port_door_open") is not None:
+        latch = "cavo bloccato" if cs.get("charge_port_latch") == "Engaged" else "cavo libero"
+        light = PORT_LIGHTS.get(cs.get("charge_port_color"), "")
+        add(
+            "ev_station", "Sportello di ricarica",
+            "Aperto" if cs["charge_port_door_open"] else "Chiuso",
+            ", ".join(x for x in (latch, light) if x).capitalize(),
+        )
+    start = _clock(cs.get("scheduled_charging_start_time_minutes"))
+    if cs.get("scheduled_charging_pending") and start:
+        add("schedule", "Carica programmata sull'auto", start, "È l'orario che Octopus ha impostato per stanotte")
+    departure = _clock(cs.get("scheduled_departure_time_minutes"))
+    if cs.get("preconditioning_enabled") and departure:
+        days = "nei giorni feriali" if cs.get("preconditioning_times") == "weekdays" else "tutti i giorni"
+        add("mode_heat", "Abitacolo pronto alla partenza", departure, f"Climatizzazione anticipata {days}")
+    if cs.get("battery_heater_on") is not None:
+        add(
+            "thermostat", "Riscaldamento della batteria",
+            "Attivo" if cs["battery_heater_on"] else "Spento",
+            "Quando è attivo, parte dell'energia di ricarica scalda la batteria",
+        )
+    if climate.get("is_climate_on") is not None:
+        setting = climate.get("driver_temp_setting")
+        add(
+            "ac_unit", "Climatizzatore",
+            "Acceso" if climate["is_climate_on"] else "Spento",
+            f"Impostato a {setting:.0f}°" if setting is not None else "",
+        )
+    if climate.get("cabin_overheat_protection"):
+        add(
+            "heat", "Protezione dal surriscaldamento",
+            {"On": "Attiva", "Off": "Spenta", "FanOnly": "Solo ventola"}.get(
+                climate["cabin_overheat_protection"], climate["cabin_overheat_protection"]
+            ),
+            "Raffredda l'abitacolo quando l'auto è parcheggiata al sole",
+        )
+    if vs.get("sentry_mode") is not None:
+        add("visibility", "Modalità Sentinella", "Attiva" if vs["sentry_mode"] else "Spenta")
+    if vs.get("dashcam_state"):
+        add(
+            "videocam", "Dashcam",
+            {"Recording": "Registra", "Unavailable": "Non disponibile", "Off": "Spenta"}.get(
+                vs["dashcam_state"], vs["dashcam_state"]
+            ),
+        )
+    openings = {
+        "finestrini": [vs.get(k) for k in ("fd_window", "fp_window", "rd_window", "rp_window")],
+        "porte": [vs.get(k) for k in ("df", "dr", "pf", "pr")],
+        "bagagliai": [vs.get(k) for k in ("ft", "rt")],
+    }
+    if any(v is not None for values in openings.values() for v in values):
+        open_parts = [name for name, values in openings.items() if any(values)]
+        add(
+            "sensor_door", "Porte, finestrini e bagagliai",
+            "Aperti" if open_parts else "Chiusi",
+            ("Aperti: " + ", ".join(open_parts)) if open_parts else "",
+        )
+    if vs.get("is_user_present") is not None:
+        add("person", "Qualcuno a bordo", "Sì" if vs["is_user_present"] else "No")
+    update = vs.get("software_update") or {}
+    if update.get("status"):
+        version = (update.get("version") or "").strip()
+        add(
+            "system_update", "Aggiornamento software",
+            f"{update.get('download_perc', 0)}%",
+            f"Versione {version} in arrivo" if version else "In arrivo",
+        )
+    if vs.get("valet_mode"):
+        add("key", "Modalità parcheggiatore", "Attiva")
+    if vs.get("service_mode"):
+        add("build", "Modalità assistenza", "Attiva")
+    return rows
+
+
+DRIVER_ASSIST = {"TeslaAP3": "Hardware 3", "TeslaAP4": "Hardware 4"}
+
+
+def _specs(vs: dict, config: dict) -> list[dict]:
+    """Dati tecnici e curiosità, nei codici interni di Tesla."""
+    specs = []
+
+    def add(label, value):
+        if value not in (None, "", "None"):
+            specs.append({"label": label, "value": str(value)})
+
+    add("Motore posteriore", config.get("rear_drive_unit"))
+    assist = config.get("driver_assist")
+    add("Computer di guida", f"{DRIVER_ASSIST[assist]} ({assist})" if assist in DRIVER_ASSIST else assist)
+    add("Pacchetto di efficienza", config.get("efficiency_package"))
+    add("Allestimento", config.get("trim_badging"))
+    add("Colore", config.get("exterior_color"))
+    add("Cerchi", config.get("wheel_type"))
+    add("Presa di ricarica", config.get("charge_port_type"))
+    add("Sportello motorizzato", {True: "Sì", False: "No"}.get(config.get("motorized_charge_port")))
+    add("Versione delle API dell'auto", vs.get("api_version"))
+    if vs.get("santa_mode") is not None:
+        add("Modalità Babbo Natale", "Attiva" if vs["santa_mode"] else "Spenta")
+    return specs
+
+
 class TeslaCar:
     """Lettura dello stato di carica e comandi all'auto.
 
@@ -145,7 +269,7 @@ class TeslaCar:
         try:
             data = api_get(
                 f"/api/1/vehicles/{self.vin()}/vehicle_data"
-                "?endpoints=charge_state%3Bvehicle_state%3Bclimate_state"
+                "?endpoints=charge_state%3Bvehicle_state%3Bclimate_state%3Bvehicle_config"
             )
         except HttpError as err:
             if err.status == 408:
@@ -154,6 +278,12 @@ class TeslaCar:
         cs = data["response"]["charge_state"]
         vs = data["response"].get("vehicle_state") or {}
         climate = data["response"].get("climate_state") or {}
+        config = data["response"].get("vehicle_config") or {}
+        update = vs.get("software_update") or {}
+
+        def any_open(*keys):
+            values = [vs.get(k) for k in keys]
+            return None if all(v is None for v in values) else any(values)
         self.last_info = {
             "name": vs.get("vehicle_name"),
             "level": cs.get("battery_level"),
@@ -169,7 +299,30 @@ class TeslaCar:
             "outside_temp": climate.get("outside_temp"),
             "software": (vs.get("car_version") or "").split(" ")[0] or None,
             "locked": vs.get("locked"),
+            "voltage": cs.get("charger_voltage"),
+            "battery_heater": cs.get("battery_heater_on"),
+            "port_open": cs.get("charge_port_door_open"),
+            "port_latch": cs.get("charge_port_latch"),
+            "sentry": vs.get("sentry_mode"),
+            "windows_open": any_open("fd_window", "fp_window", "rd_window", "rp_window"),
+            "doors_open": any_open("df", "dr", "pf", "pr"),
+            "trunks_open": any_open("ft", "rt"),
+            "user_present": vs.get("is_user_present"),
+            "update_status": update.get("status") or None,
+            "update_version": (update.get("version") or "").strip() or None,
+            "update_percent": update.get("download_perc"),
+            "car_type": config.get("car_type"),
+            "trim": config.get("trim_badging"),
+            "color": config.get("exterior_color"),
+            "wheels": config.get("wheel_type"),
         }
+        self.last_info.update(
+            usable_level=cs.get("usable_battery_level"),
+            full_charges_in_a_row=cs.get("max_range_charge_counter"),
+            pilot_amps=cs.get("charger_pilot_current"),
+            status_rows=_status_rows(cs, vs, climate),
+            specs=_specs(vs, config),
+        )
         return CarStatus(
             plugged=cs.get("charging_state") not in (None, "Disconnected"),
             charging=cs.get("charging_state") == "Charging",
