@@ -154,7 +154,6 @@ class TeslaCar:
         cs = data["response"]["charge_state"]
         vs = data["response"].get("vehicle_state") or {}
         climate = data["response"].get("climate_state") or {}
-        tyres = [vs.get(f"tpms_pressure_{w}") for w in ("fl", "fr", "rl", "rr")]
         self.last_info = {
             "name": vs.get("vehicle_name"),
             "level": cs.get("battery_level"),
@@ -166,7 +165,6 @@ class TeslaCar:
             "amps": cs.get("charger_actual_current"),
             "energy_added_kwh": cs.get("charge_energy_added"),
             "minutes_to_full": cs.get("minutes_to_full_charge"),
-            "tyres_bar": tyres if all(t is not None for t in tyres) else None,
             "inside_temp": climate.get("inside_temp"),
             "outside_temp": climate.get("outside_temp"),
             "software": (vs.get("car_version") or "").split(" ")[0] or None,

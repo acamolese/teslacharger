@@ -531,14 +531,6 @@ html.dark,html.dark body{background:#0e0e0e}
     <section class="dgrid stag" style="animation-delay: 60ms">
       <div class="dcell"><span class="t-lm v">Chilometri totali</span><span class="dval" id="dodo">–</span><span class="t-bs v">km</span></div>
       <div class="dcell"><span class="t-lm v">Temperatura</span><span class="dval" id="dtemp">–</span><span class="t-bs v" id="dtempsub">dentro</span></div>
-      <div class="dcell wide">
-        <span class="t-lm v">Pressione gomme</span>
-        <div class="tyres">
-          <div class="tyre-col"><span class="dval" style="font-size: 20px"><span id="tyfl">–</span> <small class="t-bs v">bar</small></span><span class="dval" style="font-size: 20px"><span id="tyrl">–</span> <small class="t-bs v">bar</small></span></div>
-          <div class="carbody" aria-hidden="true"><i id="tyifl" style="left: -7px; top: 14px"></i><i id="tyifr" style="right: -7px; top: 14px"></i><i id="tyirl" style="left: -7px; bottom: 14px"></i><i id="tyirr" style="right: -7px; bottom: 14px"></i></div>
-          <div class="tyre-col r"><span class="dval" style="font-size: 20px"><span id="tyfr">–</span> <small class="t-bs v">bar</small></span><span class="dval" style="font-size: 20px"><span id="tyrr">–</span> <small class="t-bs v">bar</small></span></div>
-        </div>
-      </div>
       <div class="dcell"><span class="t-lm v">Software</span><span class="dval" style="font-size: 20px" id="dsw">–</span><span class="t-bs v">versione installata</span></div>
       <div class="dcell"><span class="t-lm v">Chiusura</span><span class="dval" style="display: flex; align-items: center; gap: 6px"><span class="ic f" id="dlockic" aria-hidden="true">lock</span><span id="dlock">–</span></span><span class="t-bs v">porte e bagagliai</span></div>
     </section>
@@ -945,16 +937,6 @@ function renderCar(s) {
   $("dodo").textContent = i.odometer_km != null ? Math.round(i.odometer_km).toLocaleString("it-IT") : "–";
   $("dtemp").textContent = i.inside_temp != null ? Math.round(i.inside_temp) + "°" : "–";
   $("dtempsub").textContent = "dentro" + (i.outside_temp != null ? " · " + Math.round(i.outside_temp) + "° fuori" : "");
-  const t = i.tyres_bar;
-  if (t) {
-    const top = Math.max(...t);
-    [["fl", 0], ["fr", 1], ["rl", 2], ["rr", 3]].forEach(([k, n]) => {
-      const low = top - t[n] >= 0.2;
-      $("ty" + k).textContent = fmt(t[n]);
-      $("ty" + k).parentElement.style.color = low ? "var(--p)" : "";
-      $("tyi" + k).style.background = low ? "var(--p)" : "";
-    });
-  }
   $("dsw").textContent = i.software || "–";
   $("dlock").textContent = i.locked == null ? "–" : i.locked ? "Chiusa" : "Aperta";
   $("dlockic").textContent = i.locked === false ? "lock_open" : "lock";
