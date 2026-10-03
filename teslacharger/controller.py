@@ -50,6 +50,8 @@ class Controller:
     def set_mode(self, mode: Mode) -> None:
         with self._lock:
             self.mode = mode
+            # Una scelta esplicita dell'utente azzera le attese su risveglio e cavo
+            self.state = replace(self.state, last_wake=None, unplugged_at=None)
             self._event(f"modalità impostata: {mode.value}")
             self._save()
         self._wakeup.set()
