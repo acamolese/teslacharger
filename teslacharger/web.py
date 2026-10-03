@@ -123,6 +123,8 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                 controller.set_mode(Mode(data["mode"]))
             elif path == "/api/grid":
                 controller.set_grid_ok(bool(data["allow"]))
+            elif path == "/api/hold":
+                controller.set_hold(bool(data["enabled"]))
             elif path == "/api/target":
                 percent = data.get("percent")
                 controller.set_target(int(percent) if percent is not None else None, data.get("time") or None)

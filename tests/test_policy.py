@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime, time, timedelta
 
 from teslacharger.config import Settings
-from teslacharger.policy import Action, CarStatus, ControlState, Mode, decide, precheck
+from teslacharger.policy import Action, CarStatus, ControlState, Mode, decide, plan_battery_hold, precheck
 from teslacharger.solax import PlantSnapshot
 
 SETTINGS = Settings(
@@ -213,6 +213,40 @@ class StateTests(unittest.TestCase):
 
     def test_old_state_file_fields_are_ignored(self):
         self.assertEqual(ControlState.from_json({"soc_seen": 2, "unplugged_at": None}), ControlState())
+
+
+class BatteryHoldTests(unittest.TestCase):
+    ONE = datetime(2026, 10, 4, 1, 0)
+    WINDOWS = [(datetime(2026, 10, 4, 1, 0), datetime(2026, 10, 4, 3, 0)), (datetime(2026, 10, 4, 3, 0), datetime(2026, 10, 4, 5, 0))]
+
+    def plan(self, now, windows=None, held=None):
+        return plan_battery_hold(now, self.WINDOWS if windows is None else windows, held, SETTINGS)
+
+    def test_holds_for_the_whole_chain_of_night_windows(self):
+        p = self.plan(self.ONE + timedelta(minutes=1))
+        self.assertEqual((p.action, p.until), ("hold", datetime(2026, 10, 4, 5, 0)))
+        self.assertEqual(p.seconds, 4 * 3600 + 60)
+
+    def test_nothing_to_do_before_the_window(self):
+        self.assertIsNone(self.plan(self.ONE - timedelta(hours=1)))
+
+    def test_does_not_repeat_while_already_holding(self):
+        self.assertIsNone(self.plan(self.ONE + timedelta(minutes=30), held=datetime(2026, 10, 4, 5, 0)))
+
+    def test_extends_when_octopus_adds_a_window(self):
+        p = self.plan(self.ONE + timedelta(minutes=30), held=datetime(2026, 10, 4, 3, 0))
+        self.assertEqual((p.action, p.until), ("hold", datetime(2026, 10, 4, 5, 0)))
+
+    def test_releases_when_octopus_cancels_the_charge(self):
+        p = self.plan(self.ONE + timedelta(minutes=30), windows=[], held=datetime(2026, 10, 4, 5, 0))
+        self.assertEqual(p.action, "release")
+
+    def test_nothing_to_release_after_expiry(self):
+        self.assertIsNone(self.plan(datetime(2026, 10, 4, 6, 0), windows=[], held=datetime(2026, 10, 4, 5, 0)))
+
+    def test_daytime_windows_are_ignored(self):
+        day = [(NOON, NOON + timedelta(hours=1))]
+        self.assertIsNone(self.plan(NOON + timedelta(minutes=5), windows=day))
 
 
 if __name__ == "__main__":

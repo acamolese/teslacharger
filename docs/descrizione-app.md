@@ -76,6 +76,8 @@ La carica notturna è sempre attiva, qualunque sia la modalità. L'utente impost
 
 Octopus sceglie in autonomia in quali ore della notte caricare per rispettare livello e orario. Le preferenze valgono per tutti i giorni della settimana.
 
+C'è poi un interruttore, "Batteria di casa a riposo". Quando è attivo, per tutta la durata della carica notturna il sistema impedisce alla batteria di casa di scaricarsi: l'auto prende l'energia dalla rete a prezzo scontato e la batteria resta carica per la casa. Finita la carica, la batteria torna da sola al funzionamento normale. Se un blocco è in corso, viene indicato fino a che ora.
+
 ## Cosa mostra la webapp
 
 La webapp ha una schermata di accesso e tre sezioni, "Ricarica", "Casa" e "Auto", tra cui si passa con tre pulsanti in alto.

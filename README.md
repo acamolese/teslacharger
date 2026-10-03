@@ -63,6 +63,8 @@ Con "Carica col sole", nella fascia diurna, l'auto collegata carica con una quot
 
 Dopo la fascia diurna il sistema non carica: la batteria di casa resta alla casa, e l'auto si carica di notte con Octopus a prezzo scontato.
 
+Durante le finestre di carica notturna di Octopus il sistema può tenere a riposo la batteria di casa, con la modalità remota "solo carica" dell'inverter Solax: così l'auto non la svuota e prende dalla rete a prezzo scontato. Il blocco dura quanto la finestra e l'inverter torna da solo al funzionamento normale. Si attiva e disattiva dalla webapp.
+
 Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata. L'auto viene interrogata solo quando serve, perché le letture hanno un costo e la tengono sveglia.
 
 I dati di SolaxCloud si aggiornano ogni 5 minuti, quindi la regolazione procede a passi di 5 minuti e la batteria di casa assorbe le variazioni più rapide.

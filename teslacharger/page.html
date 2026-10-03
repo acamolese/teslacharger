@@ -454,6 +454,14 @@ html.dark,html.dark body{background:#0e0e0e}
       </div>
       <div class="t-bs v" style="margin-top: 6px; text-align: center">Tra le 4:00 e le 11:00, limiti fissati da Octopus</div>
 
+      <div style="display: flex; align-items: center; gap: 16px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--olv)">
+        <div style="flex: 1; min-width: 0">
+          <div class="t-ts" id="hold-l">Batteria di casa a riposo</div>
+          <div class="t-bs v" id="holdsub">Mentre Octopus carica l'auto, la batteria di casa non si scarica: l'auto prende dalla rete a prezzo scontato.</div>
+        </div>
+        <button class="sw" id="holdsw" role="switch" aria-checked="false" aria-labelledby="hold-l"><span class="sw-h"><span class="ic" aria-hidden="true">check</span></span></button>
+      </div>
+
       <div class="confirm t-bs" role="status">
         <span class="mini-li" id="octospin" aria-hidden="true" hidden></span>
         <span class="ic f s20 ok" id="octook" aria-hidden="true" hidden>check_circle</span>
@@ -916,7 +924,19 @@ function renderNight(s) {
   }
   if (state.level != null) { drawSlider(); drawReady(); }
   drawOcto();
+  const hold = s.hold || {};
+  $("holdsw").classList.toggle("on", !!hold.enabled);
+  $("holdsw").setAttribute("aria-checked", String(!!hold.enabled));
+  $("holdsub").textContent = hold.until
+    ? "In corso: la batteria di casa è a riposo fino alle " + hold.until + "."
+    : "Mentre Octopus carica l'auto, la batteria di casa non si scarica: l'auto prende dalla rete a prezzo scontato.";
 }
+$("holdsw").addEventListener("click", async () => {
+  const enabled = !$("holdsw").classList.contains("on");
+  const r = await post("/api/hold", { enabled });
+  toast(!r.ok ? "Modifica non riuscita" : enabled ? "Di notte la batteria di casa resterà a riposo" : "Di notte la batteria di casa potrà scaricarsi nell'auto");
+  soon();
+});
 let octoTimer;
 function scheduleOcto() {
   state.editing = true;

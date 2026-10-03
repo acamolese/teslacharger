@@ -12,9 +12,9 @@ from pathlib import Path
 from .config import Settings
 from .history import History
 from .octopus import OctopusClient
-from .policy import Action, CarStatus, ControlState, Decision, Mode, decide, precheck
+from .policy import Action, CarStatus, ControlState, Decision, Mode, decide, plan_battery_hold, precheck
 from .push import PushService
-from .solax import SolaxClient
+from .solax import MAX_HOLD_SECONDS, SolaxClient
 from .tesla import TeslaCar
 
 log = logging.getLogger("teslacharger")
@@ -59,12 +59,16 @@ class Controller:
         # Giorni in cui sono già avvenuti il passaggio del mattino e la richiesta di consenso
         self.switched_on: str | None = None
         self.asked_on: str | None = None
+        # Batteria di casa a riposo durante la carica notturna: scelta dell'utente e blocco in corso
+        self.hold_enabled = True
+        self.held_until: datetime | None = None
         self.state = ControlState()
         self.events: list[dict] = []
         self.status: dict = {}
         self._was_plugged: bool | None = None
         self._last_dispatch_sync: datetime | None = None
         self._errors = 0
+        self._hold_error: str | None = None
         self._home: dict | None = None
         self._home_time: datetime | None = None
         self._load()
@@ -83,6 +87,9 @@ class Controller:
         self.events = saved.get("events", [])
         self.switched_on = saved.get("switched_on")
         self.asked_on = saved.get("asked_on")
+        self.hold_enabled = saved.get("hold_enabled", True)
+        if saved.get("held_until"):
+            self.held_until = datetime.fromisoformat(saved["held_until"])
         self.status["car_info"] = saved.get("car_info")
         if saved.get("grid_ok_until"):
             self.grid_ok_until = datetime.fromisoformat(saved["grid_ok_until"])
@@ -97,6 +104,8 @@ class Controller:
                 "events": self.events,
                 "switched_on": self.switched_on,
                 "asked_on": self.asked_on,
+                "hold_enabled": self.hold_enabled,
+                "held_until": self.held_until.isoformat() if self.held_until else None,
                 "car_info": self.status.get("car_info"),
                 "grid_ok_until": self.grid_ok_until.isoformat() if self.grid_ok_until else None,
             })
@@ -130,6 +139,18 @@ class Controller:
                 self._event("verified_user", f"Consenso dato fino alle {end}", "Rete e batteria di casa")
             else:
                 self._event("gpp_bad", "Consenso revocato", "Scelto da te")
+            self._save()
+        self._wakeup.set()
+
+    def set_hold(self, enabled: bool) -> None:
+        """Attiva o disattiva il riposo della batteria di casa durante la carica notturna."""
+        with self._lock:
+            self.hold_enabled = enabled
+            self._event(
+                "battery_saver",
+                "Batteria di casa a riposo di notte: " + ("attivata" if enabled else "disattivata"),
+                "Scelta da te",
+            )
             self._save()
         self._wakeup.set()
 
@@ -172,6 +193,11 @@ class Controller:
                 "live": self.settings.live,
                 "poll_seconds": self.settings.poll_seconds,
                 "grid_ok": self._grid_ok(datetime.now()),
+                "hold": {
+                    "enabled": self.hold_enabled,
+                    "until": self.held_until.strftime("%H:%M")
+                    if self.held_until and self.held_until > datetime.now() else None,
+                },
                 "day_start": self.settings.day_start.strftime("%H:%M"),
                 "day_end": self.settings.day_end.strftime("%H:%M"),
                 "min_amps": self.settings.min_amps,
@@ -276,6 +302,27 @@ class Controller:
             end = datetime.fromisoformat(row["end"]).astimezone().replace(tzinfo=None)
             self.history.log_dispatch(start, end, row["kwh"])
 
+    def _hold_battery(self, now: datetime, windows: list) -> None:
+        """Tiene a riposo la batteria di casa mentre Octopus carica l'auto di notte."""
+        if not self.settings.live:
+            return
+        # Con l'opzione spenta resta solo da sbloccare un eventuale blocco in corso
+        plan = plan_battery_hold(now, windows if self.hold_enabled else [], self.held_until, self.settings)
+        if plan is None:
+            return
+        if plan.action == "release":
+            self.solax.release_battery()
+            self.held_until = None
+            self._event("battery_saver", "Batteria di casa di nuovo disponibile", "La carica notturna non è più in corso")
+            return
+        self.solax.hold_battery(min(plan.seconds, MAX_HOLD_SECONDS))
+        self.held_until = plan.until
+        self._event(
+            "battery_saver",
+            f"Batteria di casa a riposo fino alle {plan.until:%H:%M}",
+            "L'auto carica dalla rete a prezzo scontato",
+        )
+
     def _planned_window(self, device_id: str, now: datetime) -> dict | None:
         """Inizio e fine della prossima carica pianificata da Octopus, in ora locale."""
         windows = []
@@ -286,6 +333,14 @@ class Controller:
             end = datetime.fromisoformat(row["end"]).astimezone().replace(tzinfo=None)
             if end > now:
                 windows.append((start, end))
+        try:
+            self._hold_battery(now, windows)
+        except Exception as err:
+            # Un problema con l'inverter non deve fermare la gestione della ricarica
+            log.warning("blocco della batteria di casa non riuscito: %s", err)
+            if self._hold_error != str(err):
+                self._hold_error = str(err)
+                self._event("error", "Batteria di casa: comando non riuscito", str(err))
         if not windows:
             return None
         return {

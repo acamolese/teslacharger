@@ -236,3 +236,47 @@ def decide(
     if target != car.amps:
         return Decision(Action.SET_AMPS, detail, state, amps=target)
     return Decision(Action.HOLD, f"carica diurna in corso a {car.amps} A", state)
+
+
+# --- batteria di casa a riposo durante la carica notturna ---
+
+HOLD_MARGIN = timedelta(minutes=2)
+HOLD_TOLERANCE = timedelta(minutes=5)
+
+
+@dataclass(frozen=True)
+class HoldPlan:
+    # "hold": blocca la scarica per `seconds`; "release": sblocca subito
+    action: str
+    seconds: int = 0
+    until: datetime | None = None
+
+
+def plan_battery_hold(
+    now: datetime,
+    windows: list[tuple[datetime, datetime]],
+    held_until: datetime | None,
+    settings: Settings,
+) -> HoldPlan | None:
+    """Decide se tenere a riposo la batteria di casa mentre Octopus carica l'auto di notte.
+
+    Durante una finestra di carica notturna la batteria di casa non deve scaricarsi
+    nell'auto: l'auto prende dalla rete a prezzo scontato e la batteria resta per la casa.
+    Restituisce None se non c'è nulla da fare.
+    """
+    end = None
+    if not _in_day(now, settings):
+        # Fine della catena di finestre contigue che contiene questo momento
+        cursor = now
+        for start, stop in sorted(windows):
+            if start <= cursor + HOLD_TOLERANCE and stop > cursor:
+                cursor = end = stop
+    if end is None:
+        # Nessuna carica in corso: se un blocco è ancora attivo, non serve più
+        if held_until is not None and held_until > now:
+            return HoldPlan("release")
+        return None
+    if held_until is not None and held_until >= end - HOLD_TOLERANCE:
+        return None
+    seconds = int((end - now + HOLD_MARGIN).total_seconds())
+    return HoldPlan("hold", seconds=seconds, until=end)
