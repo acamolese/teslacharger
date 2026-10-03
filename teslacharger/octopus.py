@@ -10,6 +10,8 @@ ENDPOINT = "https://api.oeit-kraken.energy/v1/graphql/"
 # Il token Kraken dura un'ora: lo rinnoviamo con largo anticipo
 TOKEN_LIFETIME_SECONDS = 45 * 60
 STATE_BOOSTING = "BOOSTING"
+# Stato osservato quando l'auto non è collegata alla presa di casa
+STATE_UNPLUGGED = "SMART_CONTROL_NOT_AVAILABLE"
 
 
 @dataclass(frozen=True)
@@ -22,6 +24,10 @@ class VehicleStatus:
     @property
     def boosting(self) -> bool:
         return self.state == STATE_BOOSTING
+
+    @property
+    def plugged(self) -> bool:
+        return self.state != STATE_UNPLUGGED
 
 
 class OctopusClient:

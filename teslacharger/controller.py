@@ -51,7 +51,7 @@ class Controller:
         with self._lock:
             self.mode = mode
             # Una scelta esplicita dell'utente azzera le attese su risveglio e cavo
-            self.state = replace(self.state, last_wake=None, unplugged_at=None)
+            self.state = replace(self.state, last_wake=None, idle_at=None)
             self._event(f"modalità impostata: {mode.value}")
             self._save()
         self._wakeup.set()
@@ -87,10 +87,11 @@ class Controller:
         self.status.update(plant={**asdict(plant), "excess_w": plant.excess_w}, octopus=vehicle.state)
 
         car: CarStatus | None = None
-        if precheck(now, self.mode, plant, vehicle.boosting, self.state, self.settings) is None:
+        hints = (vehicle.boosting, vehicle.plugged)
+        if precheck(now, self.mode, plant, *hints, self.state, self.settings) is None:
             car = self.car.status()
             self.status["car"] = {**asdict(car), "time": now.isoformat(timespec="seconds")} if car else None
-        decision = decide(now, self.mode, plant, car, vehicle.boosting, self.state, self.settings)
+        decision = decide(now, self.mode, plant, car, *hints, self.state, self.settings)
         self.status["decision"] = {
             "action": decision.action.value,
             "reason": decision.reason,
@@ -113,7 +114,7 @@ class Controller:
                 self.state,
                 last_data_time=decision.state.last_data_time,
                 last_wake=decision.state.last_wake,
-                unplugged_at=decision.state.unplugged_at,
+                idle_at=decision.state.idle_at,
             )
             return
 
