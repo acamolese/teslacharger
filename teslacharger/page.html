@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TeslaCharger">
+<meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171a" media="(prefers-color-scheme: dark)">
+<title>TeslaCharger</title>
+<style>
+  :root {
+    --bg: #f4f1ea; --card: #fffdf8; --ink: #1d2226; --muted: #6b7278; --line: #e2ddd2;
+    --sun: #c9820a; --ok: #2e7d4f; --warn: #b3541e; --accent: #1d2226; --on-accent: #fffdf8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171a; --card: #1d2226; --ink: #ecebe6; --muted: #979da3; --line: #2c3338;
+      --sun: #f0b23e; --ok: #6cc892; --warn: #f09a5e; --accent: #ecebe6; --on-accent: #14171a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  }
+  main { max-width: 520px; margin: 0 auto; display: grid; gap: 14px; }
+  header { display: flex; justify-content: space-between; align-items: baseline; }
+  h1 { font-size: 1.05rem; margin: 0; letter-spacing: .02em; }
+  #updated { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  .banner { border-color: var(--warn); color: var(--warn); font-size: .9rem; }
+  #headline { font-size: 1.5rem; line-height: 1.2; font-weight: 650; margin: 0 0 6px; text-wrap: balance; }
+  #reason { color: var(--muted); margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .label { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+  .value { font-size: 1.7rem; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .value small { font-size: .95rem; font-weight: 500; color: var(--muted); }
+  .sub { color: var(--muted); font-size: .85rem; margin-top: 2px; }
+  .sun .value { color: var(--sun); }
+  .modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+  button {
+    font: inherit; font-weight: 600; padding: 12px 6px; border-radius: 12px; cursor: pointer;
+    border: 1px solid var(--line); background: transparent; color: var(--ink); min-height: 48px;
+  }
+  button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+  #modehelp { color: var(--muted); font-size: .88rem; margin: 10px 0 0; }
+  ul { list-style: none; margin: 8px 0 0; padding: 0; }
+  li { padding: 8px 0; border-top: 1px solid var(--line); font-size: .9rem; display: flex; gap: 10px; }
+  li time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  [hidden] { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <header><h1>TeslaCharger</h1><span id="updated">in caricamento</span></header>
+
+  <div id="dryrun" class="card banner" hidden>Modalità di prova: il sistema mostra cosa farebbe, ma non invia comandi all'auto.</div>
+  <div id="error" class="card banner" hidden></div>
+
+  <section class="card">
+    <p id="headline">In attesa dei dati</p>
+    <p id="reason"></p>
+  </section>
+
+  <section class="grid">
+    <div class="card sun"><div class="label">Pannelli</div><div class="value" id="pv">–</div><div class="sub" id="excess"></div></div>
+    <div class="card"><div class="label">Batteria di casa</div><div class="value" id="soc">–</div><div class="sub" id="batt"></div></div>
+    <div class="card"><div class="label">Consumi di casa</div><div class="value" id="load">–</div><div class="sub" id="grid"></div></div>
+    <div class="card"><div class="label">Auto</div><div class="value" id="car">–</div><div class="sub" id="carsub">dato non ancora letto</div></div>
+  </section>
+
+  <section class="card">
+    <div class="label">Modalità</div>
+    <div class="modes">
+      <button data-mode="auto" aria-pressed="false">Automatica</button>
+      <button data-mode="boost" aria-pressed="false">Carica subito</button>
+      <button data-mode="off" aria-pressed="false">Pausa</button>
+    </div>
+    <p id="modehelp"></p>
+  </section>
+
+  <section class="card">
+    <div class="label">Ultime manovre</div>
+    <ul id="events"><li>Nessuna manovra registrata</li></ul>
+  </section>
+</main>
+<script>
+const HELP = {
+  auto: "Di giorno carica seguendo il sole, di notte lascia fare a Octopus.",
+  boost: "Carica subito alla massima potenza, anche dalla rete. Al termine torna in automatica.",
+  off: "Il sistema non interviene. La carica notturna di Octopus resta attiva.",
+};
+const HEADLINE = {
+  "avvia": "Avvio della carica solare",
+  "ferma": "Carica fermata",
+  "regola": "Regolazione della potenza",
+  "sveglia": "Risveglio dell'auto",
+};
+const $ = (id) => document.getElementById(id);
+const kw = (w) => (Math.abs(w) / 1000).toFixed(1).replace(".", ",");
+const hhmm = (iso) => iso ? iso.slice(11, 16) : "";
+
+function render(s) {
+  $("dryrun").hidden = s.live !== false;
+  $("error").hidden = !s.error;
+  $("error").textContent = s.error ? "Ultimo ciclo non riuscito: " + s.error : "";
+  $("updated").textContent = s.time ? "aggiornato alle " + hhmm(s.time) : "in attesa";
+
+  const d = s.decision, p = s.plant, c = s.car;
+  if (d) {
+    const charging = s.octopus === "BOOSTING";
+    $("headline").textContent = HEADLINE[d.action] || (charging ? "Auto in carica" : "Nessuna carica in corso");
+    $("reason").textContent = d.reason.charAt(0).toUpperCase() + d.reason.slice(1) + (d.amps && d.action !== "nessuna azione" ? " (" + d.amps + " A)" : "");
+  }
+  if (p) {
+    $("pv").innerHTML = kw(p.pv_w) + " <small>kW</small>";
+    $("excess").textContent = (p.excess_w >= 0 ? "avanzano " : "mancano ") + kw(p.excess_w) + " kW";
+    $("soc").innerHTML = p.battery_soc + " <small>%</small>";
+    $("batt").textContent = p.battery_w > 50 ? "in carica a " + kw(p.battery_w) + " kW" : p.battery_w < -50 ? "cede " + kw(p.battery_w) + " kW" : "ferma";
+    $("load").innerHTML = kw(p.inverter_ac_w - p.grid_w) + " <small>kW</small>";
+    $("grid").textContent = Math.abs(p.grid_w) < 50 ? "nessuno scambio con la rete" : "rete " + kw(p.grid_w) + " kW";
+  }
+  if (c) {
+    $("car").innerHTML = c.level + " <small>%</small>";
+    const what = !c.plugged ? "cavo scollegato" : c.charging ? "in carica a " + c.amps + " A" : "collegata, non in carica";
+    $("carsub").textContent = what + " (alle " + hhmm(c.time) + ")";
+  }
+  document.querySelectorAll("button[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === s.mode)));
+  $("modehelp").textContent = HELP[s.mode] || "";
+  const ev = s.events || [];
+  $("events").innerHTML = "";
+  if (!ev.length) $("events").innerHTML = "<li>Nessuna manovra registrata</li>";
+  for (const e of ev.slice(0, 12)) {
+    const li = document.createElement("li"), t = document.createElement("time"), x = document.createElement("span");
+    t.textContent = e.time.slice(8, 10) + "/" + e.time.slice(5, 7) + " " + hhmm(e.time);
+    x.textContent = e.text;
+    li.append(t, x);
+    $("events").append(li);
+  }
+}
+
+async function refresh() {
+  try {
+    const r = await fetch("/api/status", { cache: "no-store" });
+    if (r.ok) render(await r.json());
+  } catch (e) {
+    $("updated").textContent = "connessione assente";
+  }
+}
+
+document.querySelectorAll("button[data-mode]").forEach((b) => b.addEventListener("click", async () => {
+  await fetch("/api/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: b.dataset.mode }) });
+  setTimeout(refresh, 400);
+  setTimeout(refresh, 4000);
+}));
+
+refresh();
+setInterval(refresh, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+</script>
+</body>
+</html>

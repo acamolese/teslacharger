@@ -28,15 +28,15 @@ def _time(name: str, default: str) -> time:
 
 @dataclass(frozen=True)
 class Settings:
-    # Potenza assorbita dall'auto durante la carica immediata
-    car_power_w: int
+    # Corrente minima a cui ha senso caricare l'auto
+    min_amps: int
     # Quanta potenza può mettere la batteria di casa per aiutare la carica
     battery_assist_w: int
     # Sotto questa carica della batteria di casa la carica dell'auto non parte
     soc_start: int
     # Sotto questa carica della batteria di casa la carica dell'auto si ferma
     soc_stop: int
-    # Letture consecutive in deficit prima di fermare la carica
+    # Letture consecutive sotto il minimo prima di fermare la carica
     deficit_samples: int
     # Tempo minimo tra un avvio e uno stop (e viceversa), per non stressare l'auto
     min_switch_minutes: int
@@ -45,17 +45,23 @@ class Settings:
     day_end: time
     # Intervallo tra un ciclo e l'altro (Solax aggiorna i dati ogni 5 minuti)
     poll_seconds: int
+    # Attesa prima di risvegliare di nuovo l'auto o di ricontrollare il cavo
+    car_retry_minutes: int
+    # Senza questo interruttore il sistema scrive cosa farebbe ma non comanda l'auto
+    live: bool
 
     @classmethod
     def from_env(cls) -> "Settings":
         return cls(
-            car_power_w=_int("CAR_POWER_W", 2800),
-            battery_assist_w=_int("BATTERY_ASSIST_W", 500),
+            min_amps=_int("MIN_AMPS", 5),
+            battery_assist_w=_int("BATTERY_ASSIST_W", 300),
             soc_start=_int("SOC_START", 80),
             soc_stop=_int("SOC_STOP", 50),
             deficit_samples=_int("DEFICIT_SAMPLES", 2),
             min_switch_minutes=_int("MIN_SWITCH_MINUTES", 15),
             day_start=_time("DAY_START", "09:00"),
             day_end=_time("DAY_END", "18:00"),
-            poll_seconds=_int("POLL_SECONDS", 300),
+            poll_seconds=_int("POLL_SECONDS", 150),
+            car_retry_minutes=_int("CAR_RETRY_MINUTES", 30),
+            live=os.environ.get("LIVE", "").lower() in ("1", "true", "si", "sì"),
         )

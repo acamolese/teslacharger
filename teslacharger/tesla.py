@@ -16,7 +16,8 @@ import urllib.parse
 from pathlib import Path
 
 from .config import load_env
-from .http import request_json
+from .http import HttpError, request_json
+from .policy import CarStatus
 
 AUTH_URL = "https://auth.tesla.com/oauth2/v3/authorize"
 TOKEN_URL = "https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token"
@@ -114,6 +115,60 @@ def access_token() -> str:
 
 def api_get(path: str) -> dict:
     return request_json(API + path, headers={"Authorization": f"Bearer {access_token()}"})
+
+
+class TeslaCar:
+    """Lettura dello stato di carica e comandi all'auto.
+
+    Le letture vanno direttamente alla Fleet API. I comandi passano dal programma
+    tesla-http-proxy, che li firma con la chiave privata dell'applicazione.
+    """
+
+    def __init__(self):
+        self._vin: str | None = os.environ.get("TESLA_VIN") or None
+        self._proxy = os.environ.get("TESLA_PROXY_URL", "https://localhost:4443")
+        self._proxy_cert = os.environ.get("TESLA_PROXY_CERT")
+
+    def vin(self) -> str:
+        if self._vin is None:
+            self._vin = api_get("/api/1/vehicles")["response"][0]["vin"]
+        return self._vin
+
+    def status(self) -> CarStatus | None:
+        """Stato della ricarica, oppure None se l'auto è in standby o non raggiungibile."""
+        try:
+            data = api_get(f"/api/1/vehicles/{self.vin()}/vehicle_data?endpoints=charge_state")
+        except HttpError as err:
+            if err.status == 408:
+                return None
+            raise
+        cs = data["response"]["charge_state"]
+        return CarStatus(
+            plugged=cs.get("charging_state") not in (None, "Disconnected"),
+            charging=cs.get("charging_state") == "Charging",
+            level=int(cs.get("battery_level") or 0),
+            limit=int(cs.get("charge_limit_soc") or 100),
+            amps=int(cs.get("charge_current_request") or 0),
+            max_amps=int(cs.get("charge_current_request_max") or 0),
+            voltage=int(cs.get("charger_voltage") or 0),
+        )
+
+    def wake(self) -> None:
+        request_json(
+            f"{API}/api/1/vehicles/{self.vin()}/wake_up",
+            headers={"Authorization": f"Bearer {access_token()}"},
+            method="POST",
+        )
+
+    def set_amps(self, amps: int) -> None:
+        data = request_json(
+            f"{self._proxy}/api/1/vehicles/{self.vin()}/command/set_charging_amps",
+            body={"charging_amps": amps},
+            headers={"Authorization": f"Bearer {access_token()}"},
+            cafile=self._proxy_cert,
+        )
+        if not data.get("response", {}).get("result"):
+            raise RuntimeError(f"Tesla: comando rifiutato ({data})")
 
 
 def main() -> None:

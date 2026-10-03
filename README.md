@@ -32,33 +32,40 @@ Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola 
 - [x] lettura dei dati in tempo reale di impianto, inverter e batteria da Solax
 - [x] accesso a Octopus Energy Italia, lettura del veicolo e delle finestre di carica
 - [x] avvio e annullamento della carica immediata tramite Octopus, provati su un'auto reale
-- [x] prima versione del ciclo di controllo: accende e spegne la carica immediata in base al surplus
+- [x] ciclo di controllo che avvia, regola e ferma la carica in base al surplus
 - [x] accesso a Tesla: lettura dello stato di carica e regolazione degli ampere, provata su un'auto reale
-- [ ] regolazione degli ampere dentro il ciclo di controllo
-- [ ] webapp con accesso riservato
-- [ ] installazione su server
-
-La prima versione non regola la potenza: l'auto carica alla potenza impostata (circa 2,8 kW nel caso di partenza) e il sistema decide solo quando avviare e quando fermare.
+- [x] webapp con accesso riservato
+- [x] installazione su server, in modalità di prova
+- [ ] passaggio ai comandi reali dopo un periodo di osservazione
 
 ## Le regole
 
-La carica solare parte quando, nella fascia diurna, la batteria di casa è sopra la soglia di avvio e il surplus copre la potenza dell'auto, al netto di un piccolo aiuto concesso alla batteria di casa. Si ferma quando il deficit dura per più letture consecutive, quando la batteria di casa scende sotto la soglia di stop o a fine giornata. Tra due manovre passa sempre un tempo minimo.
+In modalità automatica, nella fascia diurna, il sistema destina all'auto la potenza che avanza dopo i consumi di casa:
 
-Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata.
+- la carica parte quando la batteria di casa è sopra la soglia di avvio e il surplus basta per la corrente minima;
+- durante la carica gli ampere seguono il surplus, con un piccolo aiuto concesso alla batteria di casa;
+- se il sole non basta la corrente scende al minimo, e dopo più letture consecutive insufficienti la carica si ferma;
+- la carica si ferma anche se la batteria di casa scende sotto la soglia di stop, a fine giornata, a carica completata o a cavo scollegato;
+- allo stop la corrente torna al massimo, così la carica notturna di Octopus non resta rallentata.
+
+Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata. L'auto viene interrogata solo quando serve, perché le letture hanno un costo e la tengono sveglia.
 
 I dati di SolaxCloud si aggiornano ogni 5 minuti, quindi la regolazione procede a passi di 5 minuti e la batteria di casa assorbe le variazioni più rapide.
+
+Dalla webapp si sceglie la modalità: automatica, carica subito (massima potenza, anche dalla rete) o pausa.
 
 Le soglie hanno valori predefiniti e si possono cambiare nel file `.env`:
 
 | Variabile | Predefinito | Significato |
 | --- | --- | --- |
-| `CAR_POWER_W` | 2800 | Potenza assorbita dall'auto in carica |
-| `BATTERY_ASSIST_W` | 500 | Potenza che la batteria di casa può cedere alla carica |
+| `MIN_AMPS` | 5 | Corrente minima di carica |
+| `BATTERY_ASSIST_W` | 300 | Potenza che la batteria di casa può cedere alla carica |
 | `SOC_START` | 80 | Carica minima della batteria di casa per avviare (%) |
 | `SOC_STOP` | 50 | Carica della batteria di casa sotto cui si ferma (%) |
-| `DEFICIT_SAMPLES` | 2 | Letture consecutive in deficit prima dello stop |
-| `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra due manovre |
+| `DEFICIT_SAMPLES` | 2 | Letture consecutive insufficienti prima dello stop |
+| `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra un avvio e uno stop |
 | `DAY_START`, `DAY_END` | 09:00, 18:00 | Fascia in cui la carica solare è consentita |
+| `LIVE` | non impostato | Con `true` i comandi vengono inviati davvero all'auto |
 
 ## Uso
 
@@ -68,16 +75,23 @@ Serve Python 3.11 o successivo. Non ci sono dipendenze da installare.
 cp .env.example .env
 # compila .env con le tue credenziali
 
-python3 -m teslacharger.controller --once   # una valutazione, senza agire
-python3 -m teslacharger.controller          # ciclo continuo, senza agire
-python3 -m teslacharger.controller --live   # ciclo continuo che comanda davvero l'auto
+python3 -m teslacharger.tesla register      # registra il dominio presso Tesla (una tantum)
+python3 -m teslacharger.tesla auth-url      # link per autorizzare l'account Tesla
+python3 -m teslacharger.tesla exchange CODICE
 
+python3 -m teslacharger.app                 # ciclo di controllo e webapp su http://127.0.0.1:8787
 python3 -m unittest discover -s tests       # test delle regole
 ```
 
-Senza `--live` il sistema scrive solo cosa farebbe, senza inviare comandi.
+Senza `LIVE=true` il sistema resta in modalità di prova: mostra cosa farebbe, senza inviare comandi.
 
-Nella cartella `scripts/` ci sono gli script usati per esplorare le API (richiedono Node.js 20.6 o successivo): `probe-solax.mjs` e `probe-octopus.mjs` sono in sola lettura, `octopus-boost.mjs` avvia e annulla la carica immediata.
+I comandi all'auto vanno firmati: serve `tesla-http-proxy` del progetto [vehicle-command](https://github.com/teslamotors/vehicle-command) in ascolto in locale, con la chiave privata dell'applicazione, e la chiave va abbinata all'auto dall'app Tesla.
+
+## Installazione su server
+
+La cartella `deploy/` contiene i due servizi systemd (ciclo di controllo e firma dei comandi) e il modello di configurazione nginx. La webapp ascolta solo in locale: nginx la espone in HTTPS e la protegge con una password, lasciando pubblica solo la chiave che Tesla deve poter leggere.
+
+Nella cartella `scripts/` restano gli script usati per esplorare le API (richiedono Node.js 20.6 o successivo).
 
 ## Credenziali
 

@@ -1,0 +1,14 @@
+[Unit]
+Description=TeslaCharger: firma dei comandi per la Tesla (tesla-http-proxy)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+ExecStart=/home/ubuntu/teslacharger/bin/tesla-http-proxy -host 127.0.0.1 -port 4443 -tls-key /home/ubuntu/teslacharger/keys/proxy-tls-key.pem -cert /home/ubuntu/teslacharger/keys/proxy-tls-cert.pem -key-file /home/ubuntu/teslacharger/keys/private-key.pem
+Restart=on-failure
+RestartSec=10
+MemoryMax=150M
+
+[Install]
+WantedBy=multi-user.target
