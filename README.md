@@ -23,7 +23,7 @@ Il sistema mette in comunicazione tre servizi.
 | --- | --- | --- |
 | SolaxCloud | Produzione dei pannelli, scambio con la rete, stato della batteria di casa | [Solax Developer API](https://developer.solaxcloud.com/home), OAuth2 client credentials |
 | Octopus Energy Italia | Stato del veicolo in Intelligent Octopus, finestre pianificate, carica immediata (boost) | [API GraphQL Kraken](https://developer.oeit-kraken.energy/) |
-| Tesla | Livello di carica dell'auto, regolazione degli ampere | Tesla Fleet API (da integrare) |
+| Tesla | Livello di carica dell'auto, regolazione degli ampere | [Tesla Fleet API](https://developer.tesla.com/docs/fleet-api), con comandi firmati tramite `tesla-http-proxy` |
 
 Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola il surplus disponibile e, se conviene, chiede a Octopus la carica immediata e regola gli ampere dell'auto. Quando il surplus finisce annulla la carica immediata, e la pianificazione notturna di Octopus resta invariata.
 
@@ -33,7 +33,8 @@ Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola 
 - [x] accesso a Octopus Energy Italia, lettura del veicolo e delle finestre di carica
 - [x] avvio e annullamento della carica immediata tramite Octopus, provati su un'auto reale
 - [x] prima versione del ciclo di controllo: accende e spegne la carica immediata in base al surplus
-- [ ] integrazione con Tesla per la regolazione degli ampere
+- [x] accesso a Tesla: lettura dello stato di carica e regolazione degli ampere, provata su un'auto reale
+- [ ] regolazione degli ampere dentro il ciclo di controllo
 - [ ] webapp con accesso riservato
 - [ ] installazione su server
 
