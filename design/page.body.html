@@ -1043,7 +1043,7 @@ function render(s) {
 }
 async function refresh() {
   try {
-    const r = await fetch("/api/status", { cache: "no-store" });
+    const r = await fetch("/api/status?v=" + PAGE_VERSION, { cache: "no-store" });
     if (r.status === 401) return location.replace("/login");
     if (r.ok) render(await r.json());
   } catch (e) {

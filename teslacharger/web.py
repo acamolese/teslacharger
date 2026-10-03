@@ -64,6 +64,8 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
             if path in PUBLIC:
                 return self._send(200, (STATIC / path[1:]).read_bytes(), PUBLIC[path])
             if path == "/login":
+                if auth.valid(self._token()):
+                    return self._send(302, b"", "text/plain", [("Location", "/")])
                 return self._send(200, (STATIC / "login.html").read_bytes(), "text/html; charset=utf-8")
             if not auth.valid(self._token()):
                 if path.startswith("/api/"):
@@ -72,6 +74,11 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
             if path == "/":
                 self._send(200, page()[0], "text/html; charset=utf-8")
             elif path == "/api/status":
+                # Le pagine recenti dichiarano la propria versione e si ricaricano da sole quando
+                # cambia. Una pagina che non la dichiara è rimasta aperta da prima: la risposta
+                # 401 la manda all'accesso, che con la sessione valida riporta alla pagina nuova.
+                if "v=" not in self.path:
+                    return self._json(401, {"error": "versione superata"})
                 self._json(200, {**controller.snapshot(), "version": page()[1]})
             elif path == "/api/history":
                 self._json(200, controller.history_summary())
