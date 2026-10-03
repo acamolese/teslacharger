@@ -5,6 +5,9 @@ import threading
 from datetime import datetime, time, timedelta
 from pathlib import Path
 
+# Chilometri registrati oltre i quali la stima dei consumi è attendibile
+MIN_KM = 50
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS plant (
     time TEXT PRIMARY KEY, pv_w REAL, grid_w REAL, battery_w REAL, soc INTEGER
@@ -98,14 +101,17 @@ class History:
             return None
         return dict(zip(("time", "level", "range_km", "odometer_km"), rows[0]))
 
-    def consumption(self) -> dict | None:
-        """Stima dei consumi di guida dai tratti in cui la batteria è scesa e i km sono saliti."""
+    def since(self) -> str | None:
+        """Primo giorno per cui esistono dati."""
+        rows = self._all("SELECT MIN(time) FROM plant")
+        return rows[0][0][:10] if rows and rows[0][0] else None
+
+    def consumption(self) -> dict:
+        """Chilometri e batteria usata nei tratti di guida registrati, per stimare i consumi."""
         rows = self._all("SELECT level, odometer_km FROM car WHERE odometer_km IS NOT NULL ORDER BY time")
         km = percent = 0.0
         for (level_a, odo_a), (level_b, odo_b) in zip(rows, rows[1:]):
             if odo_b - odo_a > 1 and level_a > level_b:
                 km += odo_b - odo_a
                 percent += level_a - level_b
-        if km < 50:
-            return None
-        return {"km": round(km), "percent": round(percent)}
+        return {"km": round(km), "percent": round(percent), "ready": km >= MIN_KM}

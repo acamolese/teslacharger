@@ -110,6 +110,8 @@ Si installa sulla schermata Home del telefono e ha due sezioni: "Ricarica", con 
 
 Una descrizione completa, pensata per chi ne cura esperienza d'uso e interfaccia, è in [docs/descrizione-app.md](docs/descrizione-app.md).
 
+L'interfaccia segue un progetto grafico in stile Material 3 Expressive, con i materiali della Tesla (argento, grafite, nero opaco e lucido). I file del progetto sono in `design/`: `python3 design/build_page.py` ricompone le pagine prendendo da lì colori, forme e animazioni.
+
 Nella cartella `scripts/` restano gli script usati per esplorare le API (richiedono Node.js 20.6 o successivo).
 
 ## Credenziali

@@ -101,6 +101,16 @@ class OctopusClient:
                 )
         raise RuntimeError("Octopus: nessun veicolo registrato in Intelligent Octopus")
 
+    def planned_dispatches(self, device_id: str) -> list[dict]:
+        """Finestre di carica pianificate da Octopus per le prossime ore."""
+        rows = self._gql(
+            """query ($deviceId: String!) {
+              flexPlannedDispatches(deviceId: $deviceId) { start end type }
+            }""",
+            {"deviceId": device_id},
+        )["flexPlannedDispatches"]
+        return rows or []
+
     def completed_dispatches(self) -> list[dict]:
         """Ore di carica già consuntivate da Octopus, con l'energia erogata."""
         rows = self._gql(

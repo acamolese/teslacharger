@@ -119,6 +119,10 @@ class PushService:
             subs = [s for s in self._subscriptions() if s["endpoint"] != endpoint]
             self._store(subs + [entry])
 
+    def unsubscribe(self, endpoint: str) -> None:
+        with self._lock:
+            self._store([s for s in self._subscriptions() if s["endpoint"] != endpoint])
+
     def _vapid_header(self, endpoint: str) -> str:
         origin = urllib.parse.urlsplit(endpoint)
         claims = {

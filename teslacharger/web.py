@@ -110,6 +110,8 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                 return {"ok": controller.refresh_car()}
             elif path == "/api/push/subscribe":
                 controller.push.subscribe(data)
+            elif path == "/api/push/unsubscribe":
+                controller.push.unsubscribe(str(data["endpoint"]))
             elif path == "/api/push/test":
                 sent = controller.push.send("TeslaCharger", "Le notifiche funzionano.")
                 return {"ok": sent > 0, "sent": sent}
