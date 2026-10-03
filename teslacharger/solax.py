@@ -12,6 +12,7 @@ BUSINESS_RESIDENTIAL = 1
 DEVICE_INVERTER = 1
 DEVICE_BATTERY = 2
 SUCCESS = 10000
+INVALID_TOKEN = 10402
 STAT_BY_MONTH = 2
 MAX_HOLD_SECONDS = 60000
 # Valori ammessi dall'API per "cosa fare allo scadere": 160 e 161. Nella documentazione
@@ -73,8 +74,20 @@ class SolaxClient:
             self._token_expiry = time.time() + int(data["result"].get("expires_in") or 3600)
         return {"Authorization": f"bearer {self._token}"}
 
+    def _request(self, path: str, **kwargs) -> dict:
+        """Chiamata autenticata. Se il token non vale più, ne chiede uno nuovo e riprova.
+
+        Solax tiene valido un solo token per applicazione: basta che un altro programma
+        con le stesse credenziali ne chieda uno perché quello in memoria venga annullato.
+        """
+        data = request_json(BASE + path, headers=self._auth(), **kwargs)
+        if data.get("code") == INVALID_TOKEN:
+            self._token = None
+            data = request_json(BASE + path, headers=self._auth(), **kwargs)
+        return data
+
     def _get(self, path: str, params: dict):
-        data = request_json(BASE + path, params=params, headers=self._auth())
+        data = self._request(path, params=params)
         if data.get("code") != SUCCESS:
             raise RuntimeError(f"Solax: errore su {path} ({data.get('code')} {data.get('message')})")
         return data["result"]
@@ -133,10 +146,9 @@ class SolaxClient:
     # --- comandi all'inverter ---
 
     def _command(self, path: str, body: dict) -> dict:
-        data = request_json(
-            BASE + path,
+        data = self._request(
+            path,
             body={"snList": [self._device_sns()[DEVICE_INVERTER]], "businessType": BUSINESS_RESIDENTIAL, **body},
-            headers=self._auth(),
         )
         if data.get("code") != SUCCESS:
             raise RuntimeError(f"Solax: comando rifiutato ({data.get('code')} {data.get('message')})")
@@ -172,15 +184,14 @@ class SolaxClient:
         return self._plant
 
     def _month_stats(self, month: str) -> list[dict]:
-        data = request_json(
-            f"{BASE}/openapi/v2/plant/energy/get_stat_data",
+        data = self._request(
+            "/openapi/v2/plant/energy/get_stat_data",
             body={
                 "plantId": self._plant_id(),
                 "dateType": STAT_BY_MONTH,
                 "date": month,
                 "businessType": BUSINESS_RESIDENTIAL,
             },
-            headers=self._auth(),
         )
         if data.get("code") != SUCCESS:
             raise RuntimeError(f"Solax: statistiche non disponibili ({data.get('message')})")
