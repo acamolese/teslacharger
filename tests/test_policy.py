@@ -7,8 +7,7 @@ from teslacharger.solax import PlantSnapshot
 
 SETTINGS = Settings(
     min_amps=5,
-    battery_assist_w=300,
-    soc_start=80,
+    pv_share=80,
     min_switch_minutes=15,
     day_start=time(9),
     day_end=time(18),
@@ -21,9 +20,9 @@ NIGHT = NOON.replace(hour=21)
 OURS = ControlState(started_by_us=True, last_switch=NOON - timedelta(hours=1))
 
 
-def plant(excess=0, soc=90, data_time="12:00"):
+def plant(pv=2000, soc=90, data_time="12:00", excess=0):
     return PlantSnapshot(
-        data_time=data_time, pv_w=4000, inverter_ac_w=2000,
+        data_time=data_time, pv_w=pv, inverter_ac_w=2000,
         grid_w=0, battery_w=excess, battery_soc=soc,
     )
 
@@ -77,83 +76,79 @@ class PrecheckTests(unittest.TestCase):
 
 
 class AutoStartTests(unittest.TestCase):
-    def test_starts_at_amps_matching_surplus(self):
-        d = run(plant(excess=1800), car())
-        self.assertEqual((d.action, d.amps), (Action.START, 9))  # (1800 + 300 di aiuto) / 230
+    def test_starts_with_80_percent_of_panels(self):
+        # 2000 W dai pannelli: all'auto 1600 W, cioè 6 A
+        d = run(plant(pv=2000), car())
+        self.assertEqual((d.action, d.amps), (Action.START, 6))
         self.assertTrue(d.state.started_by_us)
 
     def test_starts_at_baseline_without_sun(self):
-        d = run(plant(excess=-400), car())
-        self.assertEqual((d.action, d.amps), (Action.START, 5))
-
-    def test_home_battery_priority_keeps_car_at_baseline(self):
-        d = run(plant(excess=3000, soc=60), car())
+        d = run(plant(pv=100), car())
         self.assertEqual((d.action, d.amps), (Action.START, 5))
 
     def test_amps_capped_at_car_maximum(self):
-        self.assertEqual(run(plant(excess=5000), car()).amps, 13)
+        self.assertEqual(run(plant(pv=6000), car()).amps, 13)
 
     def test_wakes_sleeping_car_once(self):
-        d = run(plant(excess=2000), None)
+        d = run(plant(), None)
         self.assertEqual(d.action, Action.WAKE)
-        self.assertEqual(run(plant(excess=2000), None, state=d.state).action, Action.HOLD)
+        self.assertEqual(run(plant(), None, state=d.state).action, Action.HOLD)
 
     def test_holds_when_unplugged_and_remembers_it(self):
-        d = run(plant(excess=2000), car(plugged=False))
+        d = run(plant(), car(plugged=False))
         self.assertEqual(d.action, Action.HOLD)
         self.assertEqual(d.state.idle_at, NOON)
 
     def test_holds_when_car_is_full(self):
-        d = run(plant(excess=2000), car(level=100))
+        d = run(plant(), car(level=100))
         self.assertEqual(d.action, Action.HOLD)
         self.assertEqual(d.state.idle_at, NOON)
 
     def test_waits_between_switches(self):
         state = ControlState(last_switch=NOON - timedelta(minutes=5))
-        self.assertEqual(run(plant(excess=2000), car(), state=state).action, Action.HOLD)
+        self.assertEqual(run(plant(), car(), state=state).action, Action.HOLD)
 
 
 class AutoRegulationTests(unittest.TestCase):
     def test_raises_amps_when_sun_increases(self):
-        # L'auto assorbe 8 A (1840 W) e avanzano ancora 700 W: può salire a 12 A
-        d = run(plant(excess=700), car(charging=True, amps=8), boosting=True, state=OURS)
+        # 3500 W dai pannelli: all'auto 2800 W, cioè 12 A
+        d = run(plant(pv=3500), car(charging=True, amps=8), boosting=True, state=OURS)
         self.assertEqual((d.action, d.amps), (Action.SET_AMPS, 12))
 
     def test_lowers_amps_when_sun_decreases(self):
-        # L'auto assorbe 13 A (2990 W) ma casa è in deficit di 1000 W
-        d = run(plant(excess=-1000), car(charging=True, amps=13), boosting=True, state=OURS)
-        self.assertEqual((d.action, d.amps), (Action.SET_AMPS, 9))
+        d = run(plant(pv=2000), car(charging=True, amps=13), boosting=True, state=OURS)
+        self.assertEqual((d.action, d.amps), (Action.SET_AMPS, 6))
 
     def test_holds_when_amps_already_right(self):
-        d = run(plant(excess=-300), car(charging=True, amps=9), boosting=True, state=OURS)
+        d = run(plant(pv=2000), car(charging=True, amps=6), boosting=True, state=OURS)
         self.assertEqual(d.action, Action.HOLD)
 
     def test_never_goes_below_baseline_and_never_stops_for_lack_of_sun(self):
         state = OURS
         for minute in ("12:00", "12:05", "12:10"):
-            d = run(plant(excess=-2500, data_time=minute), car(charging=True, amps=5), boosting=True, state=state)
+            d = run(plant(pv=0, data_time=minute), car(charging=True, amps=5), boosting=True, state=state)
             self.assertEqual(d.action, Action.HOLD)
             state = d.state
-        d = run(plant(excess=-2500, data_time="12:15"), car(charging=True, amps=9), boosting=True, state=state)
+        d = run(plant(pv=0, data_time="12:15"), car(charging=True, amps=9), boosting=True, state=state)
         self.assertEqual((d.action, d.amps), (Action.SET_AMPS, 5))
 
     def test_same_reading_is_not_acted_on_twice(self):
         state = ControlState(started_by_us=True, last_data_time="12:00")
-        d = run(plant(excess=700), car(charging=True, amps=8), boosting=True, state=state)
+        d = run(plant(pv=3500), car(charging=True, amps=8), boosting=True, state=state)
         self.assertEqual(d.action, Action.HOLD)
 
     def test_stops_at_end_of_day_and_restores_maximum_amps(self):
-        d = run(plant(excess=500), car(charging=True, amps=8), boosting=True, state=OURS,
+        d = run(plant(), car(charging=True, amps=8), boosting=True, state=OURS,
                 now=NOON.replace(hour=18, minute=1))
         self.assertEqual((d.action, d.amps), (Action.STOP, 13))
         self.assertFalse(d.state.started_by_us)
 
     def test_stops_when_car_is_full(self):
-        d = run(plant(excess=500), car(charging=True, amps=8, level=100), boosting=True, state=OURS)
+        d = run(plant(), car(charging=True, amps=8, level=100), boosting=True, state=OURS)
         self.assertEqual(d.action, Action.STOP)
 
     def test_stops_when_unplugged(self):
-        d = run(plant(excess=500), car(plugged=False), boosting=True, state=OURS)
+        d = run(plant(), car(plugged=False), boosting=True, state=OURS)
         self.assertEqual(d.action, Action.STOP)
 
 

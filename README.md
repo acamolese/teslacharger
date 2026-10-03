@@ -43,9 +43,9 @@ Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola 
 In modalità automatica, nella fascia diurna, l'auto collegata carica sempre, e più c'è sole più carica:
 
 - la carica parte appena l'auto è collegata e non è già al limite impostato;
+- all'auto va una quota fissa della produzione dei pannelli (80%): se i pannelli danno 2 kW, l'auto ne riceve 1,6;
 - la corrente non scende mai sotto la base (5 A, circa 1,1 kW), anche se il sole non basta: in quel caso la differenza arriva dalla batteria di casa o dalla rete;
-- sopra la base, gli ampere seguono il surplus dei pannelli fino al massimo consentito dal cavo;
-- finché la batteria di casa è sotto la soglia di precedenza, il surplus va a lei e l'auto resta alla base;
+- il massimo è quello consentito dal cavo;
 - la carica si ferma a fine giornata, a carica completata o a cavo scollegato, e la corrente torna al massimo, così la carica notturna di Octopus non resta rallentata.
 
 Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata. L'auto viene interrogata solo quando serve, perché le letture hanno un costo e la tengono sveglia.
@@ -59,8 +59,7 @@ Le soglie hanno valori predefiniti e si possono cambiare nel file `.env`:
 | Variabile | Predefinito | Significato |
 | --- | --- | --- |
 | `MIN_AMPS` | 5 | Corrente di base, garantita di giorno |
-| `BATTERY_ASSIST_W` | 300 | Potenza che la batteria di casa può cedere alla carica oltre la base |
-| `SOC_START` | 80 | Carica della batteria di casa sotto cui l'auto resta alla base (%) |
+| `PV_SHARE` | 80 | Quota della produzione dei pannelli destinata all'auto (%) |
 | `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra un avvio e uno stop |
 | `DAY_START`, `DAY_END` | 09:00, 18:00 | Fascia della carica diurna |
 | `LIVE` | non impostato | Con `true` i comandi vengono inviati davvero all'auto |

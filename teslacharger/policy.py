@@ -123,15 +123,10 @@ def precheck(
 
 
 def target_amps(plant: PlantSnapshot, car: CarStatus, settings: Settings) -> int:
-    """Corrente da destinare all'auto: mai sotto la base, sopra solo se c'è surplus."""
-    if plant.battery_soc < settings.soc_start:
-        # La batteria di casa ha la precedenza sul surplus: all'auto resta la base
-        return min(settings.min_amps, car.max_amps)
+    """Corrente da destinare all'auto: una quota dei pannelli, mai sotto la base."""
     voltage = car.voltage if car.charging and car.voltage > 100 else NOMINAL_VOLTAGE
-    # Nel surplus letto da Solax è già compreso il consumo dell'auto: lo si aggiunge
-    # di nuovo per sapere quanta potenza le si può destinare in tutto.
-    available = plant.excess_w + car.power_w + settings.battery_assist_w
-    return max(settings.min_amps, min(car.max_amps, int(available // voltage)))
+    share_w = plant.pv_w * settings.pv_share / 100
+    return max(min(settings.min_amps, car.max_amps), min(car.max_amps, int(share_w // voltage)))
 
 
 def decide(
@@ -197,7 +192,7 @@ def decide(
         return stop("fine della fascia diurna, la notte è gestita da Octopus")
 
     target = target_amps(plant, car, settings)
-    detail = f"surplus {plant.excess_w + car.power_w:.0f} W, batteria di casa al {plant.battery_soc}%"
+    detail = f"pannelli a {plant.pv_w:.0f} W, all'auto fino al {settings.pv_share}%"
     if not boosting:
         if not can_switch:
             return Decision(Action.HOLD, "attesa tra due manovre", state)
