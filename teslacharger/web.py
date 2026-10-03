@@ -45,7 +45,10 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                 elif self.path == "/api/grid":
                     controller.set_grid_ok(bool(data["allow"]))
                 else:
-                    controller.set_target(int(data["percent"]))
+                    percent = data.get("percent")
+                    controller.set_target(
+                        int(percent) if percent is not None else None, data.get("time") or None
+                    )
             except (ValueError, KeyError, TypeError, json.JSONDecodeError):
                 return self._json(400, {"error": "richiesta non valida"})
             except RuntimeError as err:

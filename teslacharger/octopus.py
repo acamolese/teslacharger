@@ -10,6 +10,8 @@ ENDPOINT = "https://api.oeit-kraken.energy/v1/graphql/"
 # Il token Kraken dura un'ora: lo rinnoviamo con largo anticipo
 TOKEN_LIFETIME_SECONDS = 45 * 60
 STATE_BOOSTING = "BOOSTING"
+# Orari di fine carica accettati da Octopus: dalle 04:00 alle 11:00, ogni mezz'ora
+READY_TIMES = tuple(f"{h:02d}:{m:02d}" for h in range(4, 12) for m in (0, 30) if (h, m) <= (11, 0))
 WEEKDAYS = ("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 # Stato osservato quando l'auto non è collegata alla presa di casa
 STATE_UNPLUGGED = "SMART_CONTROL_NOT_AVAILABLE"
@@ -103,6 +105,8 @@ class OctopusClient:
         """Imposta per tutti i giorni il livello di carica da raggiungere entro l'ora indicata."""
         if not 10 <= percent <= 100:
             raise ValueError("il livello di carica deve essere tra 10 e 100")
+        if ready_time not in READY_TIMES:
+            raise ValueError("orario di fine carica non ammesso")
         self._gql(
             """mutation ($input: SmartFlexDevicePreferencesInput!) {
               setDevicePreferences(input: $input) { id }

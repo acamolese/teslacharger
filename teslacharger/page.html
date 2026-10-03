@@ -105,6 +105,10 @@
       <label for="target">Livello da raggiungere</label>
       <select id="target"></select>
     </div>
+    <div class="target">
+      <label for="ready">Auto pronta entro le</label>
+      <select id="ready"></select>
+    </div>
     <p class="sub" id="targethelp"></p>
   </section>
 
@@ -162,7 +166,8 @@ function render(s) {
   $("modehelp").textContent = HELP[s.mode] || "";
   const tg = s.target;
   if (tg && tg.percent && document.activeElement !== $("target")) $("target").value = String(tg.percent);
-  $("targethelp").textContent = tg && tg.time ? "Octopus porta l'auto a questo livello entro le " + tg.time + ", nelle ore scontate." : "";
+  if (tg && tg.time && document.activeElement !== $("ready")) $("ready").value = tg.time;
+  if (!targetNote) $("targethelp").textContent = tg && tg.time ? "Octopus sceglie le ore scontate della notte per arrivare al " + tg.percent + "% entro le " + tg.time + "." : "";
   const ev = s.events || [];
   $("events").innerHTML = "";
   if (!ev.length) $("events").innerHTML = "<li>Nessuna manovra registrata</li>";
@@ -195,12 +200,20 @@ async function grid(allow) {
   setTimeout(refresh, 400);
   setTimeout(refresh, 4000);
 }
+let targetNote = false;
 for (let v = 50; v <= 100; v += 5) $("target").add(new Option(v + " %", String(v)));
-$("target").addEventListener("change", async (e) => {
-  const r = await fetch("/api/target", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ percent: Number(e.target.value) }) });
-  $("targethelp").textContent = r.ok ? "Livello inviato a Octopus." : "Octopus non ha accettato la modifica.";
-  setTimeout(refresh, 4000);
-});
+for (let m = 4 * 60; m <= 11 * 60; m += 30) {
+  const t = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  $("ready").add(new Option(t, t));
+}
+async function sendTarget(body) {
+  const r = await fetch("/api/target", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  targetNote = true;
+  $("targethelp").textContent = r.ok ? "Modifica inviata a Octopus." : "Octopus non ha accettato la modifica.";
+  setTimeout(() => { targetNote = false; refresh(); }, 5000);
+}
+$("target").addEventListener("change", (e) => sendTarget({ percent: Number(e.target.value) }));
+$("ready").addEventListener("change", (e) => sendTarget({ time: e.target.value }));
 $("allow").addEventListener("click", () => grid(true));
 $("revoke").addEventListener("click", () => grid(false));
 

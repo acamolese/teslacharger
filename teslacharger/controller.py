@@ -85,15 +85,18 @@ class Controller:
             self._save()
         self._wakeup.set()
 
-    def set_target(self, percent: int) -> None:
-        """Livello di carica che Octopus deve raggiungere con la carica notturna."""
+    def set_target(self, percent: int | None = None, ready_time: str | None = None) -> None:
+        """Livello di carica che Octopus deve raggiungere di notte, e ora entro cui farlo."""
         with self._lock:
-            vehicle = self._vehicle or self.octopus.vehicle()
+            vehicle = self.octopus.vehicle()
+            percent = percent if percent is not None else vehicle.target_percent or 100
+            ready_time = ready_time or vehicle.target_time or "09:00"
+            text = f"carica notturna: {percent}% entro le {ready_time}"
             if self.settings.live:
-                self.octopus.set_target(vehicle.device_id, percent, vehicle.target_time or "09:00")
-                self._event(f"livello di carica notturno impostato al {percent}%")
+                self.octopus.set_target(vehicle.device_id, percent, ready_time)
+                self._event(text)
             else:
-                self._event(f"[prova] livello di carica notturno al {percent}%")
+                self._event(f"[prova] {text}")
             self._save()
         self._wakeup.set()
 
