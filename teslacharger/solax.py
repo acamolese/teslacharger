@@ -13,6 +13,11 @@ DEVICE_INVERTER = 1
 DEVICE_BATTERY = 2
 SUCCESS = 10000
 STAT_BY_MONTH = 2
+MAX_HOLD_SECONDS = 60000
+# Valori ammessi dall'API per "cosa fare allo scadere": 160 e 161. Nella documentazione
+# Modbus di Solax 0xA0 (160) è l'uscita dalla modalità remota. Significato da confermare
+# sulla documentazione ufficiale del portale sviluppatori.
+NEXT_EXIT_REMOTE = 160
 ALARM_NAMES = {
     "Grid Volt Fault": "Tensione di rete fuori dai limiti",
     "Grid Freq Fault": "Frequenza di rete fuori dai limiti",
@@ -125,6 +130,36 @@ class SolaxClient:
             battery_soc=int(battery["batterySOC"]),
         )
 
+    # --- comandi all'inverter ---
+
+    def _command(self, path: str, body: dict) -> dict:
+        data = request_json(
+            BASE + path,
+            body={"snList": [self._device_sns()[DEVICE_INVERTER]], "businessType": BUSINESS_RESIDENTIAL, **body},
+            headers=self._auth(),
+        )
+        if data.get("code") != SUCCESS:
+            raise RuntimeError(f"Solax: comando rifiutato ({data.get('code')} {data.get('message')})")
+        return data
+
+    def hold_battery(self, seconds: int) -> dict:
+        """Impedisce alla batteria di casa di scaricarsi per il tempo indicato.
+
+        Usa la modalità remota "solo carica": la batteria può caricarsi dai pannelli ma
+        non cede energia. Allo scadere l'inverter esce dalla modalità remota e torna al
+        funzionamento di prima. Durata ammessa dall'API: da 1 a 60000 secondi.
+        """
+        if not 1 <= seconds <= MAX_HOLD_SECONDS:
+            raise ValueError("durata non ammessa")
+        return self._command(
+            "/openapi/v2/device/inverter_vpp_mode/self_consume/charge_only_mode",
+            {"timeOfDuration": seconds, "nextMotion": NEXT_EXIT_REMOTE},
+        )
+
+    def release_battery(self) -> dict:
+        """Esce subito dalla modalità remota e ripristina il funzionamento normale."""
+        return self._command("/openapi/v2/device/inverter_vpp_mode/exit_vpp_mode", {})
+
     # --- dati per il pannello della casa ---
 
     def _plant_id(self) -> str:
@@ -224,3 +259,32 @@ class SolaxClient:
             },
             "alarms": self._alarms(),
         }
+
+
+def main() -> None:
+    """Comandi manuali: stato, blocco della scarica, sblocco.
+
+    python3 -m teslacharger.solax status
+    python3 -m teslacharger.solax hold SECONDI
+    python3 -m teslacharger.solax release
+    """
+    import sys
+
+    from .config import load_env
+
+    load_env()
+    client = SolaxClient()
+    command = sys.argv[1] if len(sys.argv) > 1 else "status"
+    if command == "hold" and len(sys.argv) > 2:
+        print(client.hold_battery(int(sys.argv[2])))
+    elif command == "release":
+        print(client.release_battery())
+    snap = client.snapshot()
+    print(
+        f"dato delle {snap.data_time[11:16]}: batteria {snap.battery_soc}% {snap.battery_w:+.0f} W, "
+        f"rete {snap.grid_w:+.0f} W, pannelli {snap.pv_w:.0f} W"
+    )
+
+
+if __name__ == "__main__":
+    main()

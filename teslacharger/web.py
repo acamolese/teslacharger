@@ -1,5 +1,6 @@
 """Webapp: stato, modalità, pannello dell'auto e notifiche. Accesso con password."""
 
+import hashlib
 import json
 import time
 from http.cookies import SimpleCookie
@@ -20,6 +21,13 @@ PUBLIC = {
     "/icon-192.png": "image/png",
     "/icon-512.png": "image/png",
 }
+
+
+def page() -> tuple[bytes, str]:
+    """La pagina principale e la sua versione, che la pagina usa per ricaricarsi quando cambia."""
+    source = (HERE / "page.html").read_bytes()
+    version = hashlib.sha1(source).hexdigest()[:10]
+    return source.replace(b"__PAGE_VERSION__", version.encode()), version
 
 
 def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPServer:
@@ -62,9 +70,9 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                     return self._json(401, {"error": "accesso richiesto"})
                 return self._send(302, b"", "text/plain", [("Location", "/login")])
             if path == "/":
-                self._send(200, (HERE / "page.html").read_bytes(), "text/html; charset=utf-8")
+                self._send(200, page()[0], "text/html; charset=utf-8")
             elif path == "/api/status":
-                self._json(200, controller.snapshot())
+                self._json(200, {**controller.snapshot(), "version": page()[1]})
             elif path == "/api/history":
                 self._json(200, controller.history_summary())
             elif path == "/api/home":

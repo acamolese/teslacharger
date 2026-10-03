@@ -1297,7 +1297,10 @@ $("pushtest").addEventListener("click", async () => {
 });
 
 // ---- aggiornamento ----
+const PAGE_VERSION = "__PAGE_VERSION__";
 function render(s) {
+  // Se sul server c'è una versione nuova dell'app, la pagina si ricarica da sola
+  if (s.version && s.version !== PAGE_VERSION && !state.editing) return location.reload();
   state.status = s;
   $("clock").textContent = s.time ? "Ultimo aggiornamento " + hhmm(s.time) + " · prossimo " + after(s.time, s.poll_seconds || 150) : "In attesa del primo ciclo";
   $("chipdry").hidden = s.live !== false;
