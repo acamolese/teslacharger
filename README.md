@@ -40,13 +40,16 @@ Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola 
 
 ## Le regole
 
-In modalità automatica, nella fascia diurna, l'auto collegata carica sempre, e più c'è sole più carica:
+In modalità automatica, nella fascia diurna, l'auto collegata carica con una quota della produzione dei pannelli:
 
-- la carica parte appena l'auto è collegata e non è già al limite impostato;
-- all'auto va una quota fissa della produzione dei pannelli (80%): se i pannelli danno 2 kW, l'auto ne riceve 1,6;
-- la corrente non scende mai sotto la base (5 A, circa 1,1 kW), anche se il sole non basta: in quel caso la differenza arriva dalla batteria di casa o dalla rete;
+- all'auto va l'80% di quello che producono i pannelli: se danno 2 kW, l'auto ne riceve 1,6;
 - il massimo è quello consentito dal cavo;
+- l'auto non accetta meno di 5 A (circa 1,1 kW): se la quota dei pannelli non ci arriva, il sistema non preleva di sua iniziativa dalla rete o dalla batteria di casa, ma lo segnala nella webapp e chiede il consenso;
+- il consenso vale fino a fine giornata e si può revocare: con il consenso l'auto carica al minimo anche senza sole;
+- una nuvola di passaggio non ferma la carica: senza consenso lo stop arriva dopo più letture consecutive insufficienti;
 - la carica si ferma a fine giornata, a carica completata o a cavo scollegato, e la corrente torna al massimo, così la carica notturna di Octopus non resta rallentata.
+
+Dopo la fascia diurna il sistema non carica: la batteria di casa resta alla casa, e l'auto si carica di notte con Octopus a prezzo scontato.
 
 Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata. L'auto viene interrogata solo quando serve, perché le letture hanno un costo e la tengono sveglia.
 
@@ -58,10 +61,11 @@ Le soglie hanno valori predefiniti e si possono cambiare nel file `.env`:
 
 | Variabile | Predefinito | Significato |
 | --- | --- | --- |
-| `MIN_AMPS` | 5 | Corrente di base, garantita di giorno |
+| `MIN_AMPS` | 5 | Corrente minima accettata dall'auto |
+| `DEFICIT_SAMPLES` | 2 | Letture consecutive senza sole prima dello stop, se manca il consenso |
 | `PV_SHARE` | 80 | Quota della produzione dei pannelli destinata all'auto (%) |
 | `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra un avvio e uno stop |
-| `DAY_START`, `DAY_END` | 09:00, 18:00 | Fascia della carica diurna |
+| `DAY_START`, `DAY_END` | 09:00, 19:00 | Fascia della carica diurna |
 | `LIVE` | non impostato | Con `true` i comandi vengono inviati davvero all'auto |
 
 ## Uso

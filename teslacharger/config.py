@@ -28,10 +28,12 @@ def _time(name: str, default: str) -> time:
 
 @dataclass(frozen=True)
 class Settings:
-    # Corrente di base: di giorno l'auto collegata carica sempre almeno a questa corrente
+    # Corrente minima accettata dall'auto: sotto, la carica solare non è possibile
     min_amps: int
     # Quota della produzione dei pannelli destinata all'auto, in percentuale
     pv_share: int
+    # Letture consecutive senza sole prima di fermare una carica non autorizzata dalla rete
+    deficit_samples: int
     # Tempo minimo tra un avvio e uno stop (e viceversa), per non stressare l'auto
     min_switch_minutes: int
     # Fascia oraria in cui il sistema può avviare la carica solare
@@ -49,9 +51,10 @@ class Settings:
         return cls(
             min_amps=_int("MIN_AMPS", 5),
             pv_share=_int("PV_SHARE", 80),
+            deficit_samples=_int("DEFICIT_SAMPLES", 2),
             min_switch_minutes=_int("MIN_SWITCH_MINUTES", 15),
             day_start=_time("DAY_START", "09:00"),
-            day_end=_time("DAY_END", "18:00"),
+            day_end=_time("DAY_END", "19:00"),
             poll_seconds=_int("POLL_SECONDS", 150),
             car_retry_minutes=_int("CAR_RETRY_MINUTES", 30),
             live=os.environ.get("LIVE", "").lower() in ("1", "true", "si", "sì"),

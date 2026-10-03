@@ -28,6 +28,8 @@ class Controller:
         self._wakeup = threading.Event()
         self._file = Path(os.environ.get("TESLACHARGER_DATA", "data")) / "state.json"
         self.mode = Mode.AUTO
+        # Fino a quando l'utente consente di caricare da rete o batteria senza sole
+        self.grid_ok_until: datetime | None = None
         self.state = ControlState()
         self.events: list[dict] = []
         self.status: dict = {}
@@ -40,11 +42,18 @@ class Controller:
         self.mode = Mode(saved.get("mode", Mode.AUTO.value))
         self.state = ControlState.from_json(saved.get("state", {}))
         self.events = saved.get("events", [])
+        if saved.get("grid_ok_until"):
+            self.grid_ok_until = datetime.fromisoformat(saved["grid_ok_until"])
 
     def _save(self) -> None:
         self._file.parent.mkdir(parents=True, exist_ok=True)
         self._file.write_text(
-            json.dumps({"mode": self.mode.value, "state": self.state.to_json(), "events": self.events})
+            json.dumps({
+                "mode": self.mode.value,
+                "state": self.state.to_json(),
+                "events": self.events,
+                "grid_ok_until": self.grid_ok_until.isoformat() if self.grid_ok_until else None,
+            })
         )
 
     def set_mode(self, mode: Mode) -> None:
@@ -56,12 +65,26 @@ class Controller:
             self._save()
         self._wakeup.set()
 
+    def set_grid_ok(self, allow: bool) -> None:
+        """Consenso a caricare da rete o batteria di casa, valido fino a fine giornata."""
+        with self._lock:
+            now = datetime.now()
+            self.grid_ok_until = datetime.combine(now.date(), self.settings.day_end) if allow else None
+            self._event("rete e batteria autorizzate per oggi" if allow else "autorizzazione a rete e batteria revocata")
+            self._save()
+        self._wakeup.set()
+
+    def _grid_ok(self, now: datetime) -> bool:
+        return self.grid_ok_until is not None and now < self.grid_ok_until
+
     def snapshot(self) -> dict:
         with self._lock:
             return {
                 **self.status,
                 "mode": self.mode.value,
                 "live": self.settings.live,
+                "grid_ok": self._grid_ok(datetime.now()),
+                "day_end": self.settings.day_end.strftime("%H:%M"),
                 "events": list(reversed(self.events)),
             }
 
@@ -87,7 +110,7 @@ class Controller:
         self.status.update(plant={**asdict(plant), "excess_w": plant.excess_w}, octopus=vehicle.state)
 
         car: CarStatus | None = None
-        hints = (vehicle.boosting, vehicle.plugged)
+        hints = (vehicle.boosting, vehicle.plugged, self._grid_ok(now))
         if precheck(now, self.mode, plant, *hints, self.state, self.settings) is None:
             car = self.car.status()
             self.status["car"] = {**asdict(car), "time": now.isoformat(timespec="seconds")} if car else None
@@ -96,6 +119,7 @@ class Controller:
             "action": decision.action.value,
             "reason": decision.reason,
             "amps": decision.amps,
+            "ask": decision.ask,
         }
         log.info(
             "pannelli %.0f W, surplus %+.0f W, batteria casa %d%%, auto %s | %s: %s",
