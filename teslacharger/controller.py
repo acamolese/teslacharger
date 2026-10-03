@@ -22,6 +22,7 @@ MAX_EVENTS = 40
 DISPATCH_SYNC = timedelta(minutes=30)
 ERRORS_BEFORE_ALERT = 3
 # Dopo il risveglio l'auto risponde in genere entro mezzo minuto
+HOME_CACHE = timedelta(minutes=5)
 WAKE_ATTEMPTS = 8
 WAKE_PAUSE_SECONDS = 6
 MODE_NAMES = {Mode.BOOST: "Carica subito", Mode.SOLAR: "Carica col sole", Mode.AUTO: "Automatica"}
@@ -64,6 +65,8 @@ class Controller:
         self._was_plugged: bool | None = None
         self._last_dispatch_sync: datetime | None = None
         self._errors = 0
+        self._home: dict | None = None
+        self._home_time: datetime | None = None
         self._load()
 
     def _load(self) -> None:
@@ -176,6 +179,14 @@ class Controller:
                 "pv_share": self.settings.pv_share,
                 "events": list(reversed(self.events)),
             }
+
+    def home_summary(self) -> dict:
+        """Dati dell'impianto per il pannello della casa, riletti al massimo ogni 5 minuti."""
+        now = datetime.now()
+        if self._home is None or now - self._home_time > HOME_CACHE:
+            self._home = self.solax.home_summary()
+            self._home_time = now
+        return self._home
 
     def history_summary(self) -> dict:
         window = (self.settings.day_start, self.settings.day_end)

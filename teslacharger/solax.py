@@ -3,6 +3,7 @@
 import os
 import time
 from dataclasses import dataclass
+from datetime import date, datetime, timedelta
 
 from .http import request_json
 
@@ -11,6 +12,16 @@ BUSINESS_RESIDENTIAL = 1
 DEVICE_INVERTER = 1
 DEVICE_BATTERY = 2
 SUCCESS = 10000
+STAT_BY_MONTH = 2
+ALARM_NAMES = {
+    "Grid Volt Fault": "Tensione di rete fuori dai limiti",
+    "Grid Freq Fault": "Frequenza di rete fuori dai limiti",
+    "Grid Lost Fault": "Rete assente",
+    "Bus Volt Fault": "Tensione interna fuori dai limiti",
+    "Bat Volt Fault": "Tensione della batteria fuori dai limiti",
+    "Over Load Fault": "Sovraccarico",
+    "Temp Over Fault": "Temperatura troppo alta",
+}
 
 
 @dataclass(frozen=True)
@@ -20,7 +31,8 @@ class PlantSnapshot:
     pv_w: float
     # Potenza in uscita dall'inverter verso casa e rete
     inverter_ac_w: float
-    # Scambio con la rete. Segno da confermare sul campo: si assume positivo = immissione
+    # Scambio con la rete: positivo = immissione, negativo = prelievo
+    # (verificato sui contatori di energia importata ed esportata)
     grid_w: float
     # Positivo = la batteria di casa si sta caricando, negativo = si sta scaricando
     battery_w: float
@@ -112,3 +124,103 @@ class SolaxClient:
             battery_w=float(battery.get("chargeDischargePower") or 0),
             battery_soc=int(battery["batterySOC"]),
         )
+
+    # --- dati per il pannello della casa ---
+
+    def _plant_id(self) -> str:
+        if getattr(self, "_plant", None) is None:
+            self._device_sns()
+            self._plant = self._get(
+                "/openapi/v2/plant/page_plant_info",
+                {"businessType": BUSINESS_RESIDENTIAL, "pageNo": 1},
+            )["records"][0]["plantId"]
+        return self._plant
+
+    def _month_stats(self, month: str) -> list[dict]:
+        data = request_json(
+            f"{BASE}/openapi/v2/plant/energy/get_stat_data",
+            body={
+                "plantId": self._plant_id(),
+                "dateType": STAT_BY_MONTH,
+                "date": month,
+                "businessType": BUSINESS_RESIDENTIAL,
+            },
+            headers=self._auth(),
+        )
+        if data.get("code") != SUCCESS:
+            raise RuntimeError(f"Solax: statistiche non disponibili ({data.get('message')})")
+        return data["result"].get("plantEnergyStatDataList") or []
+
+    def _alarms(self) -> list[dict]:
+        records = self._get(
+            "/openapi/v2/alarm/page_alarm_info",
+            {"plantId": self._plant_id(), "businessType": BUSINESS_RESIDENTIAL, "alarmState": 0, "pageNo": 1},
+        )["records"]
+        return [
+            {
+                "name": ALARM_NAMES.get(a.get("alarmName"), a.get("alarmName")),
+                "start": a.get("alarmStartTime"),
+                "end": a.get("alarmEndTime"),
+            }
+            for a in records[:6]
+        ]
+
+    def home_summary(self, days: int = 14) -> dict:
+        """Tutto ciò che l'impianto racconta di sé: giornate, stringhe, batteria, totali, avvisi."""
+        today = date.today()
+        first = today - timedelta(days=days - 1)
+        stats = self._month_stats(today.strftime("%Y-%m"))
+        if first.month != today.month:
+            stats = self._month_stats(first.strftime("%Y-%m")) + stats
+        by_day = {s["date"]: s for s in stats}
+        series = []
+        for i in range(days):
+            day = (first + timedelta(days=i)).isoformat()
+            s = by_day.get(day, {})
+            series.append({
+                "day": day,
+                "pv": s.get("pvGeneration") or 0,
+                "load": s.get("loadConsumption") or 0,
+                "imported": s.get("importEnergy") or 0,
+                "exported": s.get("exportEnergy") or 0,
+                "battery_in": s.get("batteryCharged") or 0,
+                "battery_out": s.get("batteryDischarged") or 0,
+            })
+        inverter = self._realtime(DEVICE_INVERTER)
+        battery = self._realtime(DEVICE_BATTERY)
+        mppt = inverter.get("mpptMap") or {}
+        strings = [
+            {"w": mppt.get(f"MPPT{n}Power"), "v": mppt.get(f"MPPT{n}Voltage"), "a": mppt.get(f"MPPT{n}Current")}
+            for n in (1, 2, 3, 4)
+            if mppt.get(f"MPPT{n}Voltage") is not None
+        ]
+        return {
+            "time": inverter.get("plantLocalTime"),
+            "fetched": datetime.now().isoformat(timespec="seconds"),
+            "days": series,
+            "live": {
+                "strings": strings,
+                "inverter_temp": inverter.get("inverterTemperature"),
+                "grid_v": inverter.get("acVoltage1"),
+                "grid_hz": inverter.get("acFrequency1"),
+                "inverter_w": inverter.get("acPower1"),
+                "grid_w": inverter.get("gridPower"),
+            },
+            "battery": {
+                "soc": battery.get("batterySOC"),
+                "remaining_kwh": battery.get("batteryRemainings"),
+                "soh": battery.get("batterySOH"),
+                "cycles": battery.get("batteryCycleTimes"),
+                "temp": battery.get("batteryTemperature"),
+                "voltage": battery.get("batteryVoltage"),
+                "power_w": battery.get("chargeDischargePower"),
+                "charged_kwh": battery.get("totalDeviceCharge"),
+                "discharged_kwh": battery.get("totalDeviceDischarge"),
+            },
+            "lifetime": {
+                "pv_kwh": inverter.get("totalYield"),
+                "imported_kwh": inverter.get("totalImportEnergy"),
+                "exported_kwh": inverter.get("totalExportEnergy"),
+            },
+            "alarms": self._alarms(),
+        }
