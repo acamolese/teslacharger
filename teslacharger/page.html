@@ -7,16 +7,20 @@
 <meta name="apple-mobile-web-app-title" content="TeslaCharger">
 <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14171a" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>TeslaCharger</title>
 <style>
   :root {
     --bg: #f4f1ea; --card: #fffdf8; --ink: #1d2226; --muted: #6b7278; --line: #e2ddd2;
-    --sun: #c9820a; --ok: #2e7d4f; --warn: #b3541e; --accent: #1d2226; --on-accent: #fffdf8;
+    --sun: #c9820a; --warn: #b3541e; --accent: #1d2226; --on-accent: #fffdf8;
+    --night: #3f6fb0; --other: #9a8f80;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #14171a; --card: #1d2226; --ink: #ecebe6; --muted: #979da3; --line: #2c3338;
-      --sun: #f0b23e; --ok: #6cc892; --warn: #f09a5e; --accent: #ecebe6; --on-accent: #14171a;
+      --sun: #f0b23e; --warn: #f09a5e; --accent: #ecebe6; --on-accent: #14171a;
+      --night: #7fa8e0; --other: #8a8378;
     }
   }
   * { box-sizing: border-box; }
@@ -29,109 +33,168 @@
   header { display: flex; justify-content: space-between; align-items: baseline; }
   h1 { font-size: 1.05rem; margin: 0; letter-spacing: .02em; }
   #updated { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+  .view { display: grid; gap: 14px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
-  .ask { border-color: var(--sun); }
-  .ask p, #granted p { margin: 0 0 12px; }
-  .ask button { width: 100%; background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-  .target { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; }
-  select {
-    font: inherit; font-weight: 600; padding: 10px 12px; border-radius: 12px; min-height: 48px;
-    border: 1px solid var(--line); background: var(--card); color: var(--ink);
-  }
   .banner { border-color: var(--warn); color: var(--warn); font-size: .9rem; }
+  .ask { border-color: var(--sun); }
+  .card p { margin: 0 0 12px; }
+  .card p:last-child { margin-bottom: 0; }
   #headline { font-size: 1.5rem; line-height: 1.2; font-weight: 650; margin: 0 0 6px; text-wrap: balance; }
-  #reason { color: var(--muted); margin: 0; }
+  #reason { color: var(--muted); }
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
   .label { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
   .value { font-size: 1.7rem; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 2px; }
   .value small { font-size: .95rem; font-weight: 500; color: var(--muted); }
+  .value.small { font-size: 1.15rem; }
   .sub { color: var(--muted); font-size: .85rem; margin-top: 2px; }
   .sun .value { color: var(--sun); }
-  .modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+  .row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+  .tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   button {
     font: inherit; font-weight: 600; padding: 12px 6px; border-radius: 12px; cursor: pointer;
     border: 1px solid var(--line); background: transparent; color: var(--ink); min-height: 48px;
   }
-  button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-  button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
-  #modehelp { color: var(--muted); font-size: .88rem; margin: 10px 0 0; }
+  button[aria-pressed="true"], button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  button.wide { width: 100%; }
+  button:focus-visible, select:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+  .line { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; }
+  select {
+    font: inherit; font-weight: 600; padding: 10px 12px; border-radius: 12px; min-height: 48px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  }
+  .help { color: var(--muted); font-size: .88rem; margin-top: 10px; }
   ul { list-style: none; margin: 8px 0 0; padding: 0; }
   li { padding: 8px 0; border-top: 1px solid var(--line); font-size: .9rem; display: flex; gap: 10px; }
   li time { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  [hidden] { display: none; }
+  .bars { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; align-items: end; height: 120px; margin-top: 14px; }
+  .bar { display: flex; flex-direction: column-reverse; height: 100%; }
+  .bar span { display: block; min-height: 0; }
+  .bar .s { background: var(--sun); } .bar .o { background: var(--other); } .bar .n { background: var(--night); }
+  .bar span:last-child { border-radius: 3px 3px 0 0; }
+  .days { display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px; margin-top: 4px; font-size: .62rem; color: var(--muted); text-align: center; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 12px; font-size: .82rem; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main>
   <header><h1>TeslaCharger</h1><span id="updated">in caricamento</span></header>
 
+  <nav class="tabs" aria-label="Sezioni">
+    <button data-tab="charge" aria-pressed="true">Ricarica</button>
+    <button data-tab="car" aria-pressed="false">Auto</button>
+  </nav>
+
   <div id="dryrun" class="card banner" hidden>Modalità di prova: il sistema mostra cosa farebbe, ma non invia comandi all'auto.</div>
   <div id="error" class="card banner" hidden></div>
 
-  <section class="card">
-    <p id="headline">In attesa dei dati</p>
-    <p id="reason"></p>
-  </section>
+  <div id="view-charge" class="view">
+    <section class="card">
+      <p id="headline">In attesa dei dati</p>
+      <p id="reason"></p>
+    </section>
 
-  <section id="ask" class="card ask" hidden>
-    <p><strong>Non c'è abbastanza sole per caricare l'auto.</strong> <span id="asktext"></span></p>
-    <button id="allow">Autorizza rete e batteria per oggi</button>
-  </section>
-  <section id="granted" class="card" hidden>
-    <p class="sub" id="grantedtext"></p>
-    <button id="revoke">Revoca</button>
-  </section>
+    <section id="ask" class="card ask" hidden>
+      <p><strong>Non c'è abbastanza sole per caricare l'auto.</strong> <span id="asktext"></span></p>
+      <button id="allow" class="primary wide">Autorizza rete e batteria per oggi</button>
+    </section>
+    <section id="granted" class="card" hidden>
+      <p class="sub" id="grantedtext"></p>
+      <button id="revoke" class="wide">Revoca</button>
+    </section>
 
-  <section class="grid">
-    <div class="card sun"><div class="label">Pannelli</div><div class="value" id="pv">–</div><div class="sub" id="excess"></div></div>
-    <div class="card"><div class="label">Batteria di casa</div><div class="value" id="soc">–</div><div class="sub" id="batt"></div></div>
-    <div class="card"><div class="label">Consumi di casa</div><div class="value" id="load">–</div><div class="sub" id="grid"></div></div>
-    <div class="card"><div class="label">Auto</div><div class="value" id="car">–</div><div class="sub" id="carsub">dato non ancora letto</div></div>
-  </section>
+    <section class="grid">
+      <div class="card sun"><div class="label">Pannelli</div><div class="value" id="pv">–</div><div class="sub" id="share"></div></div>
+      <div class="card"><div class="label">Batteria di casa</div><div class="value" id="soc">–</div><div class="sub" id="batt"></div></div>
+      <div class="card"><div class="label">Consumi di casa</div><div class="value" id="load">–</div><div class="sub" id="grid"></div></div>
+      <div class="card"><div class="label">Auto</div><div class="value" id="car">–</div><div class="sub" id="carsub">dato non ancora letto</div></div>
+    </section>
 
-  <section class="card">
-    <div class="label">Modalità</div>
-    <div class="modes">
-      <button data-mode="boost" aria-pressed="false">Carica subito</button>
-      <button data-mode="solar" aria-pressed="false">Carica col sole</button>
-      <button data-mode="auto" aria-pressed="false">Automatica</button>
-    </div>
-    <p id="modehelp"></p>
-  </section>
+    <section class="card">
+      <div class="label">Modalità</div>
+      <div class="row3">
+        <button data-mode="boost" aria-pressed="false">Carica subito</button>
+        <button data-mode="solar" aria-pressed="false">Carica col sole</button>
+        <button data-mode="auto" aria-pressed="false">Automatica</button>
+      </div>
+      <p class="help" id="modehelp"></p>
+    </section>
 
-  <section class="card">
-    <div class="label">Carica notturna con Octopus</div>
-    <div class="target">
-      <label for="target">Livello da raggiungere</label>
-      <select id="target"></select>
-    </div>
-    <div class="target">
-      <label for="ready">Auto pronta entro le</label>
-      <select id="ready"></select>
-    </div>
-    <p class="sub" id="targethelp"></p>
-  </section>
+    <section class="card">
+      <div class="label">Carica notturna con Octopus</div>
+      <div class="line"><label for="target">Livello da raggiungere</label><select id="target"></select></div>
+      <div class="line"><label for="ready">Auto pronta entro le</label><select id="ready"></select></div>
+      <p class="help" id="targethelp"></p>
+    </section>
 
-  <section class="card">
-    <div class="label">Ultime manovre</div>
-    <ul id="events"><li>Nessuna manovra registrata</li></ul>
-  </section>
+    <section class="card">
+      <div class="label">Notifiche</div>
+      <p class="help" id="pushtext"></p>
+      <button id="pushon" class="primary wide" hidden>Attiva le notifiche su questo dispositivo</button>
+      <button id="pushtest" class="wide" hidden>Invia una notifica di prova</button>
+    </section>
+
+    <section class="card">
+      <div class="label">Ultime manovre</div>
+      <ul id="events"><li>Nessuna manovra registrata</li></ul>
+    </section>
+  </div>
+
+  <div id="view-car" class="view" hidden>
+    <section class="card">
+      <p id="carname" style="font-size:1.5rem;font-weight:650;line-height:1.2;margin:0 0 6px">Auto</p>
+      <p class="sub" id="cartime">Nessuna lettura disponibile</p>
+      <button id="carrefresh" class="wide">Aggiorna i dati dell'auto</button>
+      <p class="help" id="carnote" hidden></p>
+    </section>
+
+    <section class="grid">
+      <div class="card"><div class="label">Batteria</div><div class="value" id="clevel">–</div><div class="sub" id="climit"></div></div>
+      <div class="card"><div class="label">Autonomia</div><div class="value" id="crange">–</div><div class="sub" id="ccharge"></div></div>
+      <div class="card"><div class="label">Chilometri</div><div class="value" id="codo">–</div><div class="sub">totali</div></div>
+      <div class="card"><div class="label">Temperatura</div><div class="value" id="ctemp">–</div><div class="sub" id="ctempout"></div></div>
+      <div class="card"><div class="label">Gomme</div><div class="value small" id="ctyres">–</div><div class="sub">bar, anteriori e posteriori</div></div>
+      <div class="card"><div class="label">Software</div><div class="value small" id="csw">–</div><div class="sub" id="clock"></div></div>
+    </section>
+
+    <section class="card">
+      <div class="label">Ricariche a casa, ultimi 14 giorni</div>
+      <div class="bars" id="bars" role="img" aria-label="Energia caricata per giorno"></div>
+      <div class="days" id="days"></div>
+      <div class="legend">
+        <span><i style="background:var(--sun)"></i>Sole</span>
+        <span><i style="background:var(--other)"></i>Giorno, da rete o batteria</span>
+        <span><i style="background:var(--night)"></i>Notte con Octopus</span>
+      </div>
+      <p class="help" id="monthtext"></p>
+    </section>
+
+    <section class="card">
+      <div class="label">Consumi di guida</div>
+      <p class="help" id="consumption"></p>
+    </section>
+
+    <section class="card">
+      <button id="logout" class="wide">Esci</button>
+    </section>
+  </div>
 </main>
 <script>
 const HELP = {
-  boost: "Carica subito a 12 A usando tutto quello che c'è: pannelli, batteria di casa e rete. Non guarda né sole né orari.",
-  solar: "Tra le 9 e le 19 all'auto va l'80% dei pannelli. Se il sole non basta ti chiede il consenso. Di notte carica Octopus.",
-  auto: "Il sistema non interviene: l'auto carica solo di notte con Octopus, fino al livello scelto qui sotto.",
+  boost: "Carica subito alla corrente massima usando tutto quello che c'è: pannelli, batteria di casa e rete. Non guarda né sole né orari.",
+  solar: "Nella fascia diurna all'auto va una quota dei pannelli. Se il sole non basta ti chiede il consenso. La sera torna in automatica.",
+  auto: "Il sistema non interviene: l'auto carica di notte con Octopus. Al mattino passa da sola a carica col sole.",
 };
-const HEADLINE = {
-  "avvia": "Avvio della carica solare",
-  "ferma": "Carica fermata",
-  "regola": "Regolazione della potenza",
-  "sveglia": "Risveglio dell'auto",
-};
+const HEADLINE = { "avvia": "Avvio della carica", "ferma": "Carica fermata", "regola": "Regolazione della potenza", "sveglia": "Risveglio dell'auto" };
+const BATTERY_KWH = 60;
 const $ = (id) => document.getElementById(id);
-const kw = (w) => (Math.abs(w) / 1000).toFixed(1).replace(".", ",");
+const num = (v, d = 1) => Number(v).toFixed(d).replace(".", ",");
+const kw = (w) => num(Math.abs(w) / 1000);
 const hhmm = (iso) => iso ? iso.slice(11, 16) : "";
+const ddmm = (iso) => iso.slice(8, 10) + "/" + iso.slice(5, 7);
+const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+let targetNote = false;
 
 function render(s) {
   $("dryrun").hidden = s.live !== false;
@@ -151,16 +214,19 @@ function render(s) {
   $("grantedtext").textContent = "Carica da rete e batteria di casa autorizzata fino alle " + (s.day_end || "") + ".";
   if (p) {
     $("pv").innerHTML = kw(p.pv_w) + " <small>kW</small>";
-    $("excess").textContent = (p.excess_w >= 0 ? "avanzano " : "mancano ") + kw(p.excess_w) + " kW";
+    $("share").textContent = "all'auto fino a " + kw(p.pv_w * (s.pv_share || 80) / 100) + " kW";
     $("soc").innerHTML = p.battery_soc + " <small>%</small>";
     $("batt").textContent = p.battery_w > 50 ? "in carica a " + kw(p.battery_w) + " kW" : p.battery_w < -50 ? "cede " + kw(p.battery_w) + " kW" : "ferma";
     $("load").innerHTML = kw(p.inverter_ac_w - p.grid_w) + " <small>kW</small>";
     $("grid").textContent = Math.abs(p.grid_w) < 50 ? "nessuno scambio con la rete" : "rete " + kw(p.grid_w) + " kW";
   }
+  const info = s.car_info;
   if (c) {
     $("car").innerHTML = c.level + " <small>%</small>";
-    const what = !c.plugged ? "cavo scollegato" : c.charging ? "in carica a " + c.amps + " A" : "collegata, non in carica";
-    $("carsub").textContent = what + " (alle " + hhmm(c.time) + ")";
+    $("carsub").textContent = (!c.plugged ? "cavo scollegato" : c.charging ? "in carica a " + c.amps + " A" : "collegata, non in carica") + " (alle " + hhmm(c.time) + ")";
+  } else if (info) {
+    $("car").innerHTML = info.level + " <small>%</small>";
+    $("carsub").textContent = "ultima lettura " + ddmm(info.time) + " alle " + hhmm(info.time);
   }
   document.querySelectorAll("button[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === s.mode)));
   $("modehelp").textContent = HELP[s.mode] || "";
@@ -168,56 +234,165 @@ function render(s) {
   if (tg && tg.percent && document.activeElement !== $("target")) $("target").value = String(tg.percent);
   if (tg && tg.time && document.activeElement !== $("ready")) $("ready").value = tg.time;
   if (!targetNote) $("targethelp").textContent = tg && tg.time ? "Octopus sceglie le ore scontate della notte per arrivare al " + tg.percent + "% entro le " + tg.time + "." : "";
-  const ev = s.events || [];
+
   $("events").innerHTML = "";
+  const ev = s.events || [];
   if (!ev.length) $("events").innerHTML = "<li>Nessuna manovra registrata</li>";
   for (const e of ev.slice(0, 12)) {
     const li = document.createElement("li"), t = document.createElement("time"), x = document.createElement("span");
-    t.textContent = e.time.slice(8, 10) + "/" + e.time.slice(5, 7) + " " + hhmm(e.time);
+    t.textContent = ddmm(e.time) + " " + hhmm(e.time);
     x.textContent = e.text;
     li.append(t, x);
     $("events").append(li);
   }
+
+  if (info) {
+    $("carname").textContent = info.name || "Auto";
+    $("cartime").textContent = "Dati letti il " + ddmm(info.time) + " alle " + hhmm(info.time);
+    $("clevel").innerHTML = info.level + " <small>%</small>";
+    $("climit").textContent = "limite di carica " + info.limit + "%";
+    $("crange").innerHTML = info.range_km != null ? Math.round(info.range_km) + " <small>km</small>" : "–";
+    $("ccharge").textContent = info.charging ? "in carica a " + info.amps + " A, " + (info.minutes_to_full || 0) + " min alla fine" : info.charging_state === "Disconnected" ? "cavo scollegato" : "non in carica";
+    $("codo").innerHTML = info.odometer_km != null ? Math.round(info.odometer_km).toLocaleString("it-IT") + " <small>km</small>" : "–";
+    $("ctemp").innerHTML = info.inside_temp != null ? num(info.inside_temp) + " <small>°C</small>" : "–";
+    $("ctempout").textContent = info.outside_temp != null ? "esterna " + num(info.outside_temp) + " °C" : "interna";
+    $("ctyres").textContent = info.tyres_bar ? info.tyres_bar.slice(0, 2).map((v) => num(v)).join(" · ") + " / " + info.tyres_bar.slice(2).map((v) => num(v)).join(" · ") : "–";
+    $("csw").textContent = info.software || "–";
+    $("clock").textContent = info.locked == null ? "" : info.locked ? "auto chiusa" : "auto aperta";
+  }
+}
+
+function renderHistory(h) {
+  const max = Math.max(1, ...h.days.map((d) => d.sun + d.day_other + d.night));
+  $("bars").innerHTML = ""; $("days").innerHTML = "";
+  for (const d of h.days) {
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.title = ddmm(d.day + "T") + ": sole " + num(d.sun) + ", giorno altro " + num(d.day_other) + ", notte " + num(d.night) + " kWh";
+    for (const [cls, v] of [["n", d.night], ["o", d.day_other], ["s", d.sun]]) {
+      if (v <= 0) continue;
+      const seg = document.createElement("span");
+      seg.className = cls;
+      seg.style.height = (v / max * 100) + "%";
+      bar.append(seg);
+    }
+    $("bars").append(bar);
+    const lab = document.createElement("span");
+    lab.textContent = d.day.slice(8, 10);
+    $("days").append(lab);
+  }
+  const m = h.month, total = m.sun + m.day_other + m.night;
+  $("monthtext").textContent = total > 0
+    ? "Questo mese: " + num(total) + " kWh caricati a casa, di cui " + num(m.sun) + " dal sole (" + Math.round(m.sun / total * 100) + "%), " + num(m.night) + " di notte con Octopus e " + num(m.day_other) + " di giorno da rete o batteria. La quota di sole è una stima."
+    : "Nessuna ricarica registrata questo mese. Lo storico parte dal giorno di attivazione.";
+  const c = h.consumption;
+  $("consumption").textContent = c
+    ? "Circa " + num(c.percent / 100 * BATTERY_KWH / c.km * 100) + " kWh ogni 100 km, stimati su " + c.km.toLocaleString("it-IT") + " km registrati."
+    : "La stima sarà disponibile dopo almeno 50 km registrati tra una lettura e l'altra.";
 }
 
 async function refresh() {
   try {
     const r = await fetch("/api/status", { cache: "no-store" });
+    if (r.status === 401) return location.replace("/login");
     if (r.ok) render(await r.json());
   } catch (e) {
     $("updated").textContent = "connessione assente";
   }
 }
+async function refreshHistory() {
+  const r = await fetch("/api/history", { cache: "no-store" });
+  if (r.ok) renderHistory(await r.json());
+}
 
+document.querySelectorAll("button[data-tab]").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("button[data-tab]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  $("view-charge").hidden = b.dataset.tab !== "charge";
+  $("view-car").hidden = b.dataset.tab !== "car";
+  if (b.dataset.tab === "car") refreshHistory();
+}));
 document.querySelectorAll("button[data-mode]").forEach((b) => b.addEventListener("click", async () => {
-  await fetch("/api/mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: b.dataset.mode }) });
+  await post("/api/mode", { mode: b.dataset.mode });
   setTimeout(refresh, 400);
   setTimeout(refresh, 4000);
 }));
-
 async function grid(allow) {
-  await fetch("/api/grid", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ allow }) });
+  await post("/api/grid", { allow });
   setTimeout(refresh, 400);
   setTimeout(refresh, 4000);
 }
-let targetNote = false;
+$("allow").addEventListener("click", () => grid(true));
+$("revoke").addEventListener("click", () => grid(false));
+
 for (let v = 50; v <= 100; v += 5) $("target").add(new Option(v + " %", String(v)));
 for (let m = 4 * 60; m <= 11 * 60; m += 30) {
   const t = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
   $("ready").add(new Option(t, t));
 }
 async function sendTarget(body) {
-  const r = await fetch("/api/target", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const r = await post("/api/target", body);
   targetNote = true;
   $("targethelp").textContent = r.ok ? "Modifica inviata a Octopus." : "Octopus non ha accettato la modifica.";
   setTimeout(() => { targetNote = false; refresh(); }, 5000);
 }
 $("target").addEventListener("change", (e) => sendTarget({ percent: Number(e.target.value) }));
 $("ready").addEventListener("change", (e) => sendTarget({ time: e.target.value }));
-$("allow").addEventListener("click", () => grid(true));
-$("revoke").addEventListener("click", () => grid(false));
+
+$("carrefresh").addEventListener("click", async () => {
+  $("carnote").hidden = false;
+  $("carnote").textContent = "Lettura in corso…";
+  const r = await post("/api/car/refresh");
+  const ok = r.ok && (await r.json()).ok;
+  $("carnote").textContent = ok ? "Dati aggiornati." : "L'auto è in standby: i dati si aggiornano alla prossima ricarica o quando la colleghi.";
+  refresh();
+});
+$("logout").addEventListener("click", async () => { await post("/api/logout"); location.replace("/login"); });
+
+// Notifiche push
+const pushSupported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const b64ToBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), (ch) => ch.charCodeAt(0));
+async function pushState() {
+  if (!pushSupported) {
+    const ios = /iPhone|iPad/.test(navigator.userAgent);
+    $("pushtext").textContent = ios
+      ? "Per ricevere le notifiche sull'iPhone aggiungi l'app alla schermata Home (Condividi, poi Aggiungi a Home) e aprila da lì."
+      : "Questo browser non supporta le notifiche.";
+    return;
+  }
+  const reg = await navigator.serviceWorker.register("/sw.js");
+  const sub = await reg.pushManager.getSubscription();
+  const active = sub && Notification.permission === "granted";
+  $("pushon").hidden = !!active;
+  $("pushtest").hidden = !active;
+  $("pushtext").textContent = active
+    ? "Notifiche attive su questo dispositivo: avvio e stop della carica, richiesta di consenso quando manca il sole, problemi del sistema."
+    : Notification.permission === "denied"
+      ? "Le notifiche sono bloccate nelle impostazioni del dispositivo."
+      : "Ricevi un avviso quando la carica parte o si ferma e quando serve il tuo consenso.";
+  if (Notification.permission === "denied") $("pushon").hidden = true;
+}
+$("pushon").addEventListener("click", async () => {
+  try {
+    if (await Notification.requestPermission() !== "granted") return pushState();
+    const reg = await navigator.serviceWorker.ready;
+    const { key } = await (await fetch("/api/push/key")).json();
+    if (!key) { $("pushtext").textContent = "Le notifiche non sono disponibili sul server."; return; }
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(key) });
+    await post("/api/push/subscribe", sub.toJSON());
+  } catch (e) {
+    $("pushtext").textContent = "Attivazione non riuscita: " + e.message;
+    return;
+  }
+  pushState();
+});
+$("pushtest").addEventListener("click", async () => {
+  const r = await post("/api/push/test");
+  const ok = r.ok && (await r.json()).ok;
+  $("pushtext").textContent = ok ? "Notifica di prova inviata." : "Invio non riuscito.";
+});
 
 refresh();
+pushState().catch(() => {});
 setInterval(refresh, 30000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
 </script>

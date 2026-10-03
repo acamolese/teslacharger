@@ -56,7 +56,7 @@ class Settings:
             pv_share=_int("PV_SHARE", 80),
             deficit_samples=_int("DEFICIT_SAMPLES", 2),
             min_switch_minutes=_int("MIN_SWITCH_MINUTES", 15),
-            day_start=_time("DAY_START", "09:00"),
+            day_start=_time("DAY_START", "08:30"),
             day_end=_time("DAY_END", "19:00"),
             poll_seconds=_int("POLL_SECONDS", 150),
             car_retry_minutes=_int("CAR_RETRY_MINUTES", 30),

@@ -117,6 +117,10 @@ def api_get(path: str) -> dict:
     return request_json(API + path, headers={"Authorization": f"Bearer {access_token()}"})
 
 
+def _km(miles) -> float | None:
+    return round(miles * 1.609344, 1) if miles is not None else None
+
+
 class TeslaCar:
     """Lettura dello stato di carica e comandi all'auto.
 
@@ -128,6 +132,8 @@ class TeslaCar:
         self._vin: str | None = os.environ.get("TESLA_VIN") or None
         self._proxy = os.environ.get("TESLA_PROXY_URL", "https://localhost:4443")
         self._proxy_cert = os.environ.get("TESLA_PROXY_CERT")
+        # Dati dell'ultima lettura, per il pannello dell'auto
+        self.last_info: dict | None = None
 
     def vin(self) -> str:
         if self._vin is None:
@@ -137,12 +143,35 @@ class TeslaCar:
     def status(self) -> CarStatus | None:
         """Stato della ricarica, oppure None se l'auto è in standby o non raggiungibile."""
         try:
-            data = api_get(f"/api/1/vehicles/{self.vin()}/vehicle_data?endpoints=charge_state")
+            data = api_get(
+                f"/api/1/vehicles/{self.vin()}/vehicle_data"
+                "?endpoints=charge_state%3Bvehicle_state%3Bclimate_state"
+            )
         except HttpError as err:
             if err.status == 408:
                 return None
             raise
         cs = data["response"]["charge_state"]
+        vs = data["response"].get("vehicle_state") or {}
+        climate = data["response"].get("climate_state") or {}
+        tyres = [vs.get(f"tpms_pressure_{w}") for w in ("fl", "fr", "rl", "rr")]
+        self.last_info = {
+            "name": vs.get("vehicle_name"),
+            "level": cs.get("battery_level"),
+            "limit": cs.get("charge_limit_soc"),
+            "range_km": _km(cs.get("battery_range")),
+            "odometer_km": _km(vs.get("odometer")),
+            "charging": cs.get("charging_state") == "Charging",
+            "charging_state": cs.get("charging_state"),
+            "amps": cs.get("charger_actual_current"),
+            "energy_added_kwh": cs.get("charge_energy_added"),
+            "minutes_to_full": cs.get("minutes_to_full_charge"),
+            "tyres_bar": tyres if all(t is not None for t in tyres) else None,
+            "inside_temp": climate.get("inside_temp"),
+            "outside_temp": climate.get("outside_temp"),
+            "software": (vs.get("car_version") or "").split(" ")[0] or None,
+            "locked": vs.get("locked"),
+        }
         return CarStatus(
             plugged=cs.get("charging_state") not in (None, "Disconnected"),
             charging=cs.get("charging_state") == "Charging",

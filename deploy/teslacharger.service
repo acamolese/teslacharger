@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/teslacharger/app
-ExecStart=/usr/bin/python3.13 -m teslacharger.app
+ExecStart=/home/ubuntu/teslacharger/venv/bin/python -m teslacharger.app
 Restart=on-failure
 RestartSec=15
 MemoryMax=120M

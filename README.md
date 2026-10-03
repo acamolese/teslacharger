@@ -35,8 +35,10 @@ Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola 
 - [x] ciclo di controllo che avvia, regola e ferma la carica in base al surplus
 - [x] accesso a Tesla: lettura dello stato di carica e regolazione degli ampere, provata su un'auto reale
 - [x] webapp con accesso riservato
-- [x] installazione su server, in modalità di prova
-- [ ] passaggio ai comandi reali dopo un periodo di osservazione
+- [x] installazione su server
+- [x] comandi reali attivi
+- [x] notifiche push e pannello dell'auto con storico delle ricariche
+- [ ] costi e risparmi stimati nello storico
 
 ## Le regole
 
@@ -44,7 +46,9 @@ Dalla webapp si sceglie tra tre modalità:
 
 - **Carica subito**: carica alla corrente massima usando pannelli, batteria di casa e rete, senza guardare sole né orari. A carica completata torna alla modalità precedente.
 - **Carica col sole**: la modalità che ottimizza, descritta qui sotto.
-- **Automatica**: il sistema non interviene e l'auto carica solo di notte con Octopus. Dalla webapp si imposta il livello di carica che Octopus deve raggiungere.
+- **Automatica**: il sistema non interviene e l'auto carica di notte con Octopus. Al mattino passa da sola a "Carica col sole", e la sera "Carica col sole" torna in automatica.
+
+Dalla webapp si impostano anche il livello di carica che Octopus deve raggiungere di notte e l'ora entro cui l'auto deve essere pronta.
 
 La corrente massima è limitata a 12 A, un ampere sotto il limite del cavo, per restare stabili.
 
@@ -72,16 +76,17 @@ Le soglie hanno valori predefiniti e si possono cambiare nel file `.env`:
 | `DEFICIT_SAMPLES` | 2 | Letture consecutive senza sole prima dello stop, se manca il consenso |
 | `PV_SHARE` | 80 | Quota della produzione dei pannelli destinata all'auto (%) |
 | `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra un avvio e uno stop |
-| `DAY_START`, `DAY_END` | 09:00, 19:00 | Fascia della carica diurna |
+| `DAY_START`, `DAY_END` | 08:30, 19:00 | Fascia della carica diurna |
 | `LIVE` | non impostato | Con `true` i comandi vengono inviati davvero all'auto |
 
 ## Uso
 
-Serve Python 3.11 o successivo. Non ci sono dipendenze da installare.
+Serve Python 3.11 o successivo. L'unica dipendenza è `cryptography`, usata per le notifiche push: senza, il sistema funziona ma le notifiche restano disattivate.
 
 ```bash
 cp .env.example .env
 # compila .env con le tue credenziali
+pip install -r requirements.txt
 
 python3 -m teslacharger.tesla register      # registra il dominio presso Tesla (una tantum)
 python3 -m teslacharger.tesla auth-url      # link per autorizzare l'account Tesla
@@ -97,7 +102,13 @@ I comandi all'auto vanno firmati: serve `tesla-http-proxy` del progetto [vehicle
 
 ## Installazione su server
 
-La cartella `deploy/` contiene i due servizi systemd (ciclo di controllo e firma dei comandi) e il modello di configurazione nginx. La webapp ascolta solo in locale: nginx la espone in HTTPS e la protegge con una password, lasciando pubblica solo la chiave che Tesla deve poter leggere.
+La cartella `deploy/` contiene i due servizi systemd (ciclo di controllo e firma dei comandi) e il modello di configurazione nginx. La webapp ascolta solo in locale e nginx la espone in HTTPS. L'accesso richiede la password impostata in `WEB_PASSWORD`, con una sessione che resta valida sul dispositivo.
+
+## La webapp
+
+Si installa sulla schermata Home del telefono e ha due sezioni: "Ricarica", con stato, modalità, consenso e carica notturna, e "Auto", con i dati dell'auto, lo storico delle ricariche diviso tra sole, giorno e notte, e una stima dei consumi di guida. Invia notifiche push all'avvio e allo stop della carica, quando serve il consenso e in caso di problemi. Su iPhone le notifiche richiedono che l'app sia aggiunta alla schermata Home.
+
+Una descrizione completa, pensata per chi ne cura esperienza d'uso e interfaccia, è in [docs/descrizione-app.md](docs/descrizione-app.md).
 
 Nella cartella `scripts/` restano gli script usati per esplorare le API (richiedono Node.js 20.6 o successivo).
 

@@ -101,6 +101,19 @@ class OctopusClient:
                 )
         raise RuntimeError("Octopus: nessun veicolo registrato in Intelligent Octopus")
 
+    def completed_dispatches(self) -> list[dict]:
+        """Ore di carica già consuntivate da Octopus, con l'energia erogata."""
+        rows = self._gql(
+            """query ($accountNumber: String!) {
+              completedDispatches(accountNumber: $accountNumber) { start end delta }
+            }""",
+            {"accountNumber": self._account_number()},
+        )["completedDispatches"]
+        return [
+            {"start": r["start"], "end": r["end"], "kwh": abs(float(r["delta"] or 0))}
+            for r in rows or []
+        ]
+
     def set_target(self, device_id: str, percent: int, ready_time: str) -> None:
         """Imposta per tutti i giorni il livello di carica da raggiungere entro l'ora indicata."""
         if not 10 <= percent <= 100:
