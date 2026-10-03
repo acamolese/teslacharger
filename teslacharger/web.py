@@ -32,7 +32,7 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                 self._json(404, {"error": "non trovato"})
 
         def do_POST(self):
-            if self.path not in ("/api/mode", "/api/grid"):
+            if self.path not in ("/api/mode", "/api/grid", "/api/target"):
                 return self._json(404, {"error": "non trovato"})
             # Solo richieste JSON partite dalla pagina stessa
             if self.headers.get("Content-Type") != "application/json":
@@ -42,10 +42,14 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                 data = json.loads(self.rfile.read(length))
                 if self.path == "/api/mode":
                     controller.set_mode(Mode(data["mode"]))
-                else:
+                elif self.path == "/api/grid":
                     controller.set_grid_ok(bool(data["allow"]))
+                else:
+                    controller.set_target(int(data["percent"]))
             except (ValueError, KeyError, TypeError, json.JSONDecodeError):
                 return self._json(400, {"error": "richiesta non valida"})
+            except RuntimeError as err:
+                return self._json(502, {"error": str(err)})
             self._json(200, {"ok": True})
 
         def log_message(self, *args):

@@ -40,10 +40,18 @@ Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola 
 
 ## Le regole
 
-In modalità automatica, nella fascia diurna, l'auto collegata carica con una quota della produzione dei pannelli:
+Dalla webapp si sceglie tra tre modalità:
+
+- **Carica subito**: carica alla corrente massima usando pannelli, batteria di casa e rete, senza guardare sole né orari. A carica completata torna alla modalità precedente.
+- **Carica col sole**: la modalità che ottimizza, descritta qui sotto.
+- **Automatica**: il sistema non interviene e l'auto carica solo di notte con Octopus. Dalla webapp si imposta il livello di carica che Octopus deve raggiungere.
+
+La corrente massima è limitata a 12 A, un ampere sotto il limite del cavo, per restare stabili.
+
+Con "Carica col sole", nella fascia diurna, l'auto collegata carica con una quota della produzione dei pannelli:
 
 - all'auto va l'80% di quello che producono i pannelli: se danno 2 kW, l'auto ne riceve 1,6;
-- il massimo è quello consentito dal cavo;
+- il massimo è la corrente massima impostata;
 - l'auto non accetta meno di 5 A (circa 1,1 kW): se la quota dei pannelli non ci arriva, il sistema non preleva di sua iniziativa dalla rete o dalla batteria di casa, ma lo segnala nella webapp e chiede il consenso;
 - il consenso vale fino a fine giornata e si può revocare: con il consenso l'auto carica al minimo anche senza sole;
 - una nuvola di passaggio non ferma la carica: senza consenso lo stop arriva dopo più letture consecutive insufficienti;
@@ -55,13 +63,12 @@ Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata. L
 
 I dati di SolaxCloud si aggiornano ogni 5 minuti, quindi la regolazione procede a passi di 5 minuti e la batteria di casa assorbe le variazioni più rapide.
 
-Dalla webapp si sceglie la modalità: automatica, carica subito (massima potenza, anche dalla rete) o pausa.
-
 Le soglie hanno valori predefiniti e si possono cambiare nel file `.env`:
 
 | Variabile | Predefinito | Significato |
 | --- | --- | --- |
 | `MIN_AMPS` | 5 | Corrente minima accettata dall'auto |
+| `MAX_AMPS` | 12 | Corrente massima di carica |
 | `DEFICIT_SAMPLES` | 2 | Letture consecutive senza sole prima dello stop, se manca il consenso |
 | `PV_SHARE` | 80 | Quota della produzione dei pannelli destinata all'auto (%) |
 | `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra un avvio e uno stop |

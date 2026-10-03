@@ -7,6 +7,7 @@ from teslacharger.solax import PlantSnapshot
 
 SETTINGS = Settings(
     min_amps=5,
+    max_amps=12,
     pv_share=80,
     deficit_samples=2,
     min_switch_minutes=15,
@@ -35,14 +36,14 @@ def car(charging=False, amps=13, level=60, plugged=True, limit=100):
     )
 
 
-def run(p, c, boosting=False, state=ControlState(), mode=Mode.AUTO, now=NOON, plugged=True, grid_ok=False):
+def run(p, c, boosting=False, state=ControlState(), mode=Mode.SOLAR, now=NOON, plugged=True, grid_ok=False):
     return decide(now, mode, p, c, boosting, plugged, grid_ok, state, SETTINGS)
 
 
 class PrecheckTests(unittest.TestCase):
     """Casi in cui si decide senza interrogare l'auto."""
 
-    def check(self, p, boosting=False, state=ControlState(), mode=Mode.AUTO, now=NOON, plugged=True, grid_ok=False):
+    def check(self, p, boosting=False, state=ControlState(), mode=Mode.SOLAR, now=NOON, plugged=True, grid_ok=False):
         return precheck(now, mode, p, boosting, plugged, grid_ok, state, SETTINGS)
 
     def test_car_not_needed_at_night(self):
@@ -51,8 +52,8 @@ class PrecheckTests(unittest.TestCase):
     def test_car_not_needed_when_octopus_says_unplugged(self):
         self.assertEqual(self.check(plant(excess=3000), plugged=False).action, Action.HOLD)
 
-    def test_car_not_needed_when_off(self):
-        self.assertEqual(self.check(plant(excess=3000), mode=Mode.OFF).action, Action.HOLD)
+    def test_car_not_needed_in_night_only_mode(self):
+        self.assertEqual(self.check(plant(excess=3000), mode=Mode.AUTO).action, Action.HOLD)
 
     def test_manual_boost_is_left_alone(self):
         d = self.check(plant(excess=-3000, soc=20), boosting=True, now=NIGHT)
@@ -102,7 +103,7 @@ class AutoStartTests(unittest.TestCase):
         self.assertTrue(d.ask)
 
     def test_amps_capped_at_car_maximum(self):
-        self.assertEqual(run(plant(pv=6000), car()).amps, 13)
+        self.assertEqual(run(plant(pv=6000), car()).amps, 12)  # limite scelto, sotto i 13 A del cavo
 
     def test_minimum_sun_needed_is_about_1400_watts(self):
         # 5 A a 230 V sono 1150 W, cioè l'80% di circa 1440 W
@@ -154,7 +155,7 @@ class AutoRegulationTests(unittest.TestCase):
         d1 = run(plant(pv=500, data_time="12:00"), car(charging=True, amps=9), boosting=True, state=OURS)
         self.assertEqual((d1.action, d1.amps), (Action.SET_AMPS, 5))
         d2 = run(plant(pv=500, data_time="12:05"), car(charging=True, amps=5), boosting=True, state=d1.state)
-        self.assertEqual((d2.action, d2.amps), (Action.STOP, 13))
+        self.assertEqual((d2.action, d2.amps), (Action.STOP, 12))
         self.assertTrue(d2.ask)
 
     def test_passing_cloud_does_not_stop_the_charge(self):
@@ -171,7 +172,7 @@ class AutoRegulationTests(unittest.TestCase):
     def test_stops_at_end_of_day_and_restores_maximum_amps(self):
         d = run(plant(), car(charging=True, amps=8), boosting=True, state=OURS,
                 now=NOON.replace(hour=18, minute=1))
-        self.assertEqual((d.action, d.amps), (Action.STOP, 13))
+        self.assertEqual((d.action, d.amps), (Action.STOP, 12))
         self.assertFalse(d.state.started_by_us)
 
     def test_stops_when_car_is_full(self):
@@ -186,18 +187,22 @@ class AutoRegulationTests(unittest.TestCase):
 class ModeTests(unittest.TestCase):
     def test_boost_starts_at_full_power_even_without_sun(self):
         d = run(plant(excess=-500, soc=30), car(), mode=Mode.BOOST, now=NIGHT)
-        self.assertEqual((d.action, d.amps), (Action.START, 13))
+        self.assertEqual((d.action, d.amps), (Action.START, 12))
 
     def test_boost_raises_amps_to_maximum(self):
         d = run(plant(), car(charging=True, amps=6), boosting=True, mode=Mode.BOOST)
-        self.assertEqual((d.action, d.amps), (Action.SET_AMPS, 13))
+        self.assertEqual((d.action, d.amps), (Action.SET_AMPS, 12))
 
-    def test_off_releases_our_charge(self):
-        d = run(plant(excess=2000), car(charging=True, amps=8), boosting=True, state=OURS, mode=Mode.OFF)
+    def test_boost_lowers_amps_from_cable_maximum_to_chosen_limit(self):
+        d = run(plant(), car(charging=True, amps=13), boosting=True, mode=Mode.BOOST)
+        self.assertEqual((d.action, d.amps), (Action.SET_AMPS, 12))
+
+    def test_night_only_mode_releases_our_charge(self):
+        d = run(plant(excess=2000), car(charging=True, amps=8), boosting=True, state=OURS, mode=Mode.AUTO)
         self.assertEqual(d.action, Action.STOP)
 
-    def test_off_leaves_manual_boost_alone(self):
-        d = run(plant(), car(charging=True), boosting=True, mode=Mode.OFF)
+    def test_night_only_mode_leaves_manual_boost_alone(self):
+        d = run(plant(), car(charging=True), boosting=True, mode=Mode.AUTO)
         self.assertEqual(d.action, Action.HOLD)
 
 

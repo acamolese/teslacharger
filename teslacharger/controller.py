@@ -28,6 +28,9 @@ class Controller:
         self._wakeup = threading.Event()
         self._file = Path(os.environ.get("TESLACHARGER_DATA", "data")) / "state.json"
         self.mode = Mode.AUTO
+        # Modalità a cui tornare quando "carica subito" ha finito
+        self.after_boost = Mode.AUTO
+        self._vehicle = None
         # Fino a quando l'utente consente di caricare da rete o batteria senza sole
         self.grid_ok_until: datetime | None = None
         self.state = ControlState()
@@ -39,7 +42,12 @@ class Controller:
         if not self._file.exists():
             return
         saved = json.loads(self._file.read_text())
-        self.mode = Mode(saved.get("mode", Mode.AUTO.value))
+        try:
+            self.mode = Mode(saved.get("mode", Mode.AUTO.value))
+            self.after_boost = Mode(saved.get("after_boost", Mode.AUTO.value))
+        except ValueError:
+            # Modalità di una versione precedente: si riparte da quella che non interviene
+            self.mode = self.after_boost = Mode.AUTO
         self.state = ControlState.from_json(saved.get("state", {}))
         self.events = saved.get("events", [])
         if saved.get("grid_ok_until"):
@@ -50,6 +58,7 @@ class Controller:
         self._file.write_text(
             json.dumps({
                 "mode": self.mode.value,
+                "after_boost": self.after_boost.value,
                 "state": self.state.to_json(),
                 "events": self.events,
                 "grid_ok_until": self.grid_ok_until.isoformat() if self.grid_ok_until else None,
@@ -58,6 +67,8 @@ class Controller:
 
     def set_mode(self, mode: Mode) -> None:
         with self._lock:
+            if mode is Mode.BOOST and self.mode is not Mode.BOOST:
+                self.after_boost = self.mode
             self.mode = mode
             # Una scelta esplicita dell'utente azzera le attese su risveglio e cavo
             self.state = replace(self.state, last_wake=None, idle_at=None)
@@ -71,6 +82,18 @@ class Controller:
             now = datetime.now()
             self.grid_ok_until = datetime.combine(now.date(), self.settings.day_end) if allow else None
             self._event("rete e batteria autorizzate per oggi" if allow else "autorizzazione a rete e batteria revocata")
+            self._save()
+        self._wakeup.set()
+
+    def set_target(self, percent: int) -> None:
+        """Livello di carica che Octopus deve raggiungere con la carica notturna."""
+        with self._lock:
+            vehicle = self._vehicle or self.octopus.vehicle()
+            if self.settings.live:
+                self.octopus.set_target(vehicle.device_id, percent, vehicle.target_time or "09:00")
+                self._event(f"livello di carica notturno impostato al {percent}%")
+            else:
+                self._event(f"[prova] livello di carica notturno al {percent}%")
             self._save()
         self._wakeup.set()
 
@@ -106,8 +129,12 @@ class Controller:
 
     def _cycle(self, now: datetime) -> None:
         plant = self.solax.snapshot()
-        vehicle = self.octopus.vehicle()
-        self.status.update(plant={**asdict(plant), "excess_w": plant.excess_w}, octopus=vehicle.state)
+        vehicle = self._vehicle = self.octopus.vehicle()
+        self.status.update(
+            plant={**asdict(plant), "excess_w": plant.excess_w},
+            octopus=vehicle.state,
+            target={"percent": vehicle.target_percent, "time": vehicle.target_time},
+        )
 
         car: CarStatus | None = None
         hints = (vehicle.boosting, vehicle.plugged, self._grid_ok(now))
@@ -146,7 +173,7 @@ class Controller:
         self._event(f"{decision.action.value}{amps}: {decision.reason}")
         self.state = decision.state
         if decision.action is Action.STOP and self.mode is Mode.BOOST:
-            self.mode = Mode.AUTO
+            self.mode = self.after_boost
 
     def _execute(self, decision: Decision, device_id: str) -> None:
         if decision.action is Action.WAKE:

@@ -10,6 +10,7 @@ ENDPOINT = "https://api.oeit-kraken.energy/v1/graphql/"
 # Il token Kraken dura un'ora: lo rinnoviamo con largo anticipo
 TOKEN_LIFETIME_SECONDS = 45 * 60
 STATE_BOOSTING = "BOOSTING"
+WEEKDAYS = ("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 # Stato osservato quando l'auto non è collegata alla presa di casa
 STATE_UNPLUGGED = "SMART_CONTROL_NOT_AVAILABLE"
 
@@ -20,6 +21,9 @@ class VehicleStatus:
     name: str
     state: str
     suspended: bool
+    # Livello di carica che Octopus deve raggiungere e ora entro cui farlo
+    target_percent: int | None = None
+    target_time: str | None = None
 
     @property
     def boosting(self) -> bool:
@@ -77,19 +81,44 @@ class OctopusClient:
               devices(accountNumber: $accountNumber) {
                 id name deviceType
                 status { currentState isSuspended }
+                preferences { schedules { dayOfWeek max time } }
               }
             }""",
             {"accountNumber": self._account_number()},
         )["devices"]
         for device in devices or []:
             if device["deviceType"] == "ELECTRIC_VEHICLES":
+                schedules = (device.get("preferences") or {}).get("schedules") or []
                 return VehicleStatus(
                     device_id=device["id"],
                     name=device["name"],
                     state=device["status"]["currentState"],
                     suspended=bool(device["status"]["isSuspended"]),
+                    target_percent=int(schedules[0]["max"]) if schedules else None,
+                    target_time=schedules[0]["time"][:5] if schedules else None,
                 )
         raise RuntimeError("Octopus: nessun veicolo registrato in Intelligent Octopus")
+
+    def set_target(self, device_id: str, percent: int, ready_time: str) -> None:
+        """Imposta per tutti i giorni il livello di carica da raggiungere entro l'ora indicata."""
+        if not 10 <= percent <= 100:
+            raise ValueError("il livello di carica deve essere tra 10 e 100")
+        self._gql(
+            """mutation ($input: SmartFlexDevicePreferencesInput!) {
+              setDevicePreferences(input: $input) { id }
+            }""",
+            {
+                "input": {
+                    "deviceId": device_id,
+                    "mode": "CHARGE",
+                    "unit": "PERCENTAGE",
+                    "schedules": [
+                        {"dayOfWeek": day, "time": ready_time, "max": percent}
+                        for day in WEEKDAYS
+                    ],
+                }
+            },
+        )
 
     def _boost(self, device_id: str, action: str) -> None:
         self._gql(

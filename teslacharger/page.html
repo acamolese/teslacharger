@@ -33,6 +33,11 @@
   .ask { border-color: var(--sun); }
   .ask p, #granted p { margin: 0 0 12px; }
   .ask button { width: 100%; background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  .target { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; }
+  select {
+    font: inherit; font-weight: 600; padding: 10px 12px; border-radius: 12px; min-height: 48px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  }
   .banner { border-color: var(--warn); color: var(--warn); font-size: .9rem; }
   #headline { font-size: 1.5rem; line-height: 1.2; font-weight: 650; margin: 0 0 6px; text-wrap: balance; }
   #reason { color: var(--muted); margin: 0; }
@@ -87,11 +92,20 @@
   <section class="card">
     <div class="label">Modalità</div>
     <div class="modes">
-      <button data-mode="auto" aria-pressed="false">Automatica</button>
       <button data-mode="boost" aria-pressed="false">Carica subito</button>
-      <button data-mode="off" aria-pressed="false">Pausa</button>
+      <button data-mode="solar" aria-pressed="false">Carica col sole</button>
+      <button data-mode="auto" aria-pressed="false">Automatica</button>
     </div>
     <p id="modehelp"></p>
+  </section>
+
+  <section class="card">
+    <div class="label">Carica notturna con Octopus</div>
+    <div class="target">
+      <label for="target">Livello da raggiungere</label>
+      <select id="target"></select>
+    </div>
+    <p class="sub" id="targethelp"></p>
   </section>
 
   <section class="card">
@@ -101,9 +115,9 @@
 </main>
 <script>
 const HELP = {
-  auto: "Di giorno all'auto va l'80% dei pannelli. Senza sole ti chiede il consenso. Di notte lascia fare a Octopus.",
-  boost: "Carica subito alla massima potenza, anche dalla rete. Al termine torna in automatica.",
-  off: "Il sistema non interviene. La carica notturna di Octopus resta attiva.",
+  boost: "Carica subito a 12 A usando tutto quello che c'è: pannelli, batteria di casa e rete. Non guarda né sole né orari.",
+  solar: "Tra le 9 e le 19 all'auto va l'80% dei pannelli. Se il sole non basta ti chiede il consenso. Di notte carica Octopus.",
+  auto: "Il sistema non interviene: l'auto carica solo di notte con Octopus, fino al livello scelto qui sotto.",
 };
 const HEADLINE = {
   "avvia": "Avvio della carica solare",
@@ -146,6 +160,9 @@ function render(s) {
   }
   document.querySelectorAll("button[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === s.mode)));
   $("modehelp").textContent = HELP[s.mode] || "";
+  const tg = s.target;
+  if (tg && tg.percent && document.activeElement !== $("target")) $("target").value = String(tg.percent);
+  $("targethelp").textContent = tg && tg.time ? "Octopus porta l'auto a questo livello entro le " + tg.time + ", nelle ore scontate." : "";
   const ev = s.events || [];
   $("events").innerHTML = "";
   if (!ev.length) $("events").innerHTML = "<li>Nessuna manovra registrata</li>";
@@ -178,6 +195,12 @@ async function grid(allow) {
   setTimeout(refresh, 400);
   setTimeout(refresh, 4000);
 }
+for (let v = 50; v <= 100; v += 5) $("target").add(new Option(v + " %", String(v)));
+$("target").addEventListener("change", async (e) => {
+  const r = await fetch("/api/target", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ percent: Number(e.target.value) }) });
+  $("targethelp").textContent = r.ok ? "Livello inviato a Octopus." : "Octopus non ha accettato la modifica.";
+  setTimeout(refresh, 4000);
+});
 $("allow").addEventListener("click", () => grid(true));
 $("revoke").addEventListener("click", () => grid(false));
 

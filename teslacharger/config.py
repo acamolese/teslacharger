@@ -30,6 +30,8 @@ def _time(name: str, default: str) -> time:
 class Settings:
     # Corrente minima accettata dall'auto: sotto, la carica solare non è possibile
     min_amps: int
+    # Corrente massima di carica: sotto il limite del cavo, per restare stabili
+    max_amps: int
     # Quota della produzione dei pannelli destinata all'auto, in percentuale
     pv_share: int
     # Letture consecutive senza sole prima di fermare una carica non autorizzata dalla rete
@@ -50,6 +52,7 @@ class Settings:
     def from_env(cls) -> "Settings":
         return cls(
             min_amps=_int("MIN_AMPS", 5),
+            max_amps=_int("MAX_AMPS", 12),
             pv_share=_int("PV_SHARE", 80),
             deficit_samples=_int("DEFICIT_SAMPLES", 2),
             min_switch_minutes=_int("MIN_SWITCH_MINUTES", 15),

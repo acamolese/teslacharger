@@ -14,9 +14,9 @@ NOMINAL_VOLTAGE = 230
 
 
 class Mode(Enum):
-    AUTO = "auto"  # di giorno carica seguendo il sole, di notte lascia fare a Octopus
-    BOOST = "boost"  # carica subito alla massima potenza
-    OFF = "off"  # il sistema non interviene
+    BOOST = "boost"  # carica subito alla massima corrente, senza guardare sole né orari
+    SOLAR = "solar"  # di giorno carica con una quota dei pannelli
+    AUTO = "auto"  # il sistema non interviene: la carica è quella notturna di Octopus
 
 
 class Action(Enum):
@@ -114,8 +114,8 @@ def precheck(
     if not boosting:
         state = replace(state, started_by_us=False)
 
-    if mode is Mode.OFF:
-        return None if ours else Decision(Action.HOLD, "sistema in pausa", state)
+    if mode is Mode.AUTO:
+        return None if ours else Decision(Action.HOLD, "carica notturna affidata a Octopus", state)
     if mode is Mode.BOOST:
         return None
     if boosting and not ours:
@@ -165,17 +165,20 @@ def decide(
         minutes=settings.min_switch_minutes
     )
 
+    # Corrente massima: il limite scelto, mai oltre quello del cavo
+    cap = min(car.max_amps, settings.max_amps)
+
     def stop(reason: str, ask: bool = False) -> Decision:
         return Decision(
             Action.STOP,
             reason,
             replace(state, started_by_us=False, last_switch=now, deficit_count=0),
-            amps=car.max_amps,
+            amps=cap,
             ask=ask,
         )
 
-    if mode is Mode.OFF:
-        return stop("sistema messo in pausa")
+    if mode is Mode.AUTO:
+        return stop("passaggio alla carica notturna di Octopus")
 
     if not car.plugged:
         state = replace(state, idle_at=now)
@@ -191,14 +194,14 @@ def decide(
         state = replace(state, started_by_us=True)
         if not boosting:
             return Decision(
-                Action.START, "carica subito alla massima potenza",
-                replace(state, last_switch=now), amps=car.max_amps,
+                Action.START, "carica subito alla massima corrente",
+                replace(state, last_switch=now), amps=cap,
             )
-        if car.amps < car.max_amps:
-            return Decision(Action.SET_AMPS, "carica subito alla massima potenza", state, amps=car.max_amps)
+        if car.amps != cap:
+            return Decision(Action.SET_AMPS, "carica subito alla massima corrente", state, amps=cap)
         return Decision(Action.HOLD, f"carica immediata in corso a {car.amps} A", state)
 
-    # Modalità automatica
+    # Carica col sole
     if ours and not _in_day(now, settings):
         return stop("fine della fascia diurna, la notte è gestita da Octopus")
 
@@ -206,9 +209,9 @@ def decide(
     # corrente minima, si carica al minimo solo con il consenso dell'utente.
     voltage = car.voltage if car.charging and car.voltage > 100 else NOMINAL_VOLTAGE
     share = share_amps(plant, settings, voltage)
-    floor = min(settings.min_amps, car.max_amps)
+    floor = min(settings.min_amps, cap)
     enough_sun = share >= floor
-    target = max(floor, min(car.max_amps, share))
+    target = max(floor, min(cap, share))
     detail = f"pannelli a {plant.pv_w:.0f} W, all'auto fino al {settings.pv_share}%"
     if not enough_sun:
         detail = f"pannelli a {plant.pv_w:.0f} W, carica al minimo da rete o batteria autorizzata"
