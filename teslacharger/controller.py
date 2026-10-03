@@ -154,6 +154,7 @@ class Controller:
                 **self.status,
                 "mode": self.mode.value,
                 "live": self.settings.live,
+                "poll_seconds": self.settings.poll_seconds,
                 "grid_ok": self._grid_ok(datetime.now()),
                 "day_start": self.settings.day_start.strftime("%H:%M"),
                 "day_end": self.settings.day_end.strftime("%H:%M"),

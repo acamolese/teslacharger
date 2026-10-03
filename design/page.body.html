@@ -356,6 +356,10 @@ const $ = (id) => document.getElementById(id);
 const fmt = (n, d = 1) => Number(n).toFixed(d).replace(".", ",");
 const kw = (w) => fmt(Math.abs(w) / 1000);
 const hhmm = (iso) => (iso ? iso.slice(11, 16) : "");
+const after = (iso, seconds) => {
+  const d = new Date(new Date(iso.replace(" ", "T")).getTime() + seconds * 1000);
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+};
 const cap = (t) => (t ? t.charAt(0).toUpperCase() + t.slice(1) : "");
 const dayKey = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
@@ -471,7 +475,8 @@ function renderHero(s) {
 function renderTiles(s) {
   const p = s.plant, car = carNow(s);
   if (p) {
-    $("solax").textContent = "Impianto " + p.data_time.slice(11, 16);
+    // SolaxCloud pubblica un dato nuovo ogni 5 minuti
+    $("solax").textContent = "Impianto " + p.data_time.slice(11, 16) + " · nuovo alle " + after(p.data_time, 300);
     const share = p.pv_w * s.pv_share / 100, min = s.min_amps * NOMINAL_V, max = s.max_amps * NOMINAL_V;
     $("t1v").textContent = p.pv_w < 50 ? "0" : kw(p.pv_w);
     $("t1s").textContent = p.pv_w < 50 ? "Nessuna produzione"
@@ -829,7 +834,7 @@ $("pushtest").addEventListener("click", async () => {
 // ---- aggiornamento ----
 function render(s) {
   state.status = s;
-  $("clock").textContent = s.time ? "Aggiornato alle " + hhmm(s.time) + " · ogni 30 s" : "In attesa del primo ciclo";
+  $("clock").textContent = s.time ? "Ultimo aggiornamento " + hhmm(s.time) + " · prossimo " + after(s.time, s.poll_seconds || 150) : "In attesa del primo ciclo";
   $("chipdry").hidden = s.live !== false;
   $("drybanner").hidden = s.live !== false;
   $("errbanner").hidden = !s.error;
