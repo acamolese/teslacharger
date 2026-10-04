@@ -19,6 +19,7 @@ HEALTH = 0.96
 ROUND_TRIP = 0.86
 INVERTER_EFFICIENCY = 0.97
 MAX_GAP_HOURS = 0.25
+INVERTER_MAX_W = 6000
 PRICE_KWH = 0.229
 EXPORT_PRICES = (0.0, 0.05, 0.10)
 
@@ -45,13 +46,14 @@ def battery_limits() -> tuple[float, float]:
     return (low[0] if low else 10) / 100, (power[0] if power else 3000)
 
 
-def simulate(series, capacity_kwh: float, min_soc: float, max_power_w: float) -> dict:
+def simulate(series, capacity_kwh: float, min_soc: float, max_power_w: float, pv_scale: float = 1.0) -> dict:
     one_way = ROUND_TRIP ** 0.5
     floor = capacity_kwh * min_soc
     stored = floor
     months = defaultdict(lambda: {"imported": 0.0, "exported": 0.0})
     for month, hours, pv, load, _ in series:
-        net = pv * INVERTER_EFFICIENCY - load
+        # Con più pannelli la produzione cresce in proporzione, fino al limite dell'inverter
+        net = min(pv * pv_scale * INVERTER_EFFICIENCY, INVERTER_MAX_W + max_power_w) - load
         if net >= 0:
             charge = min(net, max_power_w, (capacity_kwh - stored) / one_way / hours * 1000 if hours else 0)
             stored += charge * one_way * hours / 1000
