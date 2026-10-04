@@ -22,6 +22,8 @@ MAX_EVENTS = 40
 DISPATCH_SYNC = timedelta(minutes=30)
 ERRORS_BEFORE_ALERT = 3
 # Dopo il risveglio l'auto risponde in genere entro mezzo minuto
+# Per quanto tempo il livello letto dall'auto resta attendibile, se non viene scollegata
+CAR_READING_VALID = timedelta(hours=12)
 HOME_CACHE = timedelta(minutes=5)
 BILLS_CACHE = timedelta(hours=1)
 BILLED_MONTHS_SHOWN = 6
@@ -68,6 +70,8 @@ class Controller:
         self.events: list[dict] = []
         self.status: dict = {}
         self._was_plugged: bool | None = None
+        # True se l'auto è stata scollegata dopo l'ultima lettura: il livello noto non vale più
+        self._car_stale = False
         self._last_dispatch_sync: datetime | None = None
         self._errors = 0
         self._hold_error: str | None = None
@@ -324,7 +328,18 @@ class Controller:
         self._store_car(now, car)
         return car
 
+    def _car_full(self, now: datetime) -> bool | None:
+        """L'auto è già al limite di carica? None se l'ultima lettura non è più attendibile."""
+        info = self.status.get("car_info")
+        if not info or self._car_stale or info.get("level") is None:
+            return None
+        if now - datetime.fromisoformat(info["time"]) > CAR_READING_VALID:
+            return None
+        return info["level"] >= (info.get("limit") or 100)
+
     def _store_car(self, now: datetime, car: CarStatus | None) -> None:
+        if car is not None:
+            self._car_stale = False
         if car is not None and self.car.last_info:
             info = {**self.car.last_info, "time": now.isoformat(timespec="seconds")}
             self.status["car_info"] = info
@@ -413,14 +428,21 @@ class Controller:
         self.status["planned"] = self._planned_window(vehicle.device_id, now)
         self._auto_switch(now, vehicle.boosting and self.state.started_by_us)
 
+        if not vehicle.plugged:
+            self._car_stale = True
         hints = (vehicle.boosting, vehicle.plugged, self._grid_ok(now))
-        need_car = precheck(now, self.mode, plant, *hints, self.state, self.settings) is None
+        car_full = self._car_full(now)
+        need_car = precheck(now, self.mode, plant, *hints, self.state, self.settings, car_full) is None
         # Appena l'auto viene collegata è sveglia: una lettura costa poco e aggiorna il pannello
         just_plugged = vehicle.plugged and self._was_plugged is False
         self._was_plugged = vehicle.plugged
         car = self._read_car(now) if need_car or just_plugged else None
 
-        decision = decide(now, self.mode, plant, car if need_car else None, *hints, self.state, self.settings)
+        decision = decide(
+            now, self.mode, plant, car if need_car else None, *hints, self.state, self.settings,
+            # Dopo una lettura appena fatta decide il dato fresco dell'auto, non quello ricordato
+            None if need_car else car_full,
+        )
         self.status["decision"] = {
             "action": decision.action.value,
             "reason": decision.reason,

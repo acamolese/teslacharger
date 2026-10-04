@@ -73,6 +73,27 @@ class PrecheckTests(unittest.TestCase):
     def test_car_needed_without_sun_once_consent_is_given(self):
         self.assertIsNone(self.check(plant(pv=800), grid_ok=True))
 
+    def test_does_not_ask_when_car_is_known_to_be_full(self):
+        d = precheck(NOON, Mode.SOLAR, plant(pv=800), False, True, False, ControlState(), SETTINGS, True)
+        self.assertEqual(d.action, Action.HOLD)
+        self.assertFalse(d.ask)
+
+    def test_reads_the_car_before_asking_when_its_level_is_unknown(self):
+        self.assertIsNone(precheck(NOON, Mode.SOLAR, plant(pv=800), False, True, False, ControlState(), SETTINGS, None))
+
+    def test_full_car_is_not_polled_even_with_sun(self):
+        d = precheck(NOON, Mode.SOLAR, plant(pv=4000), False, True, False, ControlState(), SETTINGS, True)
+        self.assertEqual(d.action, Action.HOLD)
+
+    def test_does_not_ask_after_reading_a_full_car(self):
+        d = decide(NOON, Mode.SOLAR, plant(pv=800), car(level=100), False, True, False, ControlState(), SETTINGS, None)
+        self.assertEqual(d.action, Action.HOLD)
+        self.assertFalse(d.ask)
+
+    def test_asks_after_reading_a_car_that_needs_charge(self):
+        d = decide(NOON, Mode.SOLAR, plant(pv=800), car(level=60), False, True, False, ControlState(), SETTINGS, None)
+        self.assertTrue(d.ask)
+
     def test_does_not_ask_when_car_is_away(self):
         self.assertFalse(self.check(plant(pv=800), plugged=False).ask)
 

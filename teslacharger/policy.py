@@ -102,6 +102,7 @@ def precheck(
     grid_ok: bool,
     state: ControlState,
     settings: Settings,
+    car_full: bool | None = False,
 ) -> Decision | None:
     """Decide senza interrogare l'auto, quando i suoi dati non servono.
 
@@ -109,6 +110,8 @@ def precheck(
     Evita letture inutili, che Tesla fa pagare e che tengono sveglia l'auto.
     `plugged` è l'indicazione di Octopus sulla presenza del cavo, `grid_ok` il consenso
     dell'utente a caricare da rete o batteria di casa quando il sole non basta.
+    `car_full` dice se dall'ultima lettura l'auto risulta già al limite di carica:
+    None se non si sa, perché non è stata letta da quando è stata collegata.
     """
     ours = boosting and state.started_by_us
     if not boosting:
@@ -133,7 +136,12 @@ def precheck(
         return Decision(Action.HOLD, "auto non collegata", state)
     if state.idle_at and now - state.idle_at < timedelta(minutes=settings.car_retry_minutes):
         return Decision(Action.HOLD, "auto già carica o cavo scollegato all'ultimo controllo", state)
+    if car_full:
+        return Decision(Action.HOLD, "auto già al limite di carica", state)
     if not grid_ok and share_amps(plant, settings) < settings.min_amps:
+        if car_full is None:
+            # Prima di chiedere il consenso serve sapere se l'auto ha bisogno di caricare
+            return None
         return Decision(Action.HOLD, NO_SUN, state, ask=True)
     return None
 
@@ -148,8 +156,9 @@ def decide(
     grid_ok: bool,
     state: ControlState,
     settings: Settings,
+    car_full: bool | None = False,
 ) -> Decision:
-    early = precheck(now, mode, plant, boosting, plugged, grid_ok, state, settings)
+    early = precheck(now, mode, plant, boosting, plugged, grid_ok, state, settings, car_full)
     state = replace(state, last_data_time=plant.data_time)
     if early is not None:
         return replace(early, state=replace(early.state, last_data_time=plant.data_time))
