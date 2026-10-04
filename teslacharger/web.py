@@ -138,6 +138,8 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                 controller.set_mode(Mode(data["mode"]))
             elif path == "/api/grid":
                 controller.set_grid_ok(bool(data["allow"]))
+            elif path == "/api/evening":
+                controller.answer_evening(str(data["choice"]))
             elif path == "/api/hold":
                 controller.set_hold(bool(data["enabled"]))
             elif path == "/api/target":

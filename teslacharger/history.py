@@ -28,6 +28,12 @@ CREATE TABLE IF NOT EXISTS session (
 CREATE TABLE IF NOT EXISTS supercharge (
     id TEXT PRIMARY KEY, start TEXT, end TEXT, site TEXT, kwh REAL, cost REAL
 );
+CREATE TABLE IF NOT EXISTS plug (
+    time TEXT PRIMARY KEY, plugged INTEGER, level INTEGER
+);
+CREATE TABLE IF NOT EXISTS evening (
+    day TEXT PRIMARY KEY, asked_at TEXT, suggestion TEXT, choice TEXT, by_user INTEGER, home_kwh REAL, level INTEGER
+);
 CREATE TABLE IF NOT EXISTS event (
     time TEXT, icon TEXT, title TEXT, sub TEXT
 );
@@ -102,6 +108,16 @@ class History:
         """Chilometri percorsi dalla prima lettura del periodo all'ultima."""
         rows = self._all("SELECT MIN(odometer_km), MAX(odometer_km) FROM car WHERE time >= ? AND odometer_km IS NOT NULL", (day,))
         return round(rows[0][1] - rows[0][0]) if rows and rows[0][0] is not None else None
+
+    def log_plug(self, when: datetime, plugged: bool, level: int | None) -> None:
+        """Registra quando l'auto viene collegata o scollegata: servono per capire le abitudini."""
+        self._run("INSERT OR REPLACE INTO plug VALUES (?, ?, ?)", (when.isoformat(timespec="seconds"), int(plugged), level))
+
+    def log_evening(self, q: dict) -> None:
+        self._run(
+            "INSERT OR REPLACE INTO evening VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (q["day"], q["asked_at"], q["suggestion"], q.get("choice"), int(bool(q.get("by_user"))), q.get("home_kwh"), q.get("level")),
+        )
 
     def log_event(self, when: str, icon: str, title: str, sub: str) -> None:
         self._run("INSERT INTO event VALUES (?, ?, ?, ?)", (when, icon, title, sub))

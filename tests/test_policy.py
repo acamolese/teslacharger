@@ -18,6 +18,10 @@ SETTINGS = Settings(
     price_kwh=0.229,
     fixed_monthly=30.47,
     night_discount_kwh=0.036,
+    home_day_target=50,
+    home_day_min_kwh=5,
+    evening_ask_hour=18,
+    evening_default_hour=22,
     live=False,
 )
 NOON = datetime(2026, 10, 3, 12, 0)

@@ -30,6 +30,12 @@ def _time(name: str, default: str) -> time:
     return time.fromisoformat(os.environ.get(name, default))
 
 
+# Ore in cui di solito l'auto è a casa collegata, per giorno della settimana (lunedì = 0).
+# È il punto di partenza: le abitudini reali vengono registrate e lo correggeranno.
+HOME_PLAN = {
+}
+
+
 @dataclass(frozen=True)
 class Settings:
     # Corrente minima accettata dall'auto: sotto, la carica solare non è possibile
@@ -55,6 +61,13 @@ class Settings:
     fixed_monthly: float
     # Sconto per ogni kWh caricato nelle finestre smart di Octopus
     night_discount_kwh: float
+    # Livello a cui caricare di notte quando il giorno dopo l'auto resta a casa col sole
+    home_day_target: int
+    # Energia solare prevista per l'auto, in kWh, oltre la quale conviene aspettare il sole
+    home_day_min_kwh: float
+    # Ora dopo la quale, collegando l'auto, parte la domanda sulla notte, e ora in cui si decide da soli
+    evening_ask_hour: int
+    evening_default_hour: int
     # Senza questo interruttore il sistema scrive cosa farebbe ma non comanda l'auto
     live: bool
 
@@ -73,5 +86,9 @@ class Settings:
             price_kwh=_float("PRICE_KWH", 0.229),
             fixed_monthly=_float("FIXED_MONTHLY", 30.47),
             night_discount_kwh=_float("NIGHT_DISCOUNT_KWH", 0.036),
+            home_day_target=_int("HOME_DAY_TARGET", 50),
+            home_day_min_kwh=_float("HOME_DAY_MIN_KWH", 5),
+            evening_ask_hour=_int("EVENING_ASK_HOUR", 18),
+            evening_default_hour=_int("EVENING_DEFAULT_HOUR", 22),
             live=os.environ.get("LIVE", "").lower() in ("1", "true", "si", "sì"),
         )

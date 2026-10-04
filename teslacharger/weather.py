@@ -7,6 +7,7 @@ giorni passati, la radiazione con quello che i pannelli hanno prodotto davvero.
 
 from datetime import date, datetime
 
+from .config import HOME_PLAN
 from .http import request_json
 
 URL = "https://api.open-meteo.com/v1/forecast"
@@ -74,13 +75,16 @@ def forecast(data: dict, factor: float, settings, now: datetime | None = None) -
     for i, day in enumerate(daily["time"]):
         if day < today:
             continue
-        car_kwh, first, last = 0.0, None, None
+        car_kwh, home_kwh, first, last = 0.0, 0.0, None, None
+        home_hours = HOME_PLAN.get(date.fromisoformat(day).weekday(), ())
         for hour, watts in hourly.get(day, []):
             # Potenza media dei pannelli nell'ora, e quota destinata all'auto
             share = factor * watts * settings.pv_share / 100
             in_window = settings.day_start.hour <= hour < settings.day_end.hour
             if in_window and share >= minimum_w:
                 car_kwh += min(share, maximum_w) / 1000
+                if any(start <= hour < end for start, end in home_hours):
+                    home_kwh += min(share, maximum_w) / 1000
                 first = hour if first is None else first
                 last = hour
         text, icon = condition(daily["weather_code"][i])
@@ -93,6 +97,9 @@ def forecast(data: dict, factor: float, settings, now: datetime | None = None) -
             "sun_hours": round((daily["sunshine_duration"][i] or 0) / 3600, 1),
             "pv_kwh": round(factor * (daily["shortwave_radiation_sum"][i] or 0) * MJ_TO_KWH, 1),
             "car_kwh": round(car_kwh, 1),
+            # Energia per l'auto nelle sole ore in cui di solito è a casa
+            "home_kwh": round(home_kwh, 1),
+            "home_day": bool(home_hours),
             "car_from": f"{first:02d}:00" if first is not None else None,
             "car_to": f"{last + 1:02d}:00" if last is not None else None,
         })

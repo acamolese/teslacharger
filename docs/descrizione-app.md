@@ -67,6 +67,17 @@ Quando è attiva "Carica col sole", l'auto è collegata e il sole non basta a ra
 
 Il consenso vale fino alle 19:00 dello stesso giorno e può essere revocato in qualsiasi momento. Con il consenso attivo, l'auto carica al minimo quando il sole non basta e segue i pannelli quando il sole c'è. La richiesta arriva anche come notifica, una sola volta al giorno.
 
+## La domanda della sera
+
+Quando l'auto viene collegata dopo le 18, il sistema chiede all'utente come comportarsi per la notte, con una notifica e con un riquadro in cima alla sezione "Ricarica". Le risposte possibili sono due:
+
+- **"Carico stanotte"**: Octopus carica l'auto fino al livello pieno scelto dall'utente.
+- **"Domani a casa"**: di notte l'auto viene caricata solo fino a un livello di riserva (50%), così il giorno dopo resta spazio in batteria per l'energia dei pannelli.
+
+Il riquadro spiega che giorno è domani, se di solito l'utente è a casa, quanta energia solare è prevista per l'auto, e quale delle due risposte è consigliata. Se l'utente non risponde entro le 22, il sistema applica la risposta consigliata e lo comunica con una notifica. Dopo la risposta il riquadro si riduce a una riga con la scelta fatta e la possibilità di cambiarla.
+
+Il consiglio si basa su un piano settimanale delle ore in cui l'auto è di solito a casa e sulla previsione del sole. Il sistema registra quando l'auto viene collegata e scollegata e cosa risponde l'utente, per affinare nel tempo quel piano.
+
 ## La carica notturna con Octopus
 
 La carica notturna è sempre attiva, qualunque sia la modalità. L'utente imposta due preferenze, che vengono trasmesse a Octopus:

@@ -9,6 +9,9 @@ html.dark,html.dark body{background:#0e0e0e}
 .tab{gap:6px}
 .room{background:var(--scl);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-height:104px}
 .room.call{background:var(--sc)}
+.consent .btn{padding:0 10px}
+.consent .btn.rec{background:var(--gloss);color:var(--onp);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 1px 3px rgba(0,0,0,.25)}
+.consent .btn:not(.rec){border:1px solid var(--ol);color:inherit}
 .fab{position:fixed;right:max(16px,calc(50vw - 244px));bottom:calc(16px + env(safe-area-inset-bottom))}
 .snack{position:fixed;left:max(16px,calc(50vw - 244px));right:max(16px,calc(50vw - 244px));bottom:calc(16px + env(safe-area-inset-bottom))}
 .snack.fab-up{bottom:calc(96px + env(safe-area-inset-bottom))}
@@ -80,6 +83,29 @@ html.dark,html.dark body{background:#0e0e0e}
         <span class="wlimit" id="wlimit" style="left: 100%"></span>
       </div>
       <div class="prog-lab t-lm"><span id="plab1">Auto –</span><span id="plab2"></span></div>
+    </section>
+
+    <!-- Domanda della sera -->
+    <section class="consent" id="evening" aria-labelledby="eve-t" hidden>
+      <div style="display: flex; gap: 12px; align-items: flex-start">
+        <span class="ic f s32" aria-hidden="true">help</span>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <h2 id="eve-t" class="t-tm" style="margin: 0">Stanotte carico o domani sei a casa?</h2>
+          <p class="t-bm" style="margin: 0" id="evetext"></p>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <button class="btn sl" id="evehome"><span class="ic s20" aria-hidden="true">wb_sunny</span>Domani a casa</button>
+        <button class="btn sl" id="evenight"><span class="ic s20" aria-hidden="true">bedtime</span>Carico stanotte</button>
+      </div>
+    </section>
+    <section class="consent ok" id="evedone" hidden>
+      <span class="ic f" style="color: var(--t)" id="evedoneic" aria-hidden="true">bedtime</span>
+      <div style="flex: 1; display: flex; flex-direction: column">
+        <span class="t-ts" id="evedonetitle"></span>
+        <span class="t-bs v" id="evedonesub"></span>
+      </div>
+      <button class="btn text sl" id="evechange">Cambia</button>
     </section>
 
     <!-- Consenso -->
@@ -675,6 +701,32 @@ function renderConsent(s) {
   $("granted").hidden = !s.grid_ok;
   $("grantedtext").textContent = "Valido fino alle " + s.day_end + " di oggi";
 }
+function renderEvening(s) {
+  const q = s.evening, reopen = state.eveReopen;
+  const open = !!q && (q.choice == null || reopen);
+  $("evening").hidden = !open;
+  $("evedone").hidden = !q || q.choice == null || reopen;
+  if (!q) return;
+  const dayName = WEEKDAYS[new Date(q.day + "T12:00:00").getDay()].toLowerCase();
+  const sun = q.home_kwh > 0 ? "sono previsti fino a " + fmt(q.home_kwh) + " kWh dal sole per l'auto (circa +" + Math.round(q.home_kwh / BATTERY_KWH * 100) + "%)" : "non è previsto sole utile per l'auto";
+  $("evetext").textContent = "Domani è " + dayName + (q.home_day ? ", di solito sei a casa" : ", di solito sei fuori") + ": " + sun + ". Se resti a casa, stanotte carico solo fino al " + s.home_day_target + "% e lascio spazio al sole. Senza risposta, alle 22 scelgo " + (q.suggestion === "home" ? "«domani a casa»." : "«carico stanotte».");
+  $("evehome").classList.toggle("rec", q.suggestion === "home");
+  $("evenight").classList.toggle("rec", q.suggestion !== "home");
+  const home = q.choice === "home";
+  $("evedoneic").textContent = home ? "wb_sunny" : "bedtime";
+  $("evedonetitle").textContent = home ? "Domani a casa: stanotte carico fino al " + q.percent + "%" : "Stanotte carico fino al " + q.percent + "%";
+  $("evedonesub").textContent = q.by_user ? "Scelto da te" : "Scelto dal sistema, senza risposta";
+}
+async function answerEvening(choice) {
+  state.eveReopen = false;
+  const r = await post("/api/evening", { choice });
+  toast(!r.ok ? "Scelta non registrata" : choice === "home" ? "Domani a casa: stanotte carico poco e aspetto il sole" : "Stanotte carico con Octopus");
+  soon();
+}
+$("evehome").addEventListener("click", () => answerEvening("home"));
+$("evenight").addEventListener("click", () => answerEvening("night"));
+$("evechange").addEventListener("click", () => { state.eveReopen = true; if (state.status) renderEvening(state.status); });
+
 $("grant").addEventListener("click", async () => {
   await post("/api/grid", { allow: true });
   toast("Rete e batteria autorizzate fino alle " + (state.status ? state.status.day_end : "sera"));
@@ -1374,7 +1426,7 @@ function render(s) {
   $("errbanner").hidden = !s.error;
   $("errtext").textContent = s.error || "";
   if (!s.time) return;
-  renderHero(s); renderConsent(s); renderTiles(s); renderModes(s); renderNight(s); renderLog(s); renderCar(s);
+  renderHero(s); renderEvening(s); renderConsent(s); renderTiles(s); renderModes(s); renderNight(s); renderLog(s); renderCar(s);
 }
 async function refresh() {
   try {
