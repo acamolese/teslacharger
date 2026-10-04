@@ -242,7 +242,8 @@ class Controller:
             )
             rooms = self.emmeti.rooms()
             for room in rooms:
-                room["label"] = names.get(room["name"], f"Stanza {room['name']}")
+                # I nomi si associano all'indirizzo del termostato, che è stabile
+                room["label"] = names.get(str(room["address"]), f"Stanza {room['name']}")
             self._climate = {
                 "configured": True,
                 "time": now.isoformat(timespec="seconds"),

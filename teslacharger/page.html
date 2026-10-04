@@ -1410,7 +1410,7 @@ function renderClimate(k) {
     head.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:8px";
     head.append(el("span", "t-lm v", r.label));
     if (r.calling) { const g = el("span", "ic f s18", summer ? "ac_unit" : "mode_heat"); g.setAttribute("aria-label", "in chiamata"); head.append(g); }
-    c.append(head, v, el("span", "t-bs v", "impostati " + deg(r.set_temp) + (r.humidity != null ? " · umidità " + Math.round(r.humidity) + "%" : "")));
+    c.append(head, v, el("span", "t-bs v", "impostati " + deg(r.set_temp) + (r.humidity != null ? " · umidità " + Math.round(r.humidity) + "%" : "") + (r.dehumidifying ? " · deumidifica" : "")));
     rooms.append(c);
   }
 
