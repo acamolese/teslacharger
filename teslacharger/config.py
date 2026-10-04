@@ -30,10 +30,21 @@ def _time(name: str, default: str) -> time:
     return time.fromisoformat(os.environ.get(name, default))
 
 
-# Ore in cui di solito l'auto è a casa collegata, per giorno della settimana (lunedì = 0).
-# È il punto di partenza: le abitudini reali vengono registrate e lo correggeranno.
-HOME_PLAN = {
-}
+def _home_plan() -> dict[int, tuple[tuple[int, int], ...]]:
+    """Ore in cui di solito l'auto è a casa collegata, per giorno della settimana (lunedì = 0).
+
+    Si legge dalla variabile HOME_PLAN, nel formato "3:8-19;5:8-10,14-19": giorno, poi una o
+    più fasce orarie. Resta fuori dal codice perché descrive quando la casa è vuota.
+    """
+    plan = {}
+    for part in os.environ.get("HOME_PLAN", "").split(";"):
+        if ":" not in part:
+            continue
+        day, ranges = part.split(":", 1)
+        plan[int(day)] = tuple(
+            (int(r.split("-")[0]), int(r.split("-")[1])) for r in ranges.split(",") if "-" in r
+        )
+    return plan
 
 
 @dataclass(frozen=True)

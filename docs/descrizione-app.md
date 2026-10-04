@@ -76,7 +76,7 @@ Quando l'auto viene collegata dopo le 18, il sistema chiede all'utente come comp
 
 Il riquadro spiega che giorno è domani, se di solito l'utente è a casa, quanta energia solare è prevista per l'auto, e quale delle due risposte è consigliata. Se l'utente non risponde entro le 22, il sistema applica la risposta consigliata e lo comunica con una notifica. Dopo la risposta il riquadro si riduce a una riga con la scelta fatta e la possibilità di cambiarla.
 
-Il consiglio si basa su un piano settimanale delle ore in cui l'auto è di solito a casa e sulla previsione del sole. Il sistema registra quando l'auto viene collegata e scollegata e cosa risponde l'utente, per affinare nel tempo quel piano.
+Il consiglio si basa su un piano settimanale delle ore in cui l'auto è di solito a casa (giorni interi o solo alcune fasce orarie) e sulla previsione del sole. Il sistema registra quando l'auto viene collegata e scollegata e cosa risponde l'utente, per affinare nel tempo quel piano.
 
 ## La carica notturna con Octopus
 

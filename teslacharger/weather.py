@@ -7,7 +7,7 @@ giorni passati, la radiazione con quello che i pannelli hanno prodotto davvero.
 
 from datetime import date, datetime
 
-from .config import HOME_PLAN
+from .config import _home_plan
 from .http import request_json
 
 URL = "https://api.open-meteo.com/v1/forecast"
@@ -71,12 +71,13 @@ def forecast(data: dict, factor: float, settings, now: datetime | None = None) -
     minimum_w = settings.min_amps * 230
     maximum_w = settings.max_amps * 230
     days = []
+    plan = _home_plan()
     daily = data["daily"]
     for i, day in enumerate(daily["time"]):
         if day < today:
             continue
         car_kwh, home_kwh, first, last = 0.0, 0.0, None, None
-        home_hours = HOME_PLAN.get(date.fromisoformat(day).weekday(), ())
+        home_hours = plan.get(date.fromisoformat(day).weekday(), ())
         for hour, watts in hourly.get(day, []):
             # Potenza media dei pannelli nell'ora, e quota destinata all'auto
             share = factor * watts * settings.pv_share / 100
