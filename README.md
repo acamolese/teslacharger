@@ -38,7 +38,7 @@ Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola 
 - [x] installazione su server
 - [x] comandi reali attivi
 - [x] notifiche push e pannello dell'auto con storico delle ricariche
-- [ ] costi e risparmi stimati nello storico
+- [x] costi e risparmi stimati nello storico
 
 ## Le regole
 
@@ -79,6 +79,8 @@ Le soglie hanno valori predefiniti e si possono cambiare nel file `.env`:
 | `PV_SHARE` | 80 | Quota della produzione dei pannelli destinata all'auto (%) |
 | `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra un avvio e uno stop |
 | `DAY_START`, `DAY_END` | 08:30, 19:00 | Fascia della carica diurna |
+| `PRICE_KWH` | 0.229 | Costo in euro di un kWh in più preso dalla rete, tasse comprese |
+| `NIGHT_DISCOUNT_KWH` | 0.036 | Sconto in euro per kWh nelle ricariche notturne di Octopus |
 | `LIVE` | non impostato | Con `true` i comandi vengono inviati davvero all'auto |
 
 ## Uso

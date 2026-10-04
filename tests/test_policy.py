@@ -15,6 +15,8 @@ SETTINGS = Settings(
     day_end=time(18),
     poll_seconds=150,
     car_retry_minutes=30,
+    price_kwh=0.229,
+    night_discount_kwh=0.036,
     live=False,
 )
 NOON = datetime(2026, 10, 3, 12, 0)

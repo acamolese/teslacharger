@@ -22,6 +22,10 @@ def _int(name: str, default: int) -> int:
     return int(os.environ.get(name, default))
 
 
+def _float(name: str, default: float) -> float:
+    return float(os.environ.get(name, default))
+
+
 def _time(name: str, default: str) -> time:
     return time.fromisoformat(os.environ.get(name, default))
 
@@ -45,6 +49,10 @@ class Settings:
     poll_seconds: int
     # Attesa prima di risvegliare di nuovo l'auto o di ricontrollare il cavo
     car_retry_minutes: int
+    # Costo di un kWh in più prelevato dalla rete, tasse comprese e quote fisse escluse
+    price_kwh: float
+    # Sconto per ogni kWh caricato nelle finestre smart di Octopus
+    night_discount_kwh: float
     # Senza questo interruttore il sistema scrive cosa farebbe ma non comanda l'auto
     live: bool
 
@@ -60,5 +68,7 @@ class Settings:
             day_end=_time("DAY_END", "19:00"),
             poll_seconds=_int("POLL_SECONDS", 150),
             car_retry_minutes=_int("CAR_RETRY_MINUTES", 30),
+            price_kwh=_float("PRICE_KWH", 0.229),
+            night_discount_kwh=_float("NIGHT_DISCOUNT_KWH", 0.036),
             live=os.environ.get("LIVE", "").lower() in ("1", "true", "si", "sì"),
         )

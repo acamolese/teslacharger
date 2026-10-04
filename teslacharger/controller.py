@@ -226,6 +226,7 @@ class Controller:
             "days": monthly[-14:],
             "month": totals,
             "since": self.history.since(),
+            "prices": {"kwh": self.settings.price_kwh, "night_discount": self.settings.night_discount_kwh},
             "consumption": self.history.consumption(),
             "insights": self.history.insights(),
         }
