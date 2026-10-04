@@ -5,6 +5,10 @@ html.dark,html.dark body{background:#0e0e0e}
 .bar{position:sticky;top:0;padding-top:env(safe-area-inset-top)}
 .scroller{overflow:visible}
 .page{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+.tab-ind{width:64px}
+.tab{gap:6px}
+.room{background:var(--scl);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-height:104px}
+.room.call{background:var(--sc)}
 .fab{position:fixed;right:max(16px,calc(50vw - 244px));bottom:calc(16px + env(safe-area-inset-bottom))}
 .snack{position:fixed;left:max(16px,calc(50vw - 244px));right:max(16px,calc(50vw - 244px));bottom:calc(16px + env(safe-area-inset-bottom))}
 .snack.fab-up{bottom:calc(96px + env(safe-area-inset-bottom))}
@@ -29,6 +33,7 @@ html.dark,html.dark body{background:#0e0e0e}
     <nav class="tabs" aria-label="Sezioni">
       <button class="tab sl on" id="tabR" aria-current="page"><span class="ic f" aria-hidden="true">bolt</span><span class="t-ts">Ricarica</span></button>
       <button class="tab sl" id="tabC" aria-current="false"><span class="ic" aria-hidden="true">home</span><span class="t-ts">Casa</span></button>
+      <button class="tab sl" id="tabK" aria-current="false"><span class="ic" aria-hidden="true">thermostat</span><span class="t-ts">Clima</span></button>
       <button class="tab sl" id="tabA" aria-current="false"><span class="ic" aria-hidden="true">directions_car</span><span class="t-ts">Auto</span></button>
       <span class="tab-ind" id="tabind"></span>
     </nav>
@@ -286,6 +291,77 @@ html.dark,html.dark body{background:#0e0e0e}
     </section>
   </main>
 
+  <!-- ================= CLIMA ================= -->
+  <main class="page fade-through" id="viewK" hidden>
+    <section class="banner err" id="climalarm" role="alert" hidden>
+      <span class="ic f" aria-hidden="true">error</span>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+        <span class="t-ts">Allarme della pompa di calore</span>
+        <span class="t-bm" id="climalarmtext"></span>
+      </div>
+    </section>
+
+    <section class="hero t-idle stag" id="climhero">
+      <div class="hero-row">
+        <div class="hs-wrap" id="climwrap"><div class="hshape sh-cookie9" id="climshape"><span class="ic s40" id="climicon" aria-hidden="true">mode_heat_cool</span></div></div>
+        <div style="display: flex; flex-direction: column; min-width: 0">
+          <div class="kw t-dl"><span id="climkw">–</span><small>kW</small></div>
+          <span class="t-ll" style="opacity: .86" id="climkwsub">assorbiti ora</span>
+        </div>
+      </div>
+      <h1 class="hero-title" id="climtitle">Pompa di calore</h1>
+      <p class="hero-reason" id="climreason">In caricamento</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px" id="climchips"></div>
+    </section>
+
+    <section class="stag" style="animation-delay: 60ms">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Stanze</h2><span class="t-bs v" id="roomsnote"></span></div>
+      <div class="dgrid" id="rooms"></div>
+    </section>
+
+    <section class="card stag" style="animation-delay: 100ms">
+      <div style="display: flex; align-items: center; gap: 12px">
+        <span class="tile-ic sh-cookie4" style="background: var(--tc); color: var(--ontc)"><span class="ic f s20" aria-hidden="true">water_drop</span></span>
+        <div style="flex: 1">
+          <h2 class="t-tm" style="margin: 0">Acqua calda</h2>
+          <span class="t-bs v" id="acssub"></span>
+        </div>
+        <span class="t-hs" id="acstemp">–</span>
+      </div>
+      <div class="sum" id="acsgrid"></div>
+    </section>
+
+    <section class="stag" style="animation-delay: 140ms">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Consumi di oggi</h2><span class="t-bs v" id="climtoday"></span></div>
+      <div class="dgrid" id="climenergy"></div>
+    </section>
+
+    <section class="card stag" style="animation-delay: 180ms">
+      <h2 class="t-tm" style="margin: 0">Consumi per mese</h2>
+      <span class="t-bs v">Ultimi 12 mesi, kWh</span>
+      <div class="legend">
+        <span><i style="background: var(--c-night)"></i>Pompa di calore</span>
+        <span><i style="background: var(--c-day)"></i>Acqua calda</span>
+        <span><i style="background: var(--c-sun)"></i>Resto della casa</span>
+      </div>
+      <div class="chart" id="climchart">
+        <div class="gl" style="bottom: 0"><span>0</span></div>
+        <div class="gl" style="bottom: 55px"><span id="kglmid"></span></div>
+        <div class="gl" style="bottom: 110px"><span id="kglmax"></span></div>
+      </div>
+      <div class="xlab" id="climxlab"></div>
+      <div class="detail">
+        <span class="t-ts" id="climseltitle">In caricamento</span>
+        <span class="t-bs v" id="climseltext">La prima lettura dei mesi richiede circa un minuto.</span>
+      </div>
+    </section>
+
+    <section class="stag" style="animation-delay: 220ms">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Impostazioni dell'impianto</h2><span class="t-bs v">sola lettura</span></div>
+      <div class="group" id="climsettings"></div>
+    </section>
+  </main>
+
   <!-- ================= AUTO ================= -->
   <main class="page fade-through" id="viewA" hidden>
     <section class="car-hero stag">
@@ -440,10 +516,10 @@ const mq = matchMedia("(prefers-color-scheme: dark)");
 const theme = () => { $("app").classList.toggle("dark", mq.matches); document.documentElement.classList.toggle("dark", mq.matches); };
 theme(); mq.addEventListener("change", theme);
 
-const TABS = { R: "tabR", C: "tabC", A: "tabA" };
+const TABS = { R: "tabR", C: "tabC", K: "tabK", A: "tabA" };
 function placeIndicator() {
   const tab = $(TABS[state.tab]);
-  $("tabind").style.transform = "translateX(" + (tab.offsetLeft + tab.offsetWidth / 2 - 52) + "px)";
+  $("tabind").style.transform = "translateX(" + (tab.offsetLeft + tab.offsetWidth / 2 - 32) + "px)";
 }
 function switchTab(t) {
   if (t === state.tab) return;
@@ -461,9 +537,11 @@ function switchTab(t) {
   placeIndicator();
   if (t === "A") refreshHistory();
   if (t === "C") refreshHome();
+  if (t === "K") refreshClimate();
 }
 $("tabR").addEventListener("click", () => switchTab("R"));
 $("tabC").addEventListener("click", () => switchTab("C"));
+$("tabK").addEventListener("click", () => switchTab("K"));
 $("tabA").addEventListener("click", () => switchTab("A"));
 window.addEventListener("resize", placeIndicator);
 window.addEventListener("scroll", () => {
@@ -1013,6 +1091,133 @@ async function refreshHome() {
   } catch (e) {}
 }
 
+// ---- sezione Clima ----
+const deg = (v, d = 1) => (v == null ? "–" : fmt(v, d) + "°");
+function chip(icon, text) {
+  const c = el("span", "chip-a t-lm"), g = el("span", "ic s18", icon);
+  g.setAttribute("aria-hidden", "true");
+  c.style.color = "inherit"; c.style.borderColor = "currentColor";
+  c.append(g, el("span", "", text));
+  return c;
+}
+function settingRow(icon, title, sub, value) {
+  const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
+  const g = el("span", "ic s20", icon);
+  g.setAttribute("aria-hidden", "true");
+  ic.append(g);
+  body.append(el("div", "t-bl", title));
+  if (sub) body.append(el("div", "t-bs v", sub));
+  row.append(ic, body, el("span", "t-ts", value));
+  return row;
+}
+function renderClimate(k) {
+  if (!k.configured) { $("climreason").textContent = "Le credenziali Emmeti non sono configurate sul server."; return; }
+  state.climate = k;
+  $("climalarm").hidden = !k.alarms.length;
+  $("climalarmtext").textContent = k.alarms.join(", ");
+  const p = k.power || {}, w = (p.heat_pump_w || 0) + (p.hot_water_w || 0), working = w > 150;
+  const summer = k.season === "estate";
+  $("climhero").className = "hero stag " + (!k.on ? "t-idle" : working ? (summer ? "t-sun" : "t-tert") : "t-night");
+  $("climwrap").className = "hs-wrap " + (working ? "spin-slow" : "");
+  $("climicon").textContent = !k.on ? "mode_off_on" : summer ? "ac_unit" : "mode_heat";
+  $("climkw").textContent = kw(w);
+  $("climkwsub").textContent = p.time ? "assorbiti alle " + p.time.slice(11, 16) : "assorbiti ora";
+  $("climtitle").textContent = !k.on ? "Pompa di calore spenta" : working ? (p.hot_water_w > p.heat_pump_w ? "Scalda l'acqua sanitaria" : summer ? "Sta raffrescando" : "Sta riscaldando") : "Accesa, in attesa";
+  $("climreason").textContent = "Stagione impostata: " + k.season + (summer ? ", raffrescamento" : ", riscaldamento") + ". Fuori ci sono " + deg(k.outside_temp) + ".";
+  const chips = $("climchips");
+  chips.textContent = "";
+  chips.append(chip("north_east", "Mandata " + deg(k.water_out)), chip("south_west", "Ritorno " + deg(k.water_in)), chip("flag", "Impostata " + deg(k.water_set)));
+  if (k.defrost) chips.append(chip("ac_unit", "Sbrinamento"));
+  if (k.resistance) chips.append(chip("bolt", "Resistenza elettrica"));
+  if (k.antifreeze) chips.append(chip("severe_cold", "Antigelo"));
+
+  const rooms = $("rooms");
+  rooms.textContent = "";
+  const calling = k.rooms.filter((r) => r.calling).length;
+  $("roomsnote").textContent = calling ? calling + (calling === 1 ? " in chiamata" : " in chiamata") : "nessuna in chiamata";
+  for (const r of k.rooms) {
+    const c = el("div", "room" + (r.calling ? " call" : ""));
+    const head = el("div", ""), v = el("span", "dval", deg(r.temp));
+    head.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:8px";
+    head.append(el("span", "t-lm v", r.label));
+    if (r.calling) { const g = el("span", "ic f s18", summer ? "ac_unit" : "mode_heat"); g.setAttribute("aria-label", "in chiamata"); head.append(g); }
+    c.append(head, v, el("span", "t-bs v", "impostati " + deg(r.set_temp) + (r.humidity != null ? " · umidità " + Math.round(r.humidity) + "%" : "")));
+    rooms.append(c);
+  }
+
+  const h = k.hot_water;
+  $("acstemp").textContent = deg(h.temp);
+  $("acssub").textContent = "Temperatura attuale dell'accumulo";
+  const g = $("acsgrid");
+  g.textContent = "";
+  const slot = (label, value) => { const d = el("div", ""); d.append(el("div", "t-hs", value), el("div", "t-bs v", label)); return d; };
+  for (const r of h.requests) if (r.time) g.append(slot("dalle " + r.time, deg(r.temp, 0)));
+  g.append(slot("mantenimento", deg(h.keep, 0)));
+  if (k.today) g.append(slot("consumati oggi", fmt(k.today.hot_water) + " kWh"));
+
+  const e = k.today, box = $("climenergy");
+  box.textContent = "";
+  if (e) {
+    $("climtoday").textContent = "fino alle " + e.to.slice(11, 16);
+    box.append(
+      cell("Pompa di calore", fmt(e.heat_pump), "kWh", "Riscaldamento e raffrescamento"),
+      cell("Acqua calda", fmt(e.hot_water), "kWh", "Produzione sanitaria"),
+      cell("Resto della casa", fmt(e.other), "kWh", "Tutto ciò che non è pompa di calore"),
+      cell("Totale", fmt(e.home), "kWh", pctOf(e.heat_pump + e.hot_water, e.home) + " per clima e acqua calda"),
+    );
+  }
+  renderClimateChart(k);
+
+  const s = k.settings, list = $("climsettings");
+  list.textContent = "";
+  const bands = (rows) => rows.filter((r) => r.time).map((r) => r.time + " " + deg(r.temp, 0)).join(" · ");
+  list.append(
+    settingRow("wb_sunny", "Comfort estivo", "Umidità impostata " + (s.humidity_summer ?? "–") + "%", deg(s.comfort_summer)),
+    settingRow("mode_heat", "Comfort invernale", "Umidità impostata " + (s.humidity_winter ?? "–") + "%", deg(s.comfort_winter)),
+    settingRow("water", "Acqua dell'impianto in riscaldamento", bands(s.heating_water), ""),
+    settingRow("water", "Acqua dell'impianto in raffrescamento", bands(s.cooling_water), ""),
+    settingRow("speed", "Portata dell'acqua", "Circolazione nell'impianto", k.flow_lh != null ? Math.round(k.flow_lh).toLocaleString("it-IT") + " l/h" : "–"),
+  );
+}
+function renderClimateChart(k) {
+  const months = k.months || [];
+  if (!months.length) return;
+  if (state.climBar == null || state.climBar >= months.length) state.climBar = months.length - 1;
+  const top = Math.max(200, Math.ceil(Math.max(...months.map((m) => m.home)) / 200) * 200), scale = 110 / top;
+  $("kglmid").textContent = top / 2; $("kglmax").textContent = top;
+  const chart = $("climchart"), xlab = $("climxlab");
+  chart.querySelectorAll(".bcol").forEach((x) => x.remove());
+  xlab.textContent = "";
+  const label = (m) => cap(MONTHS[Number(m.month.slice(5, 7)) - 1]) + " " + m.month.slice(0, 4);
+  months.forEach((m, i) => {
+    const col = el("button", "bcol" + (i === state.climBar ? " sel" : ""));
+    col.setAttribute("aria-label", label(m) + ", " + fmt(m.home, 0) + " kWh");
+    for (const [cls, v] of [["night", m.heat_pump], ["day", m.hot_water], ["sun", m.other]]) {
+      if (v <= 0) continue;
+      const seg = el("span", "bseg " + cls);
+      seg.style.height = Math.max(3, Math.round(v * scale)) + "px";
+      seg.style.animationDelay = i * 35 + "ms";
+      col.append(seg);
+    }
+    col.addEventListener("click", () => { state.climBar = i; renderClimateChart(k); });
+    chart.append(col);
+    xlab.append(el("span", i === state.climBar ? "sel" : "", MONTHS[Number(m.month.slice(5, 7)) - 1].slice(0, 3)));
+  });
+  const m = months[state.climBar];
+  $("climseltitle").textContent = label(m) + " · " + fmt(m.home, 0) + " kWh consumati";
+  $("climseltext").textContent = "Pompa di calore " + fmt(m.heat_pump, 0) + " · acqua calda " + fmt(m.hot_water, 0) + " · resto della casa " + fmt(m.other, 0) + " · prelevati dalla rete " + fmt(m.imported, 0);
+}
+async function refreshClimate() {
+  try {
+    const r = await fetch("/api/climate", { cache: "no-store" });
+    if (!r.ok) return toast("Dati della pompa di calore non disponibili in questo momento");
+    const k = await r.json();
+    renderClimate(k);
+    // I mesi vengono letti in sottofondo: si riprova finché non sono completi
+    if (k.configured && (k.months || []).length < 12 && state.tab === "K") setTimeout(refreshClimate, 15000);
+  } catch (e) {}
+}
+
 let refreshing = false;
 $("fab").addEventListener("click", async () => {
   if (refreshing) return;
@@ -1128,7 +1333,7 @@ drawRing(0, 100);
 refresh();
 initPush().catch(() => {});
 setInterval(refresh, 30000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(); if (state.tab === "A") refreshHistory(); if (state.tab === "C") refreshHome(); } });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(); if (state.tab === "A") refreshHistory(); if (state.tab === "C") refreshHome(); if (state.tab === "K") refreshClimate(); } });
 document.fonts && document.fonts.ready.then(placeIndicator);
 </script>
 </body>

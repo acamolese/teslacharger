@@ -10,6 +10,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from .config import Settings
+from .emmeti import EmmetiClient, describe
 from .history import History
 from .octopus import OctopusClient
 from .policy import Action, CarStatus, ControlState, Decision, Mode, decide, plan_battery_hold, precheck
@@ -26,6 +27,8 @@ ERRORS_BEFORE_ALERT = 3
 CAR_READING_VALID = timedelta(hours=12)
 HOME_CACHE = timedelta(minutes=5)
 BILLS_CACHE = timedelta(hours=1)
+CLIMATE_CACHE = timedelta(minutes=2)
+CLIMATE_MONTHS = 12
 BILLED_MONTHS_SHOWN = 6
 WAKE_ATTEMPTS = 8
 WAKE_PAUSE_SECONDS = 6
@@ -77,6 +80,11 @@ class Controller:
         self._hold_error: str | None = None
         self._home: dict | None = None
         self._home_time: datetime | None = None
+        self.emmeti = EmmetiClient()
+        self._climate: dict | None = None
+        self._climate_time: datetime | None = None
+        self._climate_months: dict[str, dict] = {}
+        self._climate_loader: threading.Thread | None = None
         self._bills: dict | None = None
         self._bills_time: datetime | None = None
         self._load()
@@ -221,6 +229,58 @@ class Controller:
             self._home = self.solax.home_summary()
             self._home_time = now
         return self._home
+
+    def climate_summary(self) -> dict:
+        """Pompa di calore: stato, stanze, acqua calda e consumi, riletti al massimo ogni due minuti."""
+        if not self.emmeti.configured:
+            return {"configured": False}
+        now = datetime.now()
+        if self._climate is None or now - self._climate_time > CLIMATE_CACHE:
+            today = now.date()
+            names = dict(
+                pair.split(":", 1) for pair in os.environ.get("ROOM_NAMES", "").split(",") if ":" in pair
+            )
+            rooms = self.emmeti.rooms()
+            for room in rooms:
+                room["label"] = names.get(room["name"], f"Stanza {room['name']}")
+            self._climate = {
+                "configured": True,
+                "time": now.isoformat(timespec="seconds"),
+                **describe(self.emmeti.registers()),
+                "rooms": rooms,
+                "power": self.emmeti.power(),
+                "today": self.emmeti.energy(today, today + timedelta(days=1)),
+            }
+            self._climate_time = now
+        if self._climate_loader is None or not self._climate_loader.is_alive():
+            self._climate_loader = threading.Thread(target=self._load_climate_months, daemon=True)
+            self._climate_loader.start()
+        months = [self._climate_months[m] for m in sorted(self._climate_months)][-CLIMATE_MONTHS:]
+        return {**self._climate, "months": months}
+
+    def _load_climate_months(self) -> None:
+        """Consumi mensili dell'ultimo anno. I mesi conclusi si leggono una volta sola e si conservano."""
+        cache_file = data_dir() / "emmeti-months.json"
+        if not self._climate_months and cache_file.exists():
+            self._climate_months = json.loads(cache_file.read_text())
+        this_month = date.today().replace(day=1)
+        cursor = this_month
+        for _ in range(CLIMATE_MONTHS):
+            key = cursor.strftime("%Y-%m")
+            current = cursor == this_month
+            known = self._climate_months.get(key)
+            stale = current and (not known or known.get("read_on") != date.today().isoformat())
+            if known is None or stale:
+                try:
+                    energy = self.emmeti.month_energy(cursor.year, cursor.month)
+                except Exception as err:
+                    log.warning("consumi Emmeti di %s non letti: %s", key, err)
+                    energy = None
+                if energy:
+                    self._climate_months[key] = {"month": key, **energy, "read_on": date.today().isoformat()}
+            cursor = (cursor - timedelta(days=1)).replace(day=1)
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
+        cache_file.write_text(json.dumps(self._climate_months))
 
     def bills_summary(self) -> dict:
         """Bollette emesse e stima dei mesi non ancora fatturati, rilette al massimo ogni ora."""
