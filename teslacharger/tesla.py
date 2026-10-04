@@ -245,6 +245,23 @@ def _specs(vs: dict, config: dict) -> list[dict]:
     return specs
 
 
+def charging_history(limit: int = 50) -> list[dict]:
+    """Ricariche a pagamento fuori casa (Supercharger), con energia e costo."""
+    data = api_get(f"/api/1/dx/charging/history?pageSize={limit}")
+    sessions = []
+    for item in data.get("data") or []:
+        fees = [f for f in item.get("fees") or [] if f.get("feeType") == "CHARGING"]
+        sessions.append({
+            "id": str(item.get("sessionId")),
+            "start": (item.get("chargeStartDateTime") or "")[:16],
+            "end": (item.get("chargeStopDateTime") or "")[:16],
+            "site": (item.get("siteLocationName") or "").replace(", Italy", ""),
+            "kwh": round(sum(f.get("usageBase") or 0 for f in fees), 1),
+            "cost": round(sum(f.get("totalDue") or 0 for f in item.get("fees") or []), 2),
+        })
+    return sessions
+
+
 class TeslaCar:
     """Lettura dello stato di carica e comandi all'auto.
 

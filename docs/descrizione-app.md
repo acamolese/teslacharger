@@ -97,10 +97,11 @@ Alla prima apertura viene chiesta una password. Una volta entrati, il dispositiv
    - batteria di casa: percentuale di carica e se si sta caricando, scaricando o è ferma;
    - consumi di casa: potenza assorbita in quel momento e scambio con la rete;
    - auto: percentuale di batteria e stato del cavo, con l'ora della lettura.
-4. **Modalità**: i tre pulsanti, con quello attivo evidenziato e una riga che spiega cosa fa la modalità selezionata.
-5. **Carica notturna con Octopus**: i due selettori per livello e orario, con una riga di conferma dopo ogni modifica.
-6. **Notifiche**: lo stato delle notifiche sul dispositivo, il pulsante per attivarle e quello per inviare una notifica di prova.
-7. **Ultime manovre**: l'elenco cronologico delle azioni del sistema e dell'utente, con data e ora (avvii, stop, regolazioni, cambi di modalità, consensi, modifiche alla carica notturna).
+4. **Previsione del sole**: per oggi e i due giorni seguenti, il meteo previsto, la produzione attesa dei pannelli e quanta energia potrebbe andare all'auto se restasse collegata, con la fascia oraria utile. Sotto, un suggerimento su come regolare la carica notturna in base al sole di domani.
+5. **Modalità**: i tre pulsanti, con quello attivo evidenziato e una riga che spiega cosa fa la modalità selezionata.
+6. **Carica notturna con Octopus**: i due selettori per livello e orario, con una riga di conferma dopo ogni modifica.
+7. **Notifiche**: lo stato delle notifiche sul dispositivo, il pulsante per attivarle e quello per inviare una notifica di prova.
+8. **Ultime manovre**: l'elenco cronologico delle azioni del sistema e dell'utente, con data e ora (avvii, stop, regolazioni, cambi di modalità, consensi, modifiche alla carica notturna).
 
 Due avvisi possono comparire in cima alla sezione: uno quando l'ultimo ciclo del sistema non è riuscito, con il motivo, e uno quando il sistema è in modalità di prova, cioè mostra cosa farebbe senza inviare comandi all'auto.
 

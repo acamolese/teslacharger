@@ -16,7 +16,8 @@ from .octopus import OctopusClient
 from .policy import Action, CarStatus, ControlState, Decision, Mode, decide, plan_battery_hold, precheck
 from .push import PushService
 from .solax import MAX_HOLD_SECONDS, SolaxClient
-from .tesla import TeslaCar
+from . import weather
+from .tesla import TeslaCar, charging_history
 
 log = logging.getLogger("teslacharger")
 MAX_EVENTS = 40
@@ -27,6 +28,7 @@ ERRORS_BEFORE_ALERT = 3
 CAR_READING_VALID = timedelta(hours=12)
 HOME_CACHE = timedelta(minutes=5)
 BILLS_CACHE = timedelta(hours=1)
+FORECAST_CACHE = timedelta(hours=1)
 CLIMATE_CACHE = timedelta(minutes=2)
 CLIMATE_MONTHS = 12
 BILLED_MONTHS_SHOWN = 6
@@ -85,6 +87,8 @@ class Controller:
         self._climate_time: datetime | None = None
         self._climate_months: dict[str, dict] = {}
         self._climate_loader: threading.Thread | None = None
+        self._forecast: dict | None = None
+        self._forecast_time: datetime | None = None
         self._bills: dict | None = None
         self._bills_time: datetime | None = None
         self._load()
@@ -230,6 +234,21 @@ class Controller:
             self._home_time = now
         return self._home
 
+    def forecast_summary(self) -> dict:
+        """Meteo e produzione prevista per oggi e i due giorni seguenti, riletti ogni ora."""
+        now = datetime.now()
+        if self._forecast is None or now - self._forecast_time > FORECAST_CACHE:
+            data = weather.fetch(*self.solax.coordinates())
+            produced = {d["day"]: d["pv"] for d in self.home_summary()["days"]}
+            factor = weather.yield_factor(data, produced)
+            self._forecast = {
+                "calibrated": factor is not None,
+                "days": weather.forecast(data, factor, self.settings, now) if factor else [],
+                "read": now.isoformat(timespec="minutes"),
+            }
+            self._forecast_time = now
+        return self._forecast
+
     def climate_summary(self) -> dict:
         """Pompa di calore: stato, stanze, acqua calda e consumi, riletti al massimo ogni due minuti."""
         if not self.emmeti.configured:
@@ -344,6 +363,9 @@ class Controller:
             "prices": {"kwh": self.settings.price_kwh, "night_discount": self.settings.night_discount_kwh},
             "consumption": self.history.consumption(),
             "insights": self.history.insights(),
+            "supercharges": self.history.supercharges(),
+            "supercharge_month": self.history.supercharge_month(month),
+            "km_month": self.history.km_since(month + "-01"),
         }
 
     # --- ciclo ----------------------------------------------------------------
@@ -430,6 +452,12 @@ class Controller:
             start = datetime.fromisoformat(row["start"]).astimezone().replace(tzinfo=None)
             end = datetime.fromisoformat(row["end"]).astimezone().replace(tzinfo=None)
             self.history.log_dispatch(start, end, row["kwh"])
+        if self.settings.live or os.path.exists(os.environ.get("TESLA_TOKEN_FILE", "tesla-tokens.json")):
+            try:
+                for session in charging_history():
+                    self.history.log_supercharge(session)
+            except Exception as err:
+                log.warning("storico delle ricariche Tesla non letto: %s", err)
         for session in self.octopus.charging_sessions():
             if not session["end"]:
                 continue

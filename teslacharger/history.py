@@ -25,6 +25,9 @@ CREATE TABLE IF NOT EXISTS dispatch (
 CREATE TABLE IF NOT EXISTS session (
     start TEXT PRIMARY KEY, end TEXT, type TEXT, kwh REAL, soc_change REAL, soc_final REAL, problems TEXT
 );
+CREATE TABLE IF NOT EXISTS supercharge (
+    id TEXT PRIMARY KEY, start TEXT, end TEXT, site TEXT, kwh REAL, cost REAL
+);
 CREATE TABLE IF NOT EXISTS event (
     time TEXT, icon TEXT, title TEXT, sub TEXT
 );
@@ -80,6 +83,25 @@ class History:
                 session["soc_change"], session["soc_final"], session["problems"],
             ),
         )
+
+    def log_supercharge(self, s: dict) -> None:
+        self._run(
+            "INSERT OR REPLACE INTO supercharge VALUES (?, ?, ?, ?, ?, ?)",
+            (s["id"], s["start"], s["end"], s["site"], s["kwh"], s["cost"]),
+        )
+
+    def supercharges(self, limit: int = 12) -> list[dict]:
+        rows = self._all("SELECT start, end, site, kwh, cost FROM supercharge ORDER BY start DESC LIMIT ?", (limit,))
+        return [dict(zip(("start", "end", "site", "kwh", "cost"), row)) for row in rows]
+
+    def supercharge_month(self, month: str) -> dict:
+        row = self._all("SELECT COALESCE(SUM(kwh), 0), COALESCE(SUM(cost), 0), COUNT(*) FROM supercharge WHERE start LIKE ?", (month + "%",))[0]
+        return {"kwh": round(row[0], 1), "cost": round(row[1], 2), "count": row[2]}
+
+    def km_since(self, day: str) -> float | None:
+        """Chilometri percorsi dalla prima lettura del periodo all'ultima."""
+        rows = self._all("SELECT MIN(odometer_km), MAX(odometer_km) FROM car WHERE time >= ? AND odometer_km IS NOT NULL", (day,))
+        return round(rows[0][1] - rows[0][0]) if rows and rows[0][0] is not None else None
 
     def log_event(self, when: str, icon: str, title: str, sub: str) -> None:
         self._run("INSERT INTO event VALUES (?, ?, ?, ?)", (when, icon, title, sub))

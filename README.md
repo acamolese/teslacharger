@@ -25,6 +25,7 @@ Il sistema mette in comunicazione tre servizi.
 | Octopus Energy Italia | Stato del veicolo in Intelligent Octopus, finestre pianificate, carica immediata (boost) | [API GraphQL Kraken](https://developer.oeit-kraken.energy/) |
 | Tesla | Livello di carica dell'auto, regolazione degli ampere | [Tesla Fleet API](https://developer.tesla.com/docs/fleet-api), con comandi firmati tramite `tesla-http-proxy` |
 | Emmeti AQ-IoT | Pompa di calore: stanze, acqua calda, consumi separati per pompa di calore, acqua calda e resto della casa | Portale del produttore, senza API documentata: si usano in sola lettura le chiamate della sua app web |
+| Open-Meteo | Previsione del meteo e della radiazione solare, tarata sulla produzione reale dell'impianto | [API pubblica](https://open-meteo.com/), senza chiave |
 
 Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola il surplus disponibile e, se conviene, chiede a Octopus la carica immediata e regola gli ampere dell'auto. Quando il surplus finisce annulla la carica immediata, e la pianificazione notturna di Octopus resta invariata.
 

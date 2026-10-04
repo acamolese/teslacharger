@@ -197,6 +197,13 @@ class SolaxClient:
             raise RuntimeError(f"Solax: statistiche non disponibili ({data.get('message')})")
         return data["result"].get("plantEnergyStatDataList") or []
 
+    def coordinates(self) -> tuple[float, float]:
+        """Latitudine e longitudine dell'impianto, come registrate su SolaxCloud."""
+        plant = self._get(
+            "/openapi/v2/plant/page_plant_info", {"businessType": BUSINESS_RESIDENTIAL, "pageNo": 1}
+        )["records"][0]
+        return float(plant["latitude"]), float(plant["longitude"])
+
     def month_totals(self, month: str) -> dict:
         """Energia del mese (formato AAAA-MM): prelevata dalla rete, prodotta e ceduta, in kWh."""
         days = self._month_stats(month)

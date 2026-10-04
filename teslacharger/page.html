@@ -416,6 +416,13 @@ html.dark,html.dark body{background:#0e0e0e}
       </div>
     </section>
 
+    <!-- Previsione -->
+    <section class="stag" style="animation-delay: 90ms" id="forecastsec" hidden>
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Previsione del sole</h2></div>
+      <div class="group" id="forecast"></div>
+      <p class="t-bs v" style="margin: 10px 4px 0" id="forecastnote"></p>
+    </section>
+
     <!-- Modalità -->
     <section class="stag" style="animation-delay: 120ms">
       <div class="sec-h"><h2 class="t-tm" style="margin: 0">Modalità</h2></div>
@@ -707,6 +714,8 @@ html.dark,html.dark body{background:#0e0e0e}
           <div><div class="t-hs"><span id="mday">–</span> <small class="t-bm">kWh</small></div><div class="t-bs v">Giorno non solare</div></div>
           <div><div class="t-hs"><span id="mcost">–</span> <small class="t-bm">€</small></div><div class="t-bs v">Spesa stimata</div></div>
           <div><div class="t-hs" style="color: var(--p)"><span id="msaved">–</span> <small class="t-bm">€</small></div><div class="t-bs v">Risparmiati col sole, stima</div></div>
+          <div><div class="t-hs"><span id="msuper">–</span> <small class="t-bm">kWh</small></div><div class="t-bs v" id="msupersub">Supercharger</div></div>
+          <div><div class="t-hs"><span id="mkm">–</span> <small class="t-bm">km</small></div><div class="t-bs v" id="mkmsub">Percorsi nel mese</div></div>
         </div>
         <p class="t-bs v" style="margin: 12px 0 0" id="mprices"></p>
       </div>
@@ -726,6 +735,11 @@ html.dark,html.dark body{background:#0e0e0e}
         <div class="lin" id="consbar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="50" aria-label="Chilometri registrati"><i id="consfill" style="width: 0%"></i></div>
         <span class="t-bs v" style="display: block; margin-top: 6px" id="conskm">0 km su 50</span>
       </div>
+    </section>
+
+    <section class="stag" id="supersec" hidden>
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Ricariche fuori casa</h2><span class="t-bs v">Supercharger</span></div>
+      <div class="group" id="supers"></div>
     </section>
 
     <section class="stag" id="specssec" hidden>
@@ -940,6 +954,38 @@ $("revoke").addEventListener("click", async () => {
   toast("Consenso revocato: la carica si ferma");
   soon();
 });
+
+// ---- previsione ----
+function renderForecast(f) {
+  $("forecastsec").hidden = !f.days || !f.days.length;
+  if ($("forecastsec").hidden) return;
+  const box = $("forecast"), today = dayKey(new Date());
+  box.textContent = "";
+  const battery = (kwh) => Math.round(kwh / BATTERY_KWH * 100);
+  f.days.forEach((d, i) => {
+    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
+    const g = el("span", "ic s20", d.icon);
+    g.setAttribute("aria-hidden", "true");
+    ic.append(g);
+    const name = d.day === today ? "Oggi" : i === 1 ? "Domani" : WEEKDAYS[new Date(d.day + "T12:00:00").getDay()];
+    body.append(el("div", "t-bl", name + " · " + d.text + ", " + Math.round(d.temp_min) + "°/" + Math.round(d.temp_max) + "°"));
+    body.append(el("div", "t-bs v", d.car_kwh > 0
+      ? "All'auto fino a " + fmt(d.car_kwh) + " kWh (circa +" + battery(d.car_kwh) + "%), tra le " + d.car_from + " e le " + d.car_to
+      : "Sole insufficiente per caricare l'auto"));
+    const right = el("span", "t-ts", fmt(d.pv_kwh, 0) + " kWh");
+    row.append(ic, body, right);
+    box.append(row);
+  });
+  const tomorrow = f.days[1];
+  $("forecastnote").textContent = "A destra la produzione prevista dei pannelli. La stima per l'auto vale se resta collegata tutto il giorno." +
+    (tomorrow ? (tomorrow.car_kwh >= 6 ? " Domani c'è sole: se l'auto resta a casa, stanotte puoi tenere basso il livello di Octopus." : " Domani il sole è scarso: conviene caricare stanotte con Octopus.") : "");
+}
+async function refreshForecast() {
+  try {
+    const r = await fetch("/api/forecast", { cache: "no-store" });
+    if (r.ok) renderForecast(await r.json());
+  } catch (e) {}
+}
 
 // ---- modalità ----
 function renderModes(s) {
@@ -1228,6 +1274,25 @@ function renderHistory(h) {
   $("msaved").textContent = fmt(m.sun * pr.kwh, 2);
   $("mprices").textContent = "Stime con " + fmt(pr.kwh * 100, 1) + " centesimi per kWh preso dalla rete, tasse comprese, e " + fmt(pr.night_discount * 100, 1) + " centesimi di sconto per kWh nelle ricariche notturne. Le quote fisse della bolletta sono escluse.";
   renderInsights();
+  const sm = h.supercharge_month || { kwh: 0, cost: 0, count: 0 };
+  $("msuper").textContent = fmt(sm.kwh);
+  $("msupersub").textContent = "Supercharger, " + fmt(sm.cost, 2) + " €";
+  $("mkm").textContent = h.km_month != null ? h.km_month.toLocaleString("it-IT") : "–";
+  const homeCost = (m.day_other + m.night) * pr.kwh - m.night * pr.night_discount;
+  $("mkmsub").textContent = h.km_month > 20 ? "Circa " + fmt((homeCost + sm.cost) / h.km_month * 100, 2) + " € ogni 100 km" : "Percorsi nel mese";
+  const supers = h.supercharges || [];
+  $("supersec").hidden = !supers.length;
+  $("supers").textContent = "";
+  for (const s of supers) {
+    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
+    const g = el("span", "ic s20", "ev_station");
+    g.setAttribute("aria-hidden", "true");
+    ic.append(g);
+    body.append(el("div", "t-bl", s.site || "Supercharger"));
+    body.append(el("div", "t-bs v", Number(s.start.slice(8, 10)) + " " + MONTHS[Number(s.start.slice(5, 7)) - 1] + " alle " + s.start.slice(11, 16) + " · " + fmt(s.kwh) + " kWh · " + fmt(s.cost / Math.max(s.kwh, 0.1), 2) + " €/kWh"));
+    row.append(ic, body, el("span", "t-ts", fmt(s.cost, 2) + " €"));
+    $("supers").append(row);
+  }
   const c = h.consumption || { km: 0, percent: 0, ready: false };
   $("consready").hidden = !c.ready; $("conswait").hidden = !!c.ready;
   if (c.ready) {
@@ -1600,6 +1665,8 @@ function soon() { setTimeout(refresh, 500); setTimeout(refresh, 4000); setTimeou
 placeIndicator();
 drawRing(0, 100);
 refresh();
+refreshForecast();
+setInterval(refreshForecast, 30 * 60000);
 initPush().catch(() => {});
 setInterval(refresh, 30000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(); if (state.tab === "A") refreshHistory(); if (state.tab === "C") refreshHome(); if (state.tab === "K") refreshClimate(); } });
