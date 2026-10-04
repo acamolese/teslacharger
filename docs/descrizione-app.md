@@ -80,7 +80,7 @@ C'è poi un interruttore, "Batteria di casa a riposo". Quando è attivo, per tut
 
 ## Cosa mostra la webapp
 
-La webapp ha una schermata di accesso e tre sezioni, "Ricarica", "Casa" e "Auto", tra cui si passa con tre pulsanti in alto.
+La webapp ha una schermata di accesso e quattro sezioni, "Ricarica", "Casa", "Clima" e "Auto", tra cui si passa con quattro pulsanti in alto.
 
 ### Accesso
 
@@ -117,6 +117,20 @@ Raccoglie tutto ciò che l'impianto fotovoltaico racconta di sé. È di sola con
 7. **Ultimi avvisi dell'inverter**: gli ultimi eventi anomali registrati, con data e durata.
 
 I dati si aggiornano ogni 5 minuti.
+
+### Sezione "Clima"
+
+Mostra la pompa di calore e le stanze, con i dati letti dal portale del produttore. È di sola consultazione: da qui non si cambia nessuna impostazione dell'impianto.
+
+1. **Avviso di allarme**: compare solo se la pompa di calore segnala un'anomalia, con il nome dell'allarme.
+2. **Stato della pompa di calore**: la potenza elettrica assorbita in quel momento, cosa sta facendo (spenta, in attesa, sta riscaldando, sta raffrescando, scalda l'acqua sanitaria), la stagione impostata, la temperatura esterna e le temperature dell'acqua dell'impianto (mandata, ritorno, impostata). Se sono attivi sbrinamento, resistenza elettrica o antigelo, vengono indicati.
+3. **Stanze**: un riquadro per ogni termostato, con temperatura attuale, temperatura impostata e umidità. Le stanze che in quel momento stanno chiedendo caldo o fresco sono evidenziate.
+4. **Acqua calda**: temperatura attuale dell'accumulo, le fasce orarie programmate con la loro temperatura, la temperatura di mantenimento e l'energia consumata oggi.
+5. **Consumi di oggi**: pompa di calore, acqua calda, resto della casa e totale, con la quota dovuta a clima e acqua calda.
+6. **Consumi per mese, ultimi 12 mesi**: un grafico con una colonna per mese divisa in pompa di calore, acqua calda e resto della casa. Selezionando un mese compaiono i valori e l'energia prelevata dalla rete.
+7. **Impostazioni dell'impianto**: temperature di comfort estiva e invernale, umidità impostata, fasce orarie dell'acqua dell'impianto, portata.
+
+I dati si aggiornano ogni due minuti. I consumi mensili vengono letti in sottofondo alla prima apertura, cosa che richiede circa un minuto.
 
 ### Sezione "Auto"
 
