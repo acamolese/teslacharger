@@ -22,7 +22,20 @@ CREATE TABLE IF NOT EXISTS car (
 CREATE TABLE IF NOT EXISTS dispatch (
     start TEXT PRIMARY KEY, end TEXT, kwh REAL
 );
+CREATE TABLE IF NOT EXISTS session (
+    start TEXT PRIMARY KEY, end TEXT, type TEXT, kwh REAL, soc_change REAL, soc_final REAL, problems TEXT
+);
+CREATE TABLE IF NOT EXISTS event (
+    time TEXT, icon TEXT, title TEXT, sub TEXT
+);
 """
+# Colonne aggiunte dopo la prima versione, per tabella
+ADDED_COLUMNS = {
+    "car": ("energy_added REAL", "voltage REAL", "amps REAL"),
+    # Potenza in uscita dall'inverter, stato dell'auto per Octopus, modalità del sistema,
+    # batteria di casa tenuta a riposo: servono per ricostruire a posteriori ogni intervallo
+    "plant": ("ac_w REAL", "octopus TEXT", "mode TEXT", "held INTEGER"),
+}
 
 
 class History:
@@ -30,11 +43,11 @@ class History:
         path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(path, check_same_thread=False)
         self._db.executescript(SCHEMA)
-        # Colonne aggiunte dopo la prima versione
-        present = {row[1] for row in self._db.execute("PRAGMA table_info(car)")}
-        for column in ("energy_added REAL", "voltage REAL", "amps REAL"):
-            if column.split()[0] not in present:
-                self._db.execute(f"ALTER TABLE car ADD COLUMN {column}")
+        for table, columns in ADDED_COLUMNS.items():
+            present = {row[1] for row in self._db.execute(f"PRAGMA table_info({table})")}
+            for column in columns:
+                if column.split()[0] not in present:
+                    self._db.execute(f"ALTER TABLE {table} ADD COLUMN {column}")
         self._db.commit()
         self._lock = threading.Lock()
 
@@ -47,11 +60,29 @@ class History:
         with self._lock:
             return self._db.execute(sql, args).fetchall()
 
-    def log_plant(self, plant) -> None:
+    def log_plant(self, plant, octopus: str | None = None, mode: str | None = None, held: bool = False) -> None:
+        """Registra una lettura dell'impianto con il contesto in cui è avvenuta."""
         self._run(
-            "INSERT OR IGNORE INTO plant VALUES (?, ?, ?, ?, ?)",
-            (plant.data_time, plant.pv_w, plant.grid_w, plant.battery_w, plant.battery_soc),
+            "INSERT OR IGNORE INTO plant (time, pv_w, grid_w, battery_w, soc, ac_w, octopus, mode, held)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                plant.data_time, plant.pv_w, plant.grid_w, plant.battery_w, plant.battery_soc,
+                plant.inverter_ac_w, octopus, mode, int(held),
+            ),
         )
+
+    def log_session(self, session: dict) -> None:
+        """Registra una sessione di ricarica come la vede Octopus (ora locale)."""
+        self._run(
+            "INSERT OR REPLACE INTO session VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (
+                session["start"], session["end"], session["type"], session["kwh"],
+                session["soc_change"], session["soc_final"], session["problems"],
+            ),
+        )
+
+    def log_event(self, when: str, icon: str, title: str, sub: str) -> None:
+        self._run("INSERT INTO event VALUES (?, ?, ?, ?)", (when, icon, title, sub))
 
     def log_car(self, when: datetime, info: dict) -> None:
         self._run(

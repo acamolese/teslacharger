@@ -153,6 +153,43 @@ class OctopusClient:
             for r in rows or []
         ]
 
+    def charging_sessions(self, last: int = 20) -> list[dict]:
+        """Ultime sessioni di ricarica chiuse, come compaiono nell'app di Octopus."""
+        devices = self._gql(
+            """query ($accountNumber: String!, $last: Int!) {
+              devices(accountNumber: $accountNumber) {
+                ... on SmartFlexVehicle {
+                  chargingSessions(last: $last) { edges { node {
+                    start end stateOfChargeChange stateOfChargeFinal energyAdded { value }
+                    ... on SmartFlexChargingSession {
+                      type
+                      problems {
+                        ... on SmartFlexChargingError { cause }
+                        ... on SmartFlexChargingTruncation { truncationCause }
+                      }
+                    }
+                  } } }
+                }
+              }
+            }""",
+            {"accountNumber": self._account_number(), "last": last},
+        )["devices"]
+        sessions = []
+        for device in devices or []:
+            for edge in (device.get("chargingSessions") or {}).get("edges") or []:
+                node = edge["node"]
+                problems = [p.get("cause") or p.get("truncationCause") for p in node.get("problems") or []]
+                sessions.append({
+                    "start": node["start"],
+                    "end": node["end"],
+                    "type": node.get("type"),
+                    "kwh": float((node.get("energyAdded") or {}).get("value") or 0),
+                    "soc_change": float(node["stateOfChargeChange"]) if node.get("stateOfChargeChange") else None,
+                    "soc_final": float(node["stateOfChargeFinal"]) if node.get("stateOfChargeFinal") else None,
+                    "problems": ",".join(p for p in problems if p),
+                })
+        return sessions
+
     def set_target(self, device_id: str, percent: int, ready_time: str) -> None:
         """Imposta per tutti i giorni il livello di carica da raggiungere entro l'ora indicata."""
         if not 10 <= percent <= 100:

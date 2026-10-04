@@ -298,6 +298,8 @@ class Controller:
             "sub": sub,
         })
         del self.events[:-MAX_EVENTS]
+        # Nello storico restano tutte le manovre, non solo le ultime mostrate nell'app
+        self.history.log_event(self.events[-1]["time"], icon, title, sub)
 
     def _notify(self, title: str, body: str) -> None:
         if self.push.enabled:
@@ -367,6 +369,14 @@ class Controller:
             start = datetime.fromisoformat(row["start"]).astimezone().replace(tzinfo=None)
             end = datetime.fromisoformat(row["end"]).astimezone().replace(tzinfo=None)
             self.history.log_dispatch(start, end, row["kwh"])
+        for session in self.octopus.charging_sessions():
+            if not session["end"]:
+                continue
+            for key in ("start", "end"):
+                session[key] = (
+                    datetime.fromisoformat(session[key]).astimezone().replace(tzinfo=None).isoformat(timespec="minutes")
+                )
+            self.history.log_session(session)
 
     def _hold_battery(self, now: datetime, windows: list) -> None:
         """Tiene a riposo la batteria di casa mentre Octopus carica l'auto di notte."""
@@ -416,8 +426,10 @@ class Controller:
 
     def _cycle(self, now: datetime) -> None:
         plant = self.solax.snapshot()
-        self.history.log_plant(plant)
         vehicle = self.octopus.vehicle()
+        self.history.log_plant(
+            plant, vehicle.state, self.mode.value, bool(self.held_until and self.held_until > now)
+        )
         self.status.update(
             plant={**asdict(plant), "excess_w": plant.excess_w},
             octopus=vehicle.state,
