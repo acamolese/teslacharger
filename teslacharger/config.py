@@ -33,7 +33,7 @@ def _time(name: str, default: str) -> time:
 def _home_plan() -> dict[int, tuple[tuple[int, int], ...]]:
     """Ore in cui di solito l'auto è a casa collegata, per giorno della settimana (lunedì = 0).
 
-    Si legge dalla variabile HOME_PLAN, nel formato "3:8-19;5:8-10,14-19": giorno, poi una o
+    Si legge dalla variabile HOME_PLAN, nel formato "0:9-18;2:14-19": giorno, poi una o
     più fasce orarie. Resta fuori dal codice perché descrive quando la casa è vuota.
     """
     plan = {}

@@ -120,13 +120,14 @@ Due avvisi possono comparire in cima alla sezione: uno quando l'ultimo ciclo del
 
 Raccoglie tutto ciò che l'impianto fotovoltaico racconta di sé. È di sola consultazione.
 
-1. **Oggi**: energia prodotta dai pannelli, consumata (casa e auto insieme), presa dalla rete e ceduta alla rete, più due percentuali: l'autosufficienza (quanta parte dei consumi è stata coperta senza comprare energia) e l'autoconsumo (quanta parte della produzione è stata usata in casa).
-2. **Pannelli e inverter adesso**: potenza, tensione e corrente di ciascuna delle due stringhe di pannelli, temperatura e potenza dell'inverter, tensione e frequenza della rete.
-3. **Batteria di casa**: carica ed energia disponibile, potenza in ingresso o uscita, stato di salute, numero di cicli, temperatura, e la resa (energia restituita rispetto a quella immagazzinata).
-4. **Produzione dei pannelli, ultimi 14 giorni**: un grafico con una colonna per giorno. Selezionando un giorno compaiono consumi, scambi con la rete e autosufficienza.
-5. **Bollette**: il saldo da pagare e un elenco mese per mese. Per i mesi già fatturati compaiono l'importo della bolletta, l'energia prelevata dalla rete, il costo medio al kWh e la data di pagamento. Per i mesi senza bolletta (quello appena concluso e quello in corso) compare un importo stimato, segnalato come tale, che viene sostituito da quello vero quando la bolletta arriva.
-6. **Da quando esiste l'impianto**: i totali di energia prodotta, comprata, ceduta e passata dalla batteria.
-7. **Ultimi avvisi dell'inverter**: gli ultimi eventi anomali registrati, con data e durata.
+1. **Riepilogo**: come nelle altre sezioni, un riquadro in testa dice cosa sta succedendo in quel momento. Mostra la potenza dei pannelli (o, di notte, il consumo della casa), una frase che riassume da dove arriva l'energia ("I pannelli coprono la casa e caricano la batteria", "La casa va a batteria", "La casa prende dalla rete"), il dettaglio di casa, batteria e rete, e tre indicatori: carica della batteria, energia prodotta oggi, autosufficienza di oggi.
+2. **Oggi**: energia prodotta dai pannelli, consumata (casa e auto insieme), presa dalla rete e ceduta alla rete, più due percentuali: l'autosufficienza (quanta parte dei consumi è stata coperta senza comprare energia) e l'autoconsumo (quanta parte della produzione è stata usata in casa).
+3. **Pannelli e inverter adesso**: potenza, tensione e corrente di ciascuna delle due stringhe di pannelli, temperatura e potenza dell'inverter, tensione e frequenza della rete.
+4. **Batteria di casa**: carica ed energia disponibile, potenza in ingresso o uscita, stato di salute, numero di cicli, temperatura, e la resa (energia restituita rispetto a quella immagazzinata).
+5. **Produzione dei pannelli, ultimi 14 giorni**: un grafico con una colonna per giorno. Selezionando un giorno compaiono consumi, scambi con la rete e autosufficienza.
+6. **Bollette**: il saldo da pagare e un elenco mese per mese. Per i mesi già fatturati compaiono l'importo della bolletta, l'energia prelevata dalla rete, il costo medio al kWh e la data di pagamento. Per i mesi senza bolletta (quello appena concluso e quello in corso) compare un importo stimato, segnalato come tale, che viene sostituito da quello vero quando la bolletta arriva.
+7. **Da quando esiste l'impianto**: i totali di energia prodotta, comprata, ceduta e passata dalla batteria.
+8. **Ultimi avvisi dell'inverter**: gli ultimi eventi anomali registrati, con data e durata.
 
 I dati si aggiornano ogni 5 minuti.
 

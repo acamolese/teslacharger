@@ -546,6 +546,19 @@ html.dark,html.dark body{background:#0e0e0e}
 
   <!-- ================= CASA ================= -->
   <main class="page fade-through" id="viewC" hidden>
+    <section class="hero t-idle stag" id="homehero">
+      <div class="hero-row">
+        <div class="hs-wrap" id="homewrap"><div class="hshape sh-pentagon" id="homeshape"><span class="ic s40" id="homeicon" aria-hidden="true">home</span></div></div>
+        <div style="display: flex; flex-direction: column; min-width: 0">
+          <div class="kw t-dl"><span id="homekw">–</span><small>kW</small></div>
+          <span class="t-ll" style="opacity: .86" id="homekwsub">dai pannelli</span>
+        </div>
+      </div>
+      <h1 class="hero-title" id="hometitle">La casa</h1>
+      <p class="hero-reason" id="homereason">In caricamento</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px" id="homechips"></div>
+    </section>
+
     <section class="stag">
       <div class="sec-h"><h2 class="t-tm" style="margin: 0">Oggi</h2><span class="chip-a t-lm"><span class="ic s18" aria-hidden="true">schedule</span><span id="hometime">Impianto –</span></span></div>
       <div class="dgrid" id="hometoday"></div>
@@ -1360,8 +1373,47 @@ function renderHistory(h) {
 // ---- sezione Casa ----
 const pctOf = (part, whole) => (whole > 0 ? Math.round(Math.min(1, Math.max(0, part / whole)) * 100) + "%" : "–");
 const val = (v, d = 1) => (v == null ? "–" : fmt(v, d));
+function renderHomeHero() {
+  const p = state.status && state.status.plant, h = state.home;
+  if (!p) return;
+  const load = Math.max(0, p.inverter_ac_w - p.grid_w), sun = p.pv_w >= 100;
+  const exporting = p.grid_w > 100, importing = p.grid_w < -100;
+  const charging = p.battery_w > 100, discharging = p.battery_w < -100;
+  let title, tone, icon, shape;
+  if (sun && !importing && !discharging) {
+    title = exporting ? "I pannelli coprono la casa e avanza energia" : charging ? "I pannelli coprono la casa e caricano la batteria" : "I pannelli coprono la casa";
+    tone = "t-sun"; icon = "solar_power"; shape = "sh-sunny";
+  } else if (importing) {
+    title = sun ? "I pannelli non bastano: la casa prende anche dalla rete" : "La casa prende dalla rete";
+    tone = "t-idle"; icon = "electrical_services"; shape = "sh-pentagon";
+  } else if (discharging) {
+    title = sun ? "Pannelli e batteria alimentano la casa" : "La casa va a batteria";
+    tone = "t-night"; icon = "home_storage"; shape = "sh-cookie4";
+  } else {
+    title = "Casa in equilibrio"; tone = "t-idle"; icon = "home"; shape = "sh-pentagon";
+  }
+  $("homehero").className = "hero stag " + tone;
+  $("homewrap").className = "hs-wrap " + (sun && tone === "t-sun" ? "spin-slow" : "");
+  $("homeshape").className = "hshape " + shape;
+  $("homeicon").textContent = icon;
+  $("homekw").textContent = sun ? kw(p.pv_w) : kw(load);
+  $("homekwsub").textContent = sun ? "dai pannelli" : "consumati dalla casa";
+  $("hometitle").textContent = title;
+  const parts = ["Casa " + kw(load) + " kW"];
+  parts.push(charging ? "batteria in carica a " + kw(p.battery_w) + " kW" : discharging ? "batteria cede " + kw(p.battery_w) + " kW" : "batteria ferma");
+  parts.push(exporting ? "in rete " + kw(p.grid_w) + " kW" : importing ? "dalla rete " + kw(p.grid_w) + " kW" : "nessuno scambio con la rete");
+  $("homereason").textContent = parts.join(" · ") + ". Dato delle " + p.data_time.slice(11, 16) + ".";
+  const chips = $("homechips");
+  chips.textContent = "";
+  chips.append(chip("home_storage", "Batteria " + p.battery_soc + "%"));
+  if (h && h.days && h.days.length) {
+    const d = h.days[h.days.length - 1];
+    chips.append(chip("bolt", "Prodotti oggi " + val(d.pv) + " kWh"), chip("verified", "Autosufficienza " + pctOf(d.load - d.imported, d.load)));
+  }
+}
 function renderHome(h) {
   state.home = h;
+  renderHomeHero();
   $("hometime").textContent = h.time ? "Impianto " + h.time.slice(11, 16) : "Impianto –";
   const d = h.days[h.days.length - 1], today = $("hometoday");
   today.textContent = "";
@@ -1695,6 +1747,7 @@ function render(s) {
   $("errbanner").hidden = !s.error;
   $("errtext").textContent = s.error || "";
   if (!s.time) return;
+  renderHomeHero();
   renderHero(s); renderEvening(s); renderConsent(s); renderTiles(s); renderModes(s); renderNight(s); renderLog(s); renderCar(s);
 }
 async function refresh() {
