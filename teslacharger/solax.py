@@ -197,6 +197,15 @@ class SolaxClient:
             raise RuntimeError(f"Solax: statistiche non disponibili ({data.get('message')})")
         return data["result"].get("plantEnergyStatDataList") or []
 
+    def month_totals(self, month: str) -> dict:
+        """Energia del mese (formato AAAA-MM): prelevata dalla rete, prodotta e ceduta, in kWh."""
+        days = self._month_stats(month)
+        return {
+            "imported": round(sum(d.get("importEnergy") or 0 for d in days), 1),
+            "pv": round(sum(d.get("pvGeneration") or 0 for d in days), 1),
+            "exported": round(sum(d.get("exportEnergy") or 0 for d in days), 1),
+        }
+
     def _alarms(self) -> list[dict]:
         records = self._get(
             "/openapi/v2/alarm/page_alarm_info",

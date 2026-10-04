@@ -51,6 +51,8 @@ class Settings:
     car_retry_minutes: int
     # Costo di un kWh in più prelevato dalla rete, tasse comprese e quote fisse escluse
     price_kwh: float
+    # Quote fisse mensili della bolletta (commercializzazione, trasporto, potenza, oneri), IVA compresa
+    fixed_monthly: float
     # Sconto per ogni kWh caricato nelle finestre smart di Octopus
     night_discount_kwh: float
     # Senza questo interruttore il sistema scrive cosa farebbe ma non comanda l'auto
@@ -69,6 +71,7 @@ class Settings:
             poll_seconds=_int("POLL_SECONDS", 150),
             car_retry_minutes=_int("CAR_RETRY_MINUTES", 30),
             price_kwh=_float("PRICE_KWH", 0.229),
+            fixed_monthly=_float("FIXED_MONTHLY", 30.47),
             night_discount_kwh=_float("NIGHT_DISCOUNT_KWH", 0.036),
             live=os.environ.get("LIVE", "").lower() in ("1", "true", "si", "sì"),
         )

@@ -82,6 +82,11 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                 self._json(200, {**controller.snapshot(), "version": page()[1]})
             elif path == "/api/history":
                 self._json(200, controller.history_summary())
+            elif path == "/api/bills":
+                try:
+                    self._json(200, controller.bills_summary())
+                except Exception as err:
+                    self._json(502, {"error": str(err)})
             elif path == "/api/home":
                 try:
                     self._json(200, controller.home_summary())

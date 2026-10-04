@@ -101,6 +101,35 @@ class OctopusClient:
                 )
         raise RuntimeError("Octopus: nessun veicolo registrato in Intelligent Octopus")
 
+    def billing(self) -> dict:
+        """Saldo e ultimi movimenti del conto dell'energia elettrica, in euro."""
+        ledgers = self._gql(
+            """query ($accountNumber: String!) {
+              account(accountNumber: $accountNumber) {
+                ledgers {
+                  ledgerType balance amountOwedByCustomer
+                  transactions(first: 30) {
+                    edges { node { __typename postedDate amounts { gross } } }
+                  }
+                }
+              }
+            }""",
+            {"accountNumber": self._account_number()},
+        )["account"]["ledgers"]
+        ledger = next((l for l in ledgers if "ELECTRICITY" in (l.get("ledgerType") or "")), None)
+        if ledger is None:
+            raise RuntimeError("Octopus: conto dell'energia elettrica non trovato")
+        charges, payments = [], []
+        for edge in ledger["transactions"]["edges"]:
+            node = edge["node"]
+            entry = {"date": node["postedDate"], "amount": node["amounts"]["gross"] / 100}
+            (charges if node["__typename"] == "Charge" else payments).append(entry)
+        return {
+            "owed": (ledger.get("amountOwedByCustomer") or 0) / 100,
+            "charges": charges,
+            "payments": payments,
+        }
+
     def planned_dispatches(self, device_id: str) -> list[dict]:
         """Finestre di carica pianificate da Octopus per le prossime ore."""
         rows = self._gql(

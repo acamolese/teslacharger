@@ -80,6 +80,7 @@ Le soglie hanno valori predefiniti e si possono cambiare nel file `.env`:
 | `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra un avvio e uno stop |
 | `DAY_START`, `DAY_END` | 08:30, 19:00 | Fascia della carica diurna |
 | `PRICE_KWH` | 0.229 | Costo in euro di un kWh in più preso dalla rete, tasse comprese |
+| `FIXED_MONTHLY` | 30.47 | Quote fisse mensili della bolletta in euro, IVA compresa |
 | `NIGHT_DISCOUNT_KWH` | 0.036 | Sconto in euro per kWh nelle ricariche notturne di Octopus |
 | `LIVE` | non impostato | Con `true` i comandi vengono inviati davvero all'auto |
 

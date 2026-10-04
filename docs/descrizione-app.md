@@ -112,8 +112,9 @@ Raccoglie tutto ciò che l'impianto fotovoltaico racconta di sé. È di sola con
 2. **Pannelli e inverter adesso**: potenza, tensione e corrente di ciascuna delle due stringhe di pannelli, temperatura e potenza dell'inverter, tensione e frequenza della rete.
 3. **Batteria di casa**: carica ed energia disponibile, potenza in ingresso o uscita, stato di salute, numero di cicli, temperatura, e la resa (energia restituita rispetto a quella immagazzinata).
 4. **Produzione dei pannelli, ultimi 14 giorni**: un grafico con una colonna per giorno. Selezionando un giorno compaiono consumi, scambi con la rete e autosufficienza.
-5. **Da quando esiste l'impianto**: i totali di energia prodotta, comprata, ceduta e passata dalla batteria.
-6. **Ultimi avvisi dell'inverter**: gli ultimi eventi anomali registrati, con data e durata.
+5. **Bollette**: il saldo da pagare e un elenco mese per mese. Per i mesi già fatturati compaiono l'importo della bolletta, l'energia prelevata dalla rete, il costo medio al kWh e la data di pagamento. Per i mesi senza bolletta (quello appena concluso e quello in corso) compare un importo stimato, segnalato come tale, che viene sostituito da quello vero quando la bolletta arriva.
+6. **Da quando esiste l'impianto**: i totali di energia prodotta, comprata, ceduta e passata dalla batteria.
+7. **Ultimi avvisi dell'inverter**: gli ultimi eventi anomali registrati, con data e durata.
 
 I dati si aggiornano ogni 5 minuti.
 

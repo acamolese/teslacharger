@@ -269,6 +269,12 @@ html.dark,html.dark body{background:#0e0e0e}
       </div>
     </section>
 
+    <section class="stag" style="animation-delay: 160ms">
+      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Bollette</h2><span class="chip-a t-lm"><span class="ic s18" aria-hidden="true">account_balance_wallet</span><span id="billowed">Saldo –</span></span></div>
+      <div class="group" id="bills"><div class="li"><div class="li-body t-bm v">In caricamento</div></div></div>
+      <p class="t-bs v" style="margin: 10px 4px 0" id="billnote"></p>
+    </section>
+
     <section class="stag" style="animation-delay: 180ms">
       <div class="sec-h"><h2 class="t-tm" style="margin: 0">Da quando esiste l'impianto</h2></div>
       <div class="dgrid" id="homelife"></div>
@@ -967,7 +973,39 @@ function renderHomeChart(h) {
   $("homeseltitle").textContent = longDay(d.day, today) + " · " + fmt(d.pv) + " kWh prodotti";
   $("homeseltext").textContent = "Consumati " + fmt(d.load) + " · dalla rete " + fmt(d.imported) + " · in rete " + fmt(d.exported) + " · autosufficienza " + pctOf(d.load - d.imported, d.load);
 }
+const euro = (v) => fmt(v, 2) + " €";
+const dmy = (iso) => Number(iso.slice(8, 10)) + "/" + Number(iso.slice(5, 7));
+function renderBills(b) {
+  $("billowed").textContent = b.owed > 0 ? "Da pagare " + euro(b.owed) : "Nulla da pagare";
+  const box = $("bills");
+  box.textContent = "";
+  for (const r of b.rows) {
+    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
+    const glyph = el("span", "ic s20", r.estimated ? "calculate" : "receipt_long");
+    glyph.setAttribute("aria-hidden", "true");
+    ic.append(glyph);
+    const name = cap(MONTHS[Number(r.month.slice(5, 7)) - 1]) + " " + r.month.slice(0, 4);
+    body.append(el("div", "t-bl", name));
+    const kwh = fmt(r.kwh, 0) + " kWh dalla rete";
+    body.append(el("div", "t-bs v", r.estimated
+      ? (r.in_progress ? "Stima finora · " : "Stima, bolletta non ancora arrivata · ") + kwh
+      : kwh + " · " + fmt(r.amount / Math.max(r.kwh, 1), 2) + " €/kWh in media · " + (r.paid ? "pagata il " + dmy(r.paid) : "da pagare")));
+    const amount = el("span", "t-ts", (r.estimated ? "≈ " : "") + euro(r.amount));
+    if (r.estimated) amount.style.color = "var(--onsfv)";
+    row.append(ic, body, amount);
+    box.append(row);
+  }
+  $("billnote").textContent = "Le stime usano " + fmt(b.prices.kwh * 100, 1) + " centesimi per kWh prelevato e " + euro(b.prices.fixed_monthly) + " al mese di quote fisse, ricavati dall'ultima bolletta. I kWh sono quelli misurati dall'inverter.";
+}
+async function refreshBills() {
+  try {
+    const r = await fetch("/api/bills", { cache: "no-store" });
+    if (r.ok) renderBills(await r.json());
+    else $("bills").firstChild.firstChild.textContent = "Bollette non disponibili in questo momento";
+  } catch (e) {}
+}
 async function refreshHome() {
+  refreshBills();
   try {
     const r = await fetch("/api/home", { cache: "no-store" });
     if (r.ok) renderHome(await r.json());

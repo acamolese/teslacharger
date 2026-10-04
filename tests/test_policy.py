@@ -16,6 +16,7 @@ SETTINGS = Settings(
     poll_seconds=150,
     car_retry_minutes=30,
     price_kwh=0.229,
+    fixed_monthly=30.47,
     night_discount_kwh=0.036,
     live=False,
 )

@@ -23,6 +23,8 @@ DISPATCH_SYNC = timedelta(minutes=30)
 ERRORS_BEFORE_ALERT = 3
 # Dopo il risveglio l'auto risponde in genere entro mezzo minuto
 HOME_CACHE = timedelta(minutes=5)
+BILLS_CACHE = timedelta(hours=1)
+BILLED_MONTHS_SHOWN = 6
 WAKE_ATTEMPTS = 8
 WAKE_PAUSE_SECONDS = 6
 MODE_NAMES = {Mode.BOOST: "Carica subito", Mode.SOLAR: "Carica col sole", Mode.AUTO: "Automatica"}
@@ -71,6 +73,8 @@ class Controller:
         self._hold_error: str | None = None
         self._home: dict | None = None
         self._home_time: datetime | None = None
+        self._bills: dict | None = None
+        self._bills_time: datetime | None = None
         self._load()
 
     def _load(self) -> None:
@@ -213,6 +217,52 @@ class Controller:
             self._home = self.solax.home_summary()
             self._home_time = now
         return self._home
+
+    def bills_summary(self) -> dict:
+        """Bollette emesse e stima dei mesi non ancora fatturati, rilette al massimo ogni ora."""
+        now = datetime.now()
+        if self._bills is None or now - self._bills_time > BILLS_CACHE:
+            self._bills = self._build_bills(now)
+            self._bills_time = now
+        return self._bills
+
+    def _build_bills(self, now: datetime) -> dict:
+        billing = self.octopus.billing()
+        # Ogni addebito porta la data dell'ultimo giorno del mese a cui si riferisce
+        billed = {c["date"][:7]: c for c in billing["charges"]}
+        payments = sorted(billing["payments"], key=lambda p: p["date"])
+        this_month = now.strftime("%Y-%m")
+        first_unbilled = max(billed) if billed else this_month
+        months = sorted(billed)[-BILLED_MONTHS_SHOWN:]
+        cursor = date(int(first_unbilled[:4]), int(first_unbilled[5:]), 1)
+        while cursor.strftime("%Y-%m") < this_month:
+            cursor = (cursor.replace(day=28) + timedelta(days=4)).replace(day=1)
+            months.append(cursor.strftime("%Y-%m"))
+        rows = []
+        for month in dict.fromkeys(months):
+            energy = self.solax.month_totals(month)
+            row = {"month": month, "kwh": energy["imported"], "estimated": month not in billed}
+            if month in billed:
+                charge = billed[month]
+                paid = next(
+                    (p["date"] for p in payments if p["date"] >= charge["date"] and abs(p["amount"] - charge["amount"]) < 0.01),
+                    None,
+                )
+                row.update(amount=charge["amount"], paid=paid)
+            else:
+                in_progress = month == this_month
+                days_in_month = ((date(int(month[:4]), int(month[5:]), 28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)).day
+                share = now.day / days_in_month if in_progress else 1
+                row.update(
+                    amount=round(energy["imported"] * self.settings.price_kwh + self.settings.fixed_monthly * share, 2),
+                    in_progress=in_progress,
+                )
+            rows.append(row)
+        return {
+            "owed": billing["owed"],
+            "rows": list(reversed(rows)),
+            "prices": {"kwh": self.settings.price_kwh, "fixed_monthly": self.settings.fixed_monthly},
+        }
 
     def history_summary(self) -> dict:
         window = (self.settings.day_start, self.settings.day_end)
