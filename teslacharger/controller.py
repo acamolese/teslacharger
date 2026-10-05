@@ -12,7 +12,7 @@ from pathlib import Path
 from .config import Settings
 from .emmeti import EmmetiClient, describe
 from .history import History
-from .octopus import OctopusClient
+from .octopus import MIN_TARGET, OctopusClient
 from .policy import Action, CarStatus, ControlState, Decision, Mode, decide, plan_battery_hold, precheck
 from .push import PushService
 from .solax import MAX_HOLD_SECONDS, SolaxClient
@@ -23,6 +23,8 @@ log = logging.getLogger("teslacharger")
 MAX_EVENTS = 40
 DISPATCH_SYNC = timedelta(minutes=30)
 ERRORS_BEFORE_ALERT = 3
+# Attesa massima della conferma di Octopus prima di segnalare che la manovra non è avvenuta
+NOTICE_TIMEOUT = timedelta(minutes=10)
 # Dopo il risveglio l'auto risponde in genere entro mezzo minuto
 # Per quanto tempo il livello letto dall'auto resta attendibile, se non viene scollegata
 CAR_READING_VALID = timedelta(hours=12)
@@ -83,6 +85,8 @@ class Controller:
         self._last_dispatch_sync: datetime | None = None
         self._errors = 0
         self._hold_error: str | None = None
+        # Notifica di avvio o di stop in attesa che Octopus confermi la manovra
+        self._notice: dict | None = None
         self._home: dict | None = None
         self._home_time: datetime | None = None
         self.emmeti = EmmetiClient()
@@ -220,6 +224,14 @@ class Controller:
         """Dopo le 18, con l'auto collegata, chiede se caricare stanotte o aspettare il sole di domani."""
         tomorrow = (now.date() + timedelta(days=1)).isoformat()
         asking = self.evening and self.evening.get("day") == tomorrow
+        skipped = self.evening and self.evening.get("skip") and not self.evening.get("restored")
+        if skipped and not vehicle.plugged and now.date().isoformat() >= self.evening["day"]:
+            # La notte senza carica è passata e l'auto è ripartita: il minimo non deve valere
+            # anche per un rientro a notte fonda, quando la domanda non viene posta
+            if self.settings.live:
+                self.octopus.set_target(vehicle.device_id, self.full_target, vehicle.target_time or "09:00")
+            self.evening["restored"] = True
+            self._event("bedtime", f"Carica notturna di nuovo al {self.full_target}%", "L'auto è ripartita")
         if not asking:
             if not vehicle.plugged or now.hour < self.settings.evening_ask_hour:
                 return
@@ -244,20 +256,38 @@ class Controller:
                 body = "Carico stanotte con Octopus? Tocca per scegliere, altrimenti carico alle 22."
             self._notify("Auto collegata", body)
             return
-        if self.evening.get("choice") is None and now.hour >= self.settings.evening_default_hour:
+        if self.evening.get("choice") is not None:
+            return
+        if now.hour >= self.settings.evening_default_hour:
             # Nessuna risposta: si applica il suggerimento
             self._apply_evening(self.evening["suggestion"], by_user=False)
+        elif not self.evening.get("waiting"):
+            # Finché manca la risposta Octopus non deve partire col livello della sera prima
+            self.evening["waiting"] = True
+            if self.settings.live:
+                self.octopus.set_target(vehicle.device_id, MIN_TARGET, vehicle.target_time or "09:00")
+            self._event("hourglass_top", "Carica notturna sospesa", "In attesa della tua risposta, fino alle 22")
 
     def _apply_evening(self, choice: str, by_user: bool) -> None:
         home = choice == "home"
-        percent = min(self.settings.home_day_target, self.full_target) if home else self.full_target
+        # Chi rinuncia alla notte non vuole che parta nulla: il livello va sotto quello dell'auto.
+        # Senza risposta resta invece la riserva, per non lasciare l'auto scarica all'insaputa di tutti.
+        skip = home and by_user
+        if skip:
+            percent = MIN_TARGET
+        elif home:
+            percent = min(self.settings.home_day_target, self.full_target)
+        else:
+            percent = self.full_target
         vehicle = self.octopus.vehicle()
         if self.settings.live:
             self.octopus.set_target(vehicle.device_id, percent, vehicle.target_time or "09:00")
-        self.evening.update(choice=choice, by_user=by_user, percent=percent)
+        self.evening.update(choice=choice, by_user=by_user, percent=percent, skip=skip)
         self.history.log_evening(self.evening)
         who = "Scelto da te" if by_user else "Nessuna risposta: ho seguito il suggerimento"
-        if home:
+        if skip:
+            self._event("wb_sunny", "Domani a casa: stanotte non carico", who)
+        elif home:
             self._event("wb_sunny", f"Domani a casa: stanotte carico solo fino al {percent}%", who)
         else:
             self._event("bedtime", f"Stanotte carico fino al {percent}%", who)
@@ -601,6 +631,7 @@ class Controller:
             target={"percent": vehicle.target_percent, "time": vehicle.target_time},
             push=self.push.enabled,
         )
+        self._confirm_notice(now, vehicle)
         self._sync_dispatches(now)
         self.status["planned"] = self._planned_window(vehicle.device_id, now)
         self._auto_switch(now, vehicle.boosting and self.state.started_by_us)
@@ -673,12 +704,29 @@ class Controller:
         self._execute(decision, vehicle.device_id)
         self._event(ACTION_ICONS[decision.action], title, reason)
         self.state = decision.state
+        # Il comando è partito, ma l'auto ci mette un po': la notifica aspetta la conferma
         if decision.action is Action.START:
-            self._notify("Carica avviata", f"{decision.amps} A all'auto. {reason}")
+            self._notice = {"boosting": True, "since": now, "title": "Carica avviata", "body": f"{decision.amps} A all'auto. {reason}"}
         elif decision.action is Action.STOP:
-            self._notify("Carica fermata", reason)
+            self._notice = {"boosting": False, "since": now, "title": "Carica fermata", "body": reason}
             if self.mode is Mode.BOOST:
                 self.mode = self.after_boost
+
+    def _confirm_notice(self, now: datetime, vehicle) -> None:
+        """Manda la notifica di avvio o di stop solo quando Octopus conferma che è avvenuto."""
+        notice = self._notice
+        if notice is None:
+            return
+        if vehicle.boosting == notice["boosting"]:
+            self._notify(notice["title"], notice["body"])
+        elif now - notice["since"] < NOTICE_TIMEOUT:
+            return
+        else:
+            title = "Carica non ancora avviata" if notice["boosting"] else "Carica non ancora fermata"
+            body = f"Comando inviato alle {notice['since']:%H:%M}, ma Octopus non lo conferma."
+            self._event("error", title, body)
+            self._notify(title, body)
+        self._notice = None
 
     def _execute(self, decision: Decision, device_id: str) -> None:
         if decision.action is Action.WAKE:

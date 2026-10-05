@@ -12,6 +12,8 @@ TOKEN_LIFETIME_SECONDS = 45 * 60
 STATE_BOOSTING = "BOOSTING"
 # Orari di fine carica accettati da Octopus: dalle 04:00 alle 11:00, ogni mezz'ora
 READY_TIMES = tuple(f"{h:02d}:{m:02d}" for h in range(4, 12) for m in (0, 30) if (h, m) <= (11, 0))
+# Livello di carica più basso accettato: sotto il livello dell'auto, di notte non parte nulla
+MIN_TARGET = 10
 WEEKDAYS = ("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 # Stato osservato quando l'auto non è collegata alla presa di casa
 STATE_UNPLUGGED = "SMART_CONTROL_NOT_AVAILABLE"
@@ -192,8 +194,8 @@ class OctopusClient:
 
     def set_target(self, device_id: str, percent: int, ready_time: str) -> None:
         """Imposta per tutti i giorni il livello di carica da raggiungere entro l'ora indicata."""
-        if not 10 <= percent <= 100:
-            raise ValueError("il livello di carica deve essere tra 10 e 100")
+        if not MIN_TARGET <= percent <= 100:
+            raise ValueError(f"il livello di carica deve essere tra {MIN_TARGET} e 100")
         if ready_time not in READY_TIMES:
             raise ValueError("orario di fine carica non ammesso")
         self._gql(

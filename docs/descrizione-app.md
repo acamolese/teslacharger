@@ -72,9 +72,9 @@ Il consenso vale fino alle 19:00 dello stesso giorno e può essere revocato in q
 Quando l'auto viene collegata dopo le 18, il sistema chiede all'utente come comportarsi per la notte, con una notifica e con un riquadro in cima alla sezione "Ricarica". Le risposte possibili sono due:
 
 - **"Carico stanotte"**: Octopus carica l'auto fino al livello pieno scelto dall'utente.
-- **"Domani a casa"**: di notte l'auto viene caricata solo fino a un livello di riserva (50%), così il giorno dopo resta spazio in batteria per l'energia dei pannelli.
+- **"Domani a casa"**: di notte l'auto non viene caricata. Il livello chiesto a Octopus scende al minimo (10%), sotto quello dell'auto, così la ricarica non parte e il giorno dopo tutto lo spazio in batteria resta per l'energia dei pannelli.
 
-Il riquadro spiega che giorno è domani, se di solito l'utente è a casa, quanta energia solare è prevista per l'auto, e quale delle due risposte è consigliata. Se l'utente non risponde entro le 22, il sistema applica la risposta consigliata e lo comunica con una notifica. Dopo la risposta il riquadro si riduce a una riga con la scelta fatta e la possibilità di cambiarla.
+Finché l'utente non risponde, il livello chiesto a Octopus resta al minimo, così la carica non parte col livello della sera prima. Il riquadro spiega che giorno è domani, se di solito l'utente è a casa, quanta energia solare è prevista per l'auto, e quale delle due risposte è consigliata. Se l'utente non risponde entro le 22, il sistema applica la risposta consigliata e lo comunica con una notifica; se la risposta consigliata è "Domani a casa", in questo caso carica comunque fino a un livello di riserva (50%), per non lasciare l'auto scarica senza che nessuno l'abbia deciso. Dopo la risposta il riquadro si riduce a una riga con la scelta fatta e la possibilità di cambiarla.
 
 Il consiglio si basa su un piano settimanale delle ore in cui l'auto è di solito a casa (giorni interi o solo alcune fasce orarie) e sulla previsione del sole. Il sistema registra quando l'auto viene collegata e scollegata e cosa risponde l'utente, per affinare nel tempo quel piano.
 
