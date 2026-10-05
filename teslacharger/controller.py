@@ -12,7 +12,7 @@ from pathlib import Path
 from .config import Settings
 from .emmeti import EmmetiClient, describe
 from .history import History
-from .octopus import MIN_TARGET, OctopusClient
+from .octopus import MIN_TARGET, READY_TIMES, OctopusClient
 from .policy import Action, CarStatus, ControlState, Decision, Mode, decide, plan_battery_hold, precheck
 from .push import PushService
 from .solax import MAX_HOLD_SECONDS, SolaxClient
@@ -36,6 +36,7 @@ CLIMATE_MONTHS = 12
 BILLED_MONTHS_SHOWN = 6
 WAKE_ATTEMPTS = 8
 WAKE_PAUSE_SECONDS = 6
+PLAN_NAMES = {"home": "Domani a casa", "night": "Automatico"}
 MODE_NAMES = {Mode.BOOST: "Carica subito", Mode.SOLAR: "Carica col sole", Mode.AUTO: "Automatica"}
 ACTION_ICONS = {
     Action.START: "play_circle",
@@ -71,9 +72,13 @@ class Controller:
         self.switched_on: str | None = None
         self.asked_on: str | None = None
         # Batteria di casa a riposo durante la carica notturna: scelta dell'utente e blocco in corso
-        # Domanda della sera ("carico stanotte o domani sono a casa?") e livello pieno preferito
+        # Domanda della sera: nessuna carica, domani a casa oppure automatico
         self.evening: dict | None = None
-        self.full_target = 100
+        # Livello e ora di fine carica delle due notti in cui si carica
+        self.plans = {
+            "home": {"percent": settings.home_day_target, "time": None},
+            "night": {"percent": 100, "time": None},
+        }
         self.hold_enabled = True
         self.held_until: datetime | None = None
         self.state = ControlState()
@@ -115,7 +120,11 @@ class Controller:
         self.switched_on = saved.get("switched_on")
         self.asked_on = saved.get("asked_on")
         self.evening = saved.get("evening")
-        self.full_target = saved.get("full_target", 100)
+        # Prima dei piani esisteva solo il livello pieno
+        saved_plans = saved.get("plans") or {"night": {"percent": saved.get("full_target", 100)}}
+        for key, plan in saved_plans.items():
+            if key in self.plans:
+                self.plans[key].update(plan)
         self.hold_enabled = saved.get("hold_enabled", True)
         if saved.get("held_until"):
             self.held_until = datetime.fromisoformat(saved["held_until"])
@@ -134,7 +143,7 @@ class Controller:
                 "switched_on": self.switched_on,
                 "asked_on": self.asked_on,
                 "evening": self.evening,
-                "full_target": self.full_target,
+                "plans": self.plans,
                 "hold_enabled": self.hold_enabled,
                 "held_until": self.held_until.isoformat() if self.held_until else None,
                 "car_info": self.status.get("car_info"),
@@ -185,17 +194,30 @@ class Controller:
             self._save()
         self._wakeup.set()
 
-    def set_target(self, percent: int | None = None, ready_time: str | None = None) -> None:
-        """Livello di carica che Octopus deve raggiungere di notte, e ora entro cui farlo."""
+    def _active_plan(self) -> str | None:
+        """Piano in vigore su Octopus: None quando la carica è sospesa o esclusa per stanotte."""
+        q = self.evening
+        if not q or q.get("restored") or q.get("day", "") < datetime.now().date().isoformat():
+            return "night"
+        return q["choice"] if q.get("choice") in self.plans else None
+
+    def set_target(self, plan: str = "night", percent: int | None = None, ready_time: str | None = None) -> None:
+        """Livello di carica e ora di fine di uno dei due piani notturni."""
+        if plan not in self.plans:
+            raise ValueError("piano non valido")
         with self._lock:
-            vehicle = self.octopus.vehicle()
-            percent = percent if percent is not None else vehicle.target_percent or 100
-            ready_time = ready_time or vehicle.target_time or "09:00"
-            title = f"Carica notturna: {percent}% entro le {ready_time}"
-            # Un livello scelto a mano diventa quello da ripristinare nelle notti di carica piena
-            self.full_target = percent
-            if self.settings.live:
-                self.octopus.set_target(vehicle.device_id, percent, ready_time)
+            saved = self.plans[plan]
+            percent = percent if percent is not None else saved["percent"]
+            ready_time = ready_time or saved["time"] or "09:00"
+            if not MIN_TARGET <= percent <= 100 or ready_time not in READY_TIMES:
+                raise ValueError("livello o orario non ammessi")
+            saved.update(percent=percent, time=ready_time)
+            title = f"{PLAN_NAMES[plan]}: {percent}% entro le {ready_time}"
+            if self._active_plan() != plan:
+                # Non è il piano in vigore: resta da parte per la prossima volta che viene scelto
+                self._event("bedtime", title, "Salvata, vale da quando la scegli")
+            elif self.settings.live:
+                self.octopus.set_target(self.octopus.vehicle().device_id, percent, ready_time)
                 self._event("bedtime", title, "Modificata da te")
             else:
                 self._event("bedtime", title, "Modalità di prova: non inviata a Octopus")
@@ -221,17 +243,18 @@ class Controller:
     # --- domanda della sera ---
 
     def _evening_question(self, now: datetime, vehicle, level: int | None) -> None:
-        """Dopo le 18, con l'auto collegata, chiede se caricare stanotte o aspettare il sole di domani."""
+        """Dopo le 18, con l'auto collegata, chiede come comportarsi per la notte."""
         tomorrow = (now.date() + timedelta(days=1)).isoformat()
         asking = self.evening and self.evening.get("day") == tomorrow
-        skipped = self.evening and self.evening.get("skip") and not self.evening.get("restored")
-        if skipped and not vehicle.plugged and now.date().isoformat() >= self.evening["day"]:
-            # La notte senza carica è passata e l'auto è ripartita: il minimo non deve valere
+        reduced = self.evening and self.evening.get("choice") in ("none", "home") and not self.evening.get("restored")
+        if reduced and not vehicle.plugged and now.date().isoformat() >= self.evening["day"]:
+            # La notte è passata e l'auto è ripartita: il livello ridotto non deve valere
             # anche per un rientro a notte fonda, quando la domanda non viene posta
+            night = self.plans["night"]
             if self.settings.live:
-                self.octopus.set_target(vehicle.device_id, self.full_target, vehicle.target_time or "09:00")
+                self.octopus.set_target(vehicle.device_id, night["percent"], night["time"] or vehicle.target_time or "09:00")
             self.evening["restored"] = True
-            self._event("bedtime", f"Carica notturna di nuovo al {self.full_target}%", "L'auto è ripartita")
+            self._event("bedtime", f"Carica notturna di nuovo al {night['percent']}%", "L'auto è ripartita")
         if not asking:
             if not vehicle.plugged or now.hour < self.settings.evening_ask_hour:
                 return
@@ -249,11 +272,11 @@ class Controller:
                 "choice": None,
             }
             self.history.log_evening(self.evening)
-            self._event("help", "Domanda della sera", "Carico stanotte o domani l'auto resta a casa?")
+            self._event("help", "Domanda della sera", "Nessuna carica, domani a casa o automatico?")
             if suggestion == "home":
                 body = f"Domani di solito sei a casa: previsti fino a {home_kwh:.1f} kWh dal sole. Tocca per scegliere.".replace(".", ",", 1)
             else:
-                body = "Carico stanotte con Octopus? Tocca per scegliere, altrimenti carico alle 22."
+                body = "Come carico stanotte? Tocca per scegliere, altrimenti alle 22 parte la carica automatica."
             self._notify("Auto collegata", body)
             return
         if self.evening.get("choice") is not None:
@@ -269,36 +292,29 @@ class Controller:
             self._event("hourglass_top", "Carica notturna sospesa", "In attesa della tua risposta, fino alle 22")
 
     def _apply_evening(self, choice: str, by_user: bool) -> None:
-        home = choice == "home"
-        # Chi rinuncia alla notte non vuole che parta nulla: il livello va sotto quello dell'auto.
-        # Senza risposta resta invece la riserva, per non lasciare l'auto scarica all'insaputa di tutti.
-        skip = home and by_user
-        if skip:
-            percent = MIN_TARGET
-        elif home:
-            percent = min(self.settings.home_day_target, self.full_target)
-        else:
-            percent = self.full_target
+        plan = self.plans.get(choice)
         vehicle = self.octopus.vehicle()
+        # Senza piano è "nessuna carica": il livello va sotto quello dell'auto e non parte nulla
+        percent = plan["percent"] if plan else MIN_TARGET
+        ready = (plan or self.plans["night"])["time"] or vehicle.target_time or "09:00"
         if self.settings.live:
-            self.octopus.set_target(vehicle.device_id, percent, vehicle.target_time or "09:00")
-        self.evening.update(choice=choice, by_user=by_user, percent=percent, skip=skip)
+            self.octopus.set_target(vehicle.device_id, percent, ready)
+        self.evening.update(choice=choice, by_user=by_user, percent=percent, time=ready, restored=False)
         self.history.log_evening(self.evening)
         who = "Scelto da te" if by_user else "Nessuna risposta: ho seguito il suggerimento"
-        if skip:
-            self._event("wb_sunny", "Domani a casa: stanotte non carico", who)
-        elif home:
-            self._event("wb_sunny", f"Domani a casa: stanotte carico solo fino al {percent}%", who)
+        if plan is None:
+            self._event("block", "Stanotte nessuna carica", who)
         else:
-            self._event("bedtime", f"Stanotte carico fino al {percent}%", who)
+            icon = "wb_sunny" if choice == "home" else "bedtime"
+            self._event(icon, f"{PLAN_NAMES[choice]}: stanotte carico fino al {percent}% entro le {ready}", who)
         if not by_user:
             self._notify(
                 "Ho deciso io per stanotte",
-                f"Carico fino al {percent}%" + (" e domani uso il sole." if home else " con Octopus.") + " Puoi cambiare dall'app.",
+                f"{PLAN_NAMES[choice]}: carico fino al {percent}% entro le {ready}. Puoi cambiare dall'app.",
             )
 
     def answer_evening(self, choice: str) -> None:
-        if choice not in ("home", "night"):
+        if choice not in ("none", "home", "night"):
             raise ValueError("scelta non valida")
         with self._lock:
             if not self.evening:
@@ -317,8 +333,8 @@ class Controller:
                 "grid_ok": self._grid_ok(datetime.now()),
                 "evening": self.evening
                 if self.evening and self.evening.get("day", "") >= datetime.now().date().isoformat() else None,
-                "home_day_target": self.settings.home_day_target,
-                "full_target": self.full_target,
+                "plans": self.plans,
+                "active_plan": self._active_plan(),
                 "hold": {
                     "enabled": self.hold_enabled,
                     "until": self.held_until.strftime("%H:%M")
@@ -632,6 +648,9 @@ class Controller:
             push=self.push.enabled,
         )
         self._confirm_notice(now, vehicle)
+        for plan in self.plans.values():
+            # Al primo giro i piani prendono l'ora di fine carica già impostata su Octopus
+            plan["time"] = plan["time"] or vehicle.target_time or "09:00"
         self._sync_dispatches(now)
         self.status["planned"] = self._planned_window(vehicle.device_id, now)
         self._auto_switch(now, vehicle.boosting and self.state.started_by_us)

@@ -144,7 +144,9 @@ def make_server(controller: Controller, host: str, port: int) -> ThreadingHTTPSe
                 controller.set_hold(bool(data["enabled"]))
             elif path == "/api/target":
                 percent = data.get("percent")
-                controller.set_target(int(percent) if percent is not None else None, data.get("time") or None)
+                controller.set_target(
+                    str(data.get("plan") or "night"), int(percent) if percent is not None else None, data.get("time") or None
+                )
             elif path == "/api/car/refresh":
                 return {"ok": controller.refresh_car()}
             elif path == "/api/push/subscribe":

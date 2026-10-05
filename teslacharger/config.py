@@ -72,7 +72,7 @@ class Settings:
     fixed_monthly: float
     # Sconto per ogni kWh caricato nelle finestre smart di Octopus
     night_discount_kwh: float
-    # Livello a cui caricare di notte quando il giorno dopo l'auto resta a casa col sole
+    # Livello di partenza del piano "domani a casa", poi modificabile dall'app
     home_day_target: int
     # Energia solare prevista per l'auto, in kWh, oltre la quale conviene aspettare il sole
     home_day_min_kwh: float
