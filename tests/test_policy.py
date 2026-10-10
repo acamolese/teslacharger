@@ -3,7 +3,8 @@ from datetime import datetime, time, timedelta
 
 from teslacharger.config import Settings
 from teslacharger.policy import (
-    Action, CarStatus, ControlState, Mode, decide, enough_sun, plan_battery_hold, precheck,
+    Action, CarStatus, ControlState, Mode, decide, enough_sun, home_load_w, plan_battery_hold, precheck,
+    stray_charge,
 )
 from teslacharger.solax import PlantSnapshot
 
@@ -279,12 +280,32 @@ class BatteryHoldTests(unittest.TestCase):
         self.assertIsNone(self.plan(NOON + timedelta(minutes=5), windows=day))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class EnoughSun(unittest.TestCase):
     def test_minimum_current_from_the_car_share(self):
         # 5 A a 230 V sono 1150 W, con l'80% all'auto servono 1438 W di pannelli
         self.assertFalse(enough_sun(plant(1400), SETTINGS))
         self.assertTrue(enough_sun(plant(1500), SETTINGS))
+
+
+class StrayChargeTests(unittest.TestCase):
+    def test_car_charging_above_target_without_octopus(self):
+        # 10 ottobre: auto al 71%, obiettivo al 50%, Octopus senza piano e l'auto carica lo stesso
+        self.assertTrue(stray_charge(car(charging=True, level=71), False, False, 50))
+        self.assertTrue(stray_charge(car(charging=True, level=71), False, False, 10))
+
+    def test_wanted_charges_are_left_alone(self):
+        self.assertFalse(stray_charge(car(charging=True, level=71), True, False, 50))
+        self.assertFalse(stray_charge(car(charging=True, level=71), False, True, 50))
+        self.assertFalse(stray_charge(car(charging=True, level=40), False, False, 50))
+        self.assertFalse(stray_charge(car(charging=False, level=71), False, False, 50))
+        self.assertFalse(stray_charge(car(charging=True, level=71), False, False, None))
+
+    def test_home_load(self):
+        # Sera del 10 ottobre: 27 W dai pannelli, batteria di casa in scarica a 2680 W
+        p = PlantSnapshot(data_time="18:39", pv_w=27, inverter_ac_w=0, grid_w=0, battery_w=-2680, battery_soc=71)
+        self.assertEqual(home_load_w(p), 2707)
+
+
+if __name__ == "__main__":
+    unittest.main()

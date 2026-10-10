@@ -1309,6 +1309,10 @@ function phase(s) {
     }
     return { ...base, reason: "Carica immediata avviata dall'app di Octopus: il sistema non la tocca", shape: "sh-burst", tone: "t-boost", icon: "bolt", spin: "spin-fast" };
   }
+  if (car && car.charging) {
+    // Octopus non comanda la carica: l'ha avviata l'auto da sola, se è sopra il livello di stanotte il sistema la ferma
+    return { title: "L'auto carica da sola", reason: "Octopus non la sta comandando: al " + car.level + "%, in carica a " + car.amps + " A", shape: "sh-burst", tone: "t-boost", icon: "bolt", charging: true, amps: car.amps, kw: fmt(car.amps * (car.voltage > 100 ? car.voltage : NOMINAL_V) / 1000) };
+  }
   if (d.action === "ferma") return { title: "Carica fermata", reason, shape: "sh-pentagon", tone: "t-idle", icon: "pause" };
   if (d.ask) return { title: "Nessuna carica in corso", reason, shape: "sh-circle", tone: "t-idle", icon: "cloud" };
   if (s.mode === "auto" || !inDay(s)) {

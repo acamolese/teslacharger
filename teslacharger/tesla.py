@@ -5,6 +5,10 @@ Uso:
   python3 -m teslacharger.tesla auth-url          stampa il link con cui autorizzare l'account
   python3 -m teslacharger.tesla exchange CODICE   scambia il codice ricevuto con i token
   python3 -m teslacharger.tesla vehicles          elenca i veicoli dell'account
+  python3 -m teslacharger.tesla charge-status     livello e stato della carica
+  python3 -m teslacharger.tesla charge-stop       ferma la carica e rilegge l'auto
+  python3 -m teslacharger.tesla charge-start      riavvia la carica e rilegge l'auto
+  python3 -m teslacharger.tesla charge-amps N     imposta la corrente di carica a N ampere
 """
 
 import json
@@ -367,6 +371,33 @@ class TeslaCar:
         if not data.get("response", {}).get("result"):
             raise RuntimeError(f"Tesla: comando rifiutato ({data})")
 
+    def _command(self, name: str) -> dict:
+        return request_json(
+            f"{self._proxy}/api/1/vehicles/{self.vin()}/command/{name}",
+            body={},
+            headers={"Authorization": f"Bearer {access_token()}"},
+            cafile=self._proxy_cert,
+        ).get("response", {})
+
+    def stop_charging(self) -> None:
+        """Ferma la carica in corso. Un'auto che già non carica risponde not_charging: va bene lo stesso."""
+        response = self._command("charge_stop")
+        if not response.get("result") and response.get("reason") != "not_charging":
+            raise RuntimeError(f"Tesla: stop rifiutato ({response})")
+
+    def start_charging(self) -> None:
+        response = self._command("charge_start")
+        if not response.get("result") and response.get("reason") != "is_charging":
+            raise RuntimeError(f"Tesla: avvio rifiutato ({response})")
+
+
+def _print_charge(car: "TeslaCar") -> None:
+    status = car.status()
+    if status is None:
+        print("auto in standby")
+    else:
+        print(f"livello {status.level}%, limite {status.limit}%, in carica: {'sì' if status.charging else 'no'}, {status.amps} A")
+
 
 def main() -> None:
     load_env()
@@ -382,6 +413,20 @@ def main() -> None:
     elif command == "vehicles":
         for vehicle in api_get("/api/1/vehicles")["response"]:
             print(vehicle["display_name"], vehicle["vin"][-6:], vehicle["state"])
+    elif command == "charge-amps" and len(sys.argv) > 2:
+        car = TeslaCar()
+        _print_charge(car)
+        car.set_amps(int(sys.argv[2]))
+        print("comando accettato")
+        _print_charge(car)
+    elif command in ("charge-status", "charge-stop", "charge-start"):
+        car = TeslaCar()
+        _print_charge(car)
+        if command != "charge-status":
+            car.stop_charging() if command == "charge-stop" else car.start_charging()
+            print("comando accettato, rileggo tra 30 secondi")
+            time.sleep(30)
+            _print_charge(car)
     else:
         print(__doc__)
         sys.exit(1)

@@ -69,6 +69,8 @@ Di notte la carica è di Octopus, nelle finestre a prezzo scontato. Durante quel
 
 Octopus fissa il piano della notte poco dopo il collegamento, con il livello di quel momento, e se il livello scende dopo non sempre lo ricalcola. Quando è stato scelto "Nessuna carica" ma Octopus ha comunque una carica in programma, il sistema ripete il comando e avvisa subito con una notifica: in quel caso la carica si ferma con certezza solo dall'app Tesla o da quella di Octopus.
 
+Quando l'auto è già sopra il livello chiesto, Octopus non la tiene sotto controllo e la Tesla carica per conto suo fino al proprio limite, a prezzo pieno e spesso dalla batteria di casa. Octopus non lo segnala: il sistema se ne accorge leggendo l'auto qualche minuto dopo il collegamento e ogni volta che il consumo di casa supera 1,5 kW (se resta alto, al massimo una volta l'ora, per lasciarla dormire). Se l'auto carica fuori da una finestra di Octopus e oltre il livello di stanotte, il sistema le manda il comando di stop e avvisa quando l'auto lo conferma. Dopo due stop nello stesso collegamento la lascia fare, perché potrebbe essere stato l'utente a riavviarla; per caricare comunque si sceglie "Carica subito".
+
 ### Altro
 
 Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata. L'auto viene interrogata solo quando serve, perché le letture hanno un costo e la tengono sveglia. Le notifiche di avvio e stop partono solo quando Octopus conferma che la manovra è avvenuta.
@@ -114,6 +116,7 @@ pip install -r requirements.txt
 python3 -m teslacharger.tesla register      # registra il dominio presso Tesla (una tantum)
 python3 -m teslacharger.tesla auth-url      # link per autorizzare l'account Tesla
 python3 -m teslacharger.tesla exchange CODICE
+python3 -m teslacharger.tesla charge-status # livello e stato della carica (charge-stop e charge-start la comandano)
 
 python3 -m teslacharger.app                 # ciclo di controllo e webapp su http://127.0.0.1:8787
 python3 -m unittest discover -s tests       # test delle regole
@@ -154,6 +157,7 @@ Nella cartella `scripts/` restano gli script usati per esplorare le API (richied
 ## Limiti noti
 
 - Octopus non ricalcola sempre il piano della notte quando il livello scende dopo il collegamento: con "Nessuna carica" il sistema avvisa, ma la carica va fermata a mano.
+- Una carica partita dall'auto da sola viene vista solo leggendo l'auto, quindi lo stop può arrivare con qualche minuto di ritardo.
 - Il portale Emmeti non ha un'API ufficiale: se cambia la sua app web, la sezione "Clima" può smettere di funzionare.
 - Solax tiene valido un solo token per applicazione: uno script lanciato in parallelo con le stesse credenziali annulla quello del servizio, che si rinnova da solo al ciclo successivo.
 

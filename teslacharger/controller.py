@@ -14,7 +14,8 @@ from .emmeti import EmmetiClient, describe
 from .history import History
 from .octopus import MIN_TARGET, READY_TIMES, STATE_PLANNED, OctopusClient
 from .policy import (
-    NOMINAL_VOLTAGE, Action, CarStatus, ControlState, Decision, Mode, decide, enough_sun, plan_battery_hold, precheck,
+    NOMINAL_VOLTAGE, STRAY_LOAD_W, Action, CarStatus, ControlState, Decision, Mode, decide, enough_sun, home_load_w,
+    plan_battery_hold, precheck, stray_charge,
 )
 from .push import PushService
 from .solax import MAX_HOLD_SECONDS, SolaxClient
@@ -30,6 +31,10 @@ NOTICE_TIMEOUT = timedelta(minutes=10)
 # Attesa dopo il collegamento prima di avviare la carica: nei primi istanti Octopus
 # prende in carico l'auto e annulla una carica immediata appena richiesta
 PLUG_SETTLE = timedelta(minutes=4)
+# Carica partita dall'auto senza Octopus: ogni quanto rileggere l'auto se la casa continua a consumare molto,
+# e quante volte fermarla per collegamento prima di lasciar fare (potrebbe averla riavviata l'utente)
+STRAY_RECHECK = timedelta(hours=1)
+STRAY_MAX_STOPS = 2
 # Dopo il risveglio l'auto risponde in genere entro mezzo minuto
 # Per quanto tempo il livello letto dall'auto resta attendibile, se non viene scollegata
 CAR_READING_VALID = timedelta(hours=12)
@@ -93,6 +98,10 @@ class Controller:
         self.status: dict = {}
         self._was_plugged: bool | None = None
         self._plugged_at: datetime | None = None
+        # Finestre di carica in programma su Octopus, in ora locale
+        self._windows: list[tuple[datetime, datetime]] = []
+        # Controllo delle cariche partite dall'auto da sola, azzerato a ogni collegamento
+        self._stray: dict = {}
         # True se l'auto è stata scollegata dopo l'ultima lettura: il livello noto non vale più
         self._car_stale = False
         self._last_dispatch_sync: datetime | None = None
@@ -714,6 +723,7 @@ class Controller:
             end = datetime.fromisoformat(row["end"]).astimezone().replace(tzinfo=None)
             if end > now:
                 windows.append((start, end))
+        self._windows = windows
         try:
             self._hold_battery(now, windows)
         except Exception as err:
@@ -762,6 +772,7 @@ class Controller:
         self._was_plugged = vehicle.plugged
         if just_plugged:
             self._plugged_at = now
+            self._stray = {}
         car = self._read_car(now) if need_car or just_plugged else None
         if just_plugged or just_unplugged:
             self.history.log_plug(now, vehicle.plugged, car.level if car else None)
@@ -770,6 +781,12 @@ class Controller:
             self._evening_question(now, vehicle, car.level if car else known.get("level"))
         except Exception as err:
             log.warning("domanda della sera non riuscita: %s", err)
+
+        try:
+            car = self._guard_stray(now, plant, vehicle, car)
+            self._restore_amps(vehicle, car)
+        except Exception as err:
+            log.warning("controllo della carica dell'auto non riuscito: %s", err)
 
         decision = decide(
             now, self.mode, plant, car if need_car else None, *hints, self.state, self.settings,
@@ -835,6 +852,90 @@ class Controller:
             self._notice = {"boosting": False, "since": now, "title": "Carica fermata", "body": reason}
             if self.mode is Mode.BOOST:
                 self.mode = self.after_boost
+
+    def _guard_stray(self, now: datetime, plant, vehicle, car: CarStatus | None) -> CarStatus | None:
+        """Ferma l'auto quando carica da sola oltre il livello chiesto a Octopus.
+
+        Il 10 ottobre, con l'auto al 71% e l'obiettivo di Octopus al 50%, Octopus ha lasciato
+        l'auto senza piano e la Tesla ha caricato per conto suo verso il 100%, dalla batteria
+        di casa. Octopus non lo vede: lo si scopre dai consumi di casa e dalla lettura dell'auto.
+        Di giorno con «Carica col sole» la carica è del sistema e qui non si interviene.
+        """
+        in_day = self.settings.day_start <= now.time() < self.settings.day_end
+        guard = self._stray
+        if not vehicle.plugged or vehicle.boosting or (in_day and self.mode is not Mode.AUTO) or guard.get("gave_up"):
+            return car
+        # Si legge l'auto quando il consumo di casa sale oltre la soglia, e se resta alto al
+        # massimo una volta l'ora: letture frequenti la terrebbero sveglia tutta la notte
+        high = home_load_w(plant) >= STRAY_LOAD_W
+        rising = high and not guard.get("high")
+        guard["high"] = high
+        # Una lettura in più qualche minuto dopo il collegamento: è lì che l'auto parte da sola,
+        # quando Octopus la lascia, e la casa potrebbe già consumare molto per altro
+        settled = self._plugged_at and now - self._plugged_at >= 2 * PLUG_SETTLE and not guard.get("settled")
+        if car is None:
+            recent = guard.get("checked") and now - guard["checked"] < STRAY_RECHECK
+            if not guard.get("pending") and not settled and not rising and (not high or recent):
+                return car
+            car = self._read_car(now)
+            if car is None:
+                return car
+        guard["checked"] = now
+        if settled:
+            guard["settled"] = True
+        in_window = any(start <= now < end for start, end in self._windows)
+        stray = stray_charge(car, vehicle.boosting, in_window, vehicle.target_percent)
+        if guard.pop("pending", False) and not stray:
+            title = "Carica fermata"
+            body = (
+                f"L'auto caricava da sola al {car.level}%, oltre il {vehicle.target_percent}% chiesto a Octopus. "
+                "Se vuoi caricarla scegli «Carica subito»."
+            )
+            self._event("stop_circle", title, "Confermato dall'auto")
+            self._notify(title, body)
+            return car
+        if not stray:
+            return car
+        stops = guard.get("stops", 0)
+        if stops >= STRAY_MAX_STOPS:
+            guard["gave_up"] = True
+            body = (
+                f"L'auto carica ancora da sola al {car.level}% dopo {stops} tentativi di fermarla. "
+                "La lascio fare: se non la vuoi, fermala dall'app Tesla."
+            )
+            self._event("error", "L'auto carica da sola", body)
+            self._notify("L'auto carica da sola", body)
+            return car
+        reason = f"Auto al {car.level}% oltre il {vehicle.target_percent}% chiesto a Octopus, che non la controlla"
+        if not self.settings.live:
+            guard["gave_up"] = True
+            self._event("science", "Prova: l'auto carica da sola, la fermerei", reason)
+            return car
+        self.car.stop_charging()
+        guard.update(stops=stops + 1, pending=True)
+        self._event("stop_circle", "L'auto caricava da sola: comando di stop inviato", reason)
+        log.info("carica partita dall'auto senza Octopus: stop inviato (%s)", reason)
+        return car
+
+    def _restore_amps(self, vehicle, car: CarStatus | None) -> None:
+        """Riporta al massimo la corrente rimasta bassa da una carica col sole.
+
+        Lo stop del sistema la ripristina già, ma una carica col sole finita in altro modo
+        (auto scollegata, stop dall'app di Octopus) la lascia bassa: il 10 ottobre l'auto
+        chiedeva 7 A e la carica notturna sarebbe andata a poco più di metà potenza.
+        Una volta per collegamento, solo con l'auto appena letta, quindi sveglia.
+        """
+        if car is None or not car.plugged or vehicle.boosting or self._stray.get("amps_checked"):
+            return
+        self._stray["amps_checked"] = True
+        cap = min(car.max_amps, self.settings.max_amps)
+        if car.amps >= cap:
+            return
+        if not self.settings.live:
+            self._event("science", f"Prova: corrente riportata a {cap} A", f"L'auto chiedeva {car.amps} A")
+            return
+        self.car.set_amps(cap)
+        self._event("tune", f"Corrente riportata a {cap} A", f"L'auto chiedeva ancora {car.amps} A")
 
     def _confirm_notice(self, now: datetime, vehicle) -> None:
         """Manda la notifica di avvio o di stop solo quando Octopus conferma che è avvenuto."""

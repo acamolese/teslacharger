@@ -182,6 +182,8 @@ Le notifiche inviate sono queste:
 | Sole insufficiente per l'auto | Serve il consenso per caricare da rete o batteria. Una volta al giorno |
 | Auto collegata | Dopo le 18, con l'auto collegata: la domanda della sera |
 | Ho deciso io per stanotte | Alle 22, senza risposta alla domanda della sera, con il piano applicato |
+| Carica fermata (l'auto caricava da sola) | L'auto caricava per conto suo, fuori dalle finestre di Octopus e oltre il livello di stanotte, e ha confermato lo stop chiesto dal sistema |
+| L'auto carica da sola | Dopo due stop nello stesso collegamento l'auto è ripartita: il sistema la lascia fare |
 | Octopus ha in programma una carica | È stato scelto "Nessuna carica" ma Octopus ha comunque una carica in programma |
 | TeslaCharger ha un problema | Tre cicli consecutivi non sono riusciti |
 

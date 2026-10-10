@@ -250,6 +250,29 @@ def decide(
     return Decision(Action.HOLD, f"carica diurna in corso a {car.amps} A", state)
 
 
+# --- carica partita dall'auto senza Octopus ---
+
+# Consumo di casa oltre il quale vale la pena controllare se è l'auto che carica
+STRAY_LOAD_W = 1500
+
+
+def home_load_w(plant: PlantSnapshot) -> float:
+    """Consumo della casa: pannelli più prelievo dalla rete più scarica della batteria."""
+    return plant.pv_w - plant.grid_w - plant.battery_w
+
+
+def stray_charge(car: CarStatus, boosting: bool, in_window: bool, target: int | None) -> bool:
+    """L'auto carica per conto suo, oltre il livello chiesto a Octopus per stanotte?
+
+    Quando l'auto è già sopra il livello obiettivo Octopus non la tiene più sotto controllo
+    e la Tesla carica da sola fino al proprio limite, a prezzo pieno e spesso dalla
+    batteria di casa. Una carica immediata o una finestra di Octopus invece sono volute.
+    """
+    if not car.charging or boosting or in_window or target is None:
+        return False
+    return car.level >= target
+
+
 # --- batteria di casa a riposo durante la carica notturna ---
 
 HOLD_MARGIN = timedelta(minutes=2)
