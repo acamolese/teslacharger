@@ -398,6 +398,18 @@ html.dark,html.dark body{background:#0e0e0e}
       <button class="btn text sl" id="revoke">Revoca</button>
     </section>
 
+    <!-- C'è sole, ma ieri sera «Nessuna carica»: decide l'utente -->
+    <section class="consent" id="sunnow" aria-labelledby="sun-t" hidden>
+      <div style="display: flex; gap: 12px; align-items: flex-start">
+        <span class="ic f s32" aria-hidden="true">wb_sunny</span>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <h2 id="sun-t" class="t-tm" style="margin: 0">C'è sole per caricare l'auto</h2>
+          <p class="t-bm" style="margin: 0" id="suntext"></p>
+        </div>
+      </div>
+      <button class="btn fill block sl" id="sungo"><span class="ic s20" aria-hidden="true">wb_sunny</span><span id="sungotext">Carica col sole adesso</span></button>
+    </section>
+
     <!-- Casa e auto -->
     <section class="stag" style="animation-delay: 60ms">
       <div class="sec-h">
@@ -922,7 +934,10 @@ function phase(s) {
   if (d.ask) return { title: "Nessuna carica in corso", reason, shape: "sh-circle", tone: "t-idle", icon: "cloud" };
   if (s.mode === "auto" || !inDay(s)) {
     const plan = s.planned ? "Carica notturna affidata a Octopus, dalle " + s.planned.start + " alle " + s.planned.end : null;
-    const text = s.mode === "auto" && inDay(s) ? "Automatica: oggi niente carica col sole. Stanotte carica Octopus" : plan || reason;
+    const noCharge = s.no_charge_today
+      ? "Oggi nessuna carica automatica, come hai scelto ieri sera" + (s.sun_enough ? ". Ora il sole basta: decidi tu se caricare" : ": ti avviso quando c'è sole")
+      : "Automatica: oggi niente carica col sole. Stanotte carica Octopus";
+    const text = s.mode === "auto" && inDay(s) ? noCharge : plan || reason;
     return { title: "Nessuna carica in corso", reason: text, shape: "sh-clover", tone: "t-night", icon: "bedtime" };
   }
   return { title: "Nessuna carica in corso", reason, shape: "sh-circle", tone: "t-idle", icon: "ev_station" };
@@ -982,6 +997,17 @@ function readAt(iso) {
   return iso.slice(0, 10) === dayKey(new Date()) ? hhmm(iso) : hhmm(iso) + " del " + Number(iso.slice(8, 10)) + "/" + Number(iso.slice(5, 7));
 }
 
+function renderSunNow(s) {
+  const car = carNow(s), plugged = car ? car.plugged : s.octopus !== "SMART_CONTROL_NOT_AVAILABLE";
+  $("sunnow").hidden = !(s.no_charge_today && s.mode === "auto" && inDay(s) && s.sun_enough && s.octopus !== "BOOSTING" && plugged);
+  if (s.plant) $("suntext").textContent = "I pannelli danno " + Math.round(s.plant.pv_w) + " W: basta per l'auto. Ieri sera hai scelto «Nessuna carica», quindi non parto da solo. Vuoi caricare col sole fino alle " + s.day_end + "?";
+}
+$("sungo").addEventListener("click", async () => {
+  if (state.status) { state.status.mode = "solar"; renderModes(state.status); }
+  const r = await post("/api/mode", { mode: "solar" });
+  toast(r.ok ? "Carica col sole: rivaluto subito la situazione" : "Cambio di modalità non riuscito");
+  soon();
+});
 function renderConsent(s) {
   const d = s.decision || {}, p = s.plant;
   $("ask").hidden = !d.ask || s.grid_ok;
@@ -1073,7 +1099,7 @@ function renderModes(s) {
   const desc = {
     boost: "Carica alla corrente massima con pannelli, batteria di casa e rete. A carica completa torna da sola alla modalità di prima.",
     solar: "Dalle " + s.day_start + " alle " + s.day_end + " all'auto va l'" + s.pv_share + "% della produzione dei pannelli, tra " + min + " e " + max + " kW. Una nuvola non ferma la carica: lo stop arriva dopo 10 minuti di sole scarso.",
-    auto: inDay(s) ? "Il sistema non interviene fino a stasera: oggi niente carica col sole. Di notte carica Octopus." : "Di notte carica Octopus nelle ore scontate. Alle " + s.day_start + " si passa da soli a Carica col sole.",
+    auto: inDay(s) ? "Di giorno il sistema non parte da solo col sole: se il sole basta ti avviso e decidi tu. Di notte carica Octopus." : "Di notte carica Octopus nelle ore scontate. Alle " + s.day_start + " si passa da soli a Carica col sole, salvo «Nessuna carica» la sera prima.",
   }[s.mode] || "";
   if ($("modedesc").textContent !== desc) {
     const fresh = el("p", "t-bm v", desc);
@@ -1716,7 +1742,7 @@ function drawPush() {
   $("pushsw").setAttribute("aria-checked", String(pushOn));
   $("pushicon").textContent = pushOn ? "notifications_active" : "notifications_off";
   $("pushicon").classList.toggle("f", pushOn);
-  $("pushsub").textContent = pushOn ? "Avvii, stop, consenso e problemi" : Notification.permission === "denied" ? "Bloccate nelle impostazioni del dispositivo" : "Disattivate: non ricevi avvisi";
+  $("pushsub").textContent = pushOn ? "Avvii e stop, domanda della sera, sole e problemi" : Notification.permission === "denied" ? "Bloccate nelle impostazioni del dispositivo" : "Disattivate: non ricevi avvisi";
   $("pushtest").disabled = !pushOn;
 }
 async function initPush() {
@@ -1777,7 +1803,7 @@ function render(s) {
   $("errtext").textContent = s.error || "";
   if (!s.time) return;
   renderHomeHero();
-  renderHero(s); renderEvening(s); renderConsent(s); renderTiles(s); renderModes(s); renderNight(s); renderLog(s); renderCar(s);
+  renderHero(s); renderEvening(s); renderConsent(s); renderSunNow(s); renderTiles(s); renderModes(s); renderNight(s); renderLog(s); renderCar(s);
 }
 async function refresh() {
   try {

@@ -14,7 +14,7 @@ from .emmeti import EmmetiClient, describe
 from .history import History
 from .octopus import MIN_TARGET, READY_TIMES, STATE_PLANNED, OctopusClient
 from .policy import (
-    Action, CarStatus, ControlState, Decision, Mode, decide, enough_sun, plan_battery_hold, precheck,
+    NOMINAL_VOLTAGE, Action, CarStatus, ControlState, Decision, Mode, decide, enough_sun, plan_battery_hold, precheck,
 )
 from .push import PushService
 from .solax import MAX_HOLD_SECONDS, SolaxClient
@@ -356,6 +356,8 @@ class Controller:
                 "live": self.settings.live,
                 "poll_seconds": self.settings.poll_seconds,
                 "grid_ok": self._grid_ok(datetime.now()),
+                "no_charge_today": self._no_charge_today(datetime.now()),
+                "sun_enough": self._sun_enough(),
                 "evening": self._current_evening(datetime.now()),
                 "plans": self.plans,
                 "active_plan": self._active_plan(),
@@ -371,6 +373,12 @@ class Controller:
                 "pv_share": self.settings.pv_share,
                 "events": list(reversed(self.events)),
             }
+
+    def _sun_enough(self) -> bool:
+        """Dall'ultima lettura dell'impianto: la quota per l'auto arriva alla corrente minima?"""
+        pv = float((self.status.get("plant") or {}).get("pv_w") or 0)
+        floor = min(self.settings.min_amps, self.settings.max_amps) * NOMINAL_VOLTAGE
+        return pv * self.settings.pv_share / 100 >= floor
 
     def home_summary(self) -> dict:
         """Dati dell'impianto per il pannello della casa, riletti al massimo ogni 5 minuti."""
