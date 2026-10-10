@@ -12,7 +12,7 @@ from pathlib import Path
 from .config import Settings
 from .emmeti import EmmetiClient, describe
 from .history import History
-from .octopus import MIN_TARGET, READY_TIMES, OctopusClient
+from .octopus import MIN_TARGET, READY_TIMES, STATE_PLANNED, OctopusClient
 from .policy import Action, CarStatus, ControlState, Decision, Mode, decide, plan_battery_hold, precheck
 from .push import PushService
 from .solax import MAX_HOLD_SECONDS, SolaxClient
@@ -25,6 +25,9 @@ DISPATCH_SYNC = timedelta(minutes=30)
 ERRORS_BEFORE_ALERT = 3
 # Attesa massima della conferma di Octopus prima di segnalare che la manovra non è avvenuta
 NOTICE_TIMEOUT = timedelta(minutes=10)
+# Attesa dopo il collegamento prima di avviare la carica: nei primi istanti Octopus
+# prende in carico l'auto e annulla una carica immediata appena richiesta
+PLUG_SETTLE = timedelta(minutes=4)
 # Dopo il risveglio l'auto risponde in genere entro mezzo minuto
 # Per quanto tempo il livello letto dall'auto resta attendibile, se non viene scollegata
 CAR_READING_VALID = timedelta(hours=12)
@@ -85,6 +88,7 @@ class Controller:
         self.events: list[dict] = []
         self.status: dict = {}
         self._was_plugged: bool | None = None
+        self._plugged_at: datetime | None = None
         # True se l'auto è stata scollegata dopo l'ultima lettura: il livello noto non vale più
         self._car_stale = False
         self._last_dispatch_sync: datetime | None = None
@@ -193,6 +197,21 @@ class Controller:
             )
             self._save()
         self._wakeup.set()
+
+    def _current_evening(self, now: datetime) -> dict | None:
+        """Domanda della notte che sta per arrivare o di quella in corso, fino all'inizio del giorno.
+
+        La domanda di ieri sera resta salvata (serve a ripristinare il livello quando l'auto
+        riparte), ma di giorno non va più mostrata né accetta risposte: una scelta fatta lì
+        finirebbe sulla notte già passata.
+        """
+        q = self.evening
+        if not q:
+            return None
+        today = now.date().isoformat()
+        if q["day"] > today or (q["day"] == today and now.time() < self.settings.day_start):
+            return q
+        return None
 
     def _active_plan(self) -> str | None:
         """Piano in vigore su Octopus: None quando la carica è sospesa o esclusa per stanotte."""
@@ -317,7 +336,7 @@ class Controller:
         if choice not in ("none", "home", "night"):
             raise ValueError("scelta non valida")
         with self._lock:
-            if not self.evening:
+            if not self._current_evening(datetime.now()):
                 raise ValueError("nessuna domanda in corso")
             self._apply_evening(choice, by_user=True)
             self._save()
@@ -331,8 +350,7 @@ class Controller:
                 "live": self.settings.live,
                 "poll_seconds": self.settings.poll_seconds,
                 "grid_ok": self._grid_ok(datetime.now()),
-                "evening": self.evening
-                if self.evening and self.evening.get("day", "") >= datetime.now().date().isoformat() else None,
+                "evening": self._current_evening(datetime.now()),
                 "plans": self.plans,
                 "active_plan": self._active_plan(),
                 "hold": {
@@ -589,6 +607,28 @@ class Controller:
                 )
             self.history.log_session(session)
 
+    def _check_skipped_night(self, now: datetime, vehicle, windows: dict | None) -> None:
+        """Avvisa se Octopus ha in programma una carica in una notte in cui si è scelto di non caricare.
+
+        Octopus fissa il piano della notte poco dopo il collegamento, con il livello di quel
+        momento, e abbassandolo dopo non lo ricalcola: nelle notti rispettate lo stato restava
+        "capable", in quella non rispettata era "in progress" con una finestra in programma.
+        Il comando viene ripetuto e l'utente avvisato una volta, perché solo dall'auto o
+        dall'app di Octopus la carica si ferma con certezza.
+        """
+        q = self._current_evening(now)
+        if not q or q.get("choice") != "none" or q.get("warned") or not windows or vehicle.state != STATE_PLANNED:
+            return
+        q["warned"] = True
+        if self.settings.live:
+            self.octopus.set_target(vehicle.device_id, MIN_TARGET, q.get("time") or vehicle.target_time or "09:00")
+        body = (
+            f"Octopus ha già in programma una carica dalle {windows['start']} alle {windows['end']} "
+            "e potrebbe non rispettare «Nessuna carica». Per esserne sicuro fermala dall'app Tesla quando parte."
+        )
+        self._event("error", "Octopus ha in programma una carica", body)
+        self._notify("Octopus ha in programma una carica", body)
+
     def _hold_battery(self, now: datetime, windows: list) -> None:
         """Tiene a riposo la batteria di casa mentre Octopus carica l'auto di notte."""
         if not self.settings.live:
@@ -653,6 +693,7 @@ class Controller:
             plan["time"] = plan["time"] or vehicle.target_time or "09:00"
         self._sync_dispatches(now)
         self.status["planned"] = self._planned_window(vehicle.device_id, now)
+        self._check_skipped_night(now, vehicle, self.status["planned"])
         self._auto_switch(now, vehicle.boosting and self.state.started_by_us)
 
         if not vehicle.plugged:
@@ -664,6 +705,8 @@ class Controller:
         just_plugged = vehicle.plugged and self._was_plugged is False
         just_unplugged = not vehicle.plugged and self._was_plugged is True
         self._was_plugged = vehicle.plugged
+        if just_plugged:
+            self._plugged_at = now
         car = self._read_car(now) if need_car or just_plugged else None
         if just_plugged or just_unplugged:
             self.history.log_plug(now, vehicle.plugged, car.level if car else None)
@@ -698,6 +741,10 @@ class Controller:
                 "Sole insufficiente per l'auto",
                 f"Pannelli a {kw} kW. Tocca per caricare al minimo da batteria di casa e rete fino alle {end}.",
             )
+        if decision.action is Action.START and self._plugged_at and now - self._plugged_at < PLUG_SETTLE:
+            # Il 9 ottobre una carica chiesta sei secondi dopo il collegamento è stata annullata da Octopus
+            log.info("auto appena collegata: avvio rimandato al prossimo ciclo")
+            return
         if decision.action is Action.HOLD:
             self.state = decision.state
             return
@@ -743,6 +790,10 @@ class Controller:
         else:
             title = "Carica non ancora avviata" if notice["boosting"] else "Carica non ancora fermata"
             body = f"Comando inviato alle {notice['since']:%H:%M}, ma Octopus non lo conferma."
+            if notice["boosting"]:
+                # L'avvio non è avvenuto: niente attesa tra due manovre, si riprova appena possibile
+                self.state = replace(self.state, started_by_us=False, last_switch=None)
+                body += " Riprovo al prossimo ciclo."
             self._event("error", title, body)
             self._notify(title, body)
         self._notice = None

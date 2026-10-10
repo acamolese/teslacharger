@@ -17,6 +17,8 @@ MIN_TARGET = 10
 WEEKDAYS = ("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
 # Stato osservato quando l'auto non è collegata alla presa di casa
 STATE_UNPLUGGED = "SMART_CONTROL_NOT_AVAILABLE"
+# Stato con un piano di carica in corso: Octopus ha preso in carico l'auto
+STATE_PLANNED = "SMART_CONTROL_IN_PROGRESS"
 
 
 @dataclass(frozen=True)
