@@ -1,90 +1,105 @@
 # TeslaCharger
 
-Sistema personale per ricaricare una Tesla nel modo più conveniente possibile, combinando un impianto fotovoltaico Solax con accumulo e la tariffa Intelligent Octopus di Octopus Energy Italia.
+Sistema personale per ricaricare una Tesla nel modo più conveniente possibile, combinando un impianto fotovoltaico Solax con accumulo e la tariffa Intelligent Octopus di Octopus Energy Italia. Con il tempo è diventato anche il cruscotto della casa: impianto, pompa di calore Emmeti, bollette e previsione del sole.
 
 ## Il problema
 
-Intelligent Octopus pianifica la ricarica dell'auto nelle ore notturne e applica uno sconto sull'energia caricata in quelle finestre. Funziona bene di notte, ma di giorno ignora il fotovoltaico: se c'è sole e l'auto è in garage, per caricarla bisogna aprire l'app di Octopus e avviare a mano la carica immediata, che parte a piena potenza senza tenere conto di quanta energia stanno producendo i pannelli.
+Intelligent Octopus pianifica la ricarica dell'auto nelle ore notturne e applica uno sconto sull'energia caricata in quelle finestre. Funziona bene di notte, ma di giorno ignora il fotovoltaico: se c'è sole e l'auto è in garage, per caricarla bisogna aprire l'app di Octopus e avviare a mano la carica immediata, che parte a piena potenza senza tenere conto di quanta energia stanno producendo i pannelli. E di notte carica sempre allo stesso livello, anche quando il giorno dopo l'auto resterà a casa col sole o non ha bisogno di energia.
 
-## L'obiettivo
+## Cosa fa
 
-Un servizio sempre acceso che decide da solo quando e quanto caricare:
+Un servizio sempre acceso che decide quando e quanto caricare:
 
-- di giorno, quando l'auto è collegata e c'è surplus solare, avvia la carica e ne regola la potenza seguendo la produzione dei pannelli;
-- protegge la batteria di casa, che ha la precedenza e non deve scaricarsi nell'auto;
-- la sera lascia il controllo a Octopus, che completa la carica di notte a prezzo scontato;
-- espone una webapp a uso personale, pensata per il telefono, con lo stato in tempo reale e la scelta della modalità (solo sole, sole e notte, carica subito, non intervenire).
+- di giorno, quando l'auto è collegata, la carica con una quota della produzione dei pannelli e ne regola la potenza seguendo il sole;
+- non preleva di sua iniziativa da rete o batteria di casa: se il sole non basta chiede il consenso;
+- la sera chiede come comportarsi per la notte: nessuna carica, carica ridotta perché domani l'auto resta a casa, oppure carica piena con Octopus a prezzo scontato;
+- durante la carica notturna può tenere a riposo la batteria di casa, così l'auto prende dalla rete scontata;
+- espone una webapp per il telefono con lo stato in tempo reale, le scelte, lo storico e le notifiche push.
 
 ## Come funziona
 
-Il sistema mette in comunicazione tre servizi.
+Il sistema mette in comunicazione questi servizi.
 
 | Servizio | A cosa serve | API |
 | --- | --- | --- |
-| SolaxCloud | Produzione dei pannelli, scambio con la rete, stato della batteria di casa | [Solax Developer API](https://developer.solaxcloud.com/home), OAuth2 client credentials |
-| Octopus Energy Italia | Stato del veicolo in Intelligent Octopus, finestre pianificate, carica immediata (boost) | [API GraphQL Kraken](https://developer.oeit-kraken.energy/) |
-| Tesla | Livello di carica dell'auto, regolazione degli ampere | [Tesla Fleet API](https://developer.tesla.com/docs/fleet-api), con comandi firmati tramite `tesla-http-proxy` |
+| SolaxCloud | Produzione dei pannelli, scambio con la rete, stato della batteria di casa, comando di riposo della batteria | [Solax Developer API](https://developer.solaxcloud.com/home), OAuth2 client credentials |
+| Octopus Energy Italia | Stato del veicolo in Intelligent Octopus, livello e ora della carica notturna, finestre pianificate, carica immediata (boost), bollette | [API GraphQL Kraken](https://developer.oeit-kraken.energy/) |
+| Tesla | Livello di carica dell'auto, regolazione degli ampere, storico delle ricariche | [Tesla Fleet API](https://developer.tesla.com/docs/fleet-api), con comandi firmati tramite `tesla-http-proxy` |
 | Emmeti AQ-IoT | Pompa di calore: stanze, acqua calda, consumi separati per pompa di calore, acqua calda e resto della casa | Portale del produttore, senza API documentata: si usano in sola lettura le chiamate della sua app web |
 | Open-Meteo | Previsione del meteo e della radiazione solare, tarata sulla produzione reale dell'impianto | [API pubblica](https://open-meteo.com/), senza chiave |
 
-Il ciclo di controllo legge i dati dell'impianto a intervalli regolari, calcola il surplus disponibile e, se conviene, chiede a Octopus la carica immediata e regola gli ampere dell'auto. Quando il surplus finisce annulla la carica immediata, e la pianificazione notturna di Octopus resta invariata.
-
-## Stato del progetto
-
-- [x] lettura dei dati in tempo reale di impianto, inverter e batteria da Solax
-- [x] accesso a Octopus Energy Italia, lettura del veicolo e delle finestre di carica
-- [x] avvio e annullamento della carica immediata tramite Octopus, provati su un'auto reale
-- [x] ciclo di controllo che avvia, regola e ferma la carica in base al surplus
-- [x] accesso a Tesla: lettura dello stato di carica e regolazione degli ampere, provata su un'auto reale
-- [x] webapp con accesso riservato
-- [x] installazione su server
-- [x] comandi reali attivi
-- [x] notifiche push e pannello dell'auto con storico delle ricariche
-- [x] costi e risparmi stimati nello storico
+Il ciclo di controllo legge i dati dell'impianto ogni due minuti e mezzo, decide cosa fare e, se serve, chiede a Octopus la carica immediata e regola gli ampere dell'auto. Le regole stanno in `teslacharger/policy.py`, funzioni pure coperte dai test; `teslacharger/controller.py` le applica, parla con i servizi e tiene lo stato.
 
 ## Le regole
+
+### Modalità
 
 Dalla webapp si sceglie tra tre modalità:
 
 - **Carica subito**: carica alla corrente massima usando pannelli, batteria di casa e rete, senza guardare sole né orari. A carica completata torna alla modalità precedente.
 - **Carica col sole**: la modalità che ottimizza, descritta qui sotto.
-- **Automatica**: il sistema non interviene e l'auto carica di notte con Octopus. Al mattino passa da sola a "Carica col sole", e la sera "Carica col sole" torna in automatica.
+- **Automatica**: il sistema non interviene durante il giorno e l'auto carica di notte con Octopus. Al mattino passa da sola a "Carica col sole", e la sera "Carica col sole" torna in automatica.
 
-Dalla webapp si impostano anche il livello di carica che Octopus deve raggiungere di notte e l'ora entro cui l'auto deve essere pronta.
+### Carica col sole
 
-La corrente massima è limitata a 12 A, un ampere sotto il limite del cavo, per restare stabili.
-
-Con "Carica col sole", nella fascia diurna, l'auto collegata carica con una quota della produzione dei pannelli:
+Nella fascia diurna, con l'auto collegata:
 
 - all'auto va l'80% di quello che producono i pannelli: se danno 2 kW, l'auto ne riceve 1,6;
-- il massimo è la corrente massima impostata;
-- l'auto non accetta meno di 5 A (circa 1,1 kW): se la quota dei pannelli non ci arriva, il sistema non preleva di sua iniziativa dalla rete o dalla batteria di casa, ma lo segnala nella webapp e chiede il consenso;
+- il massimo è la corrente massima impostata (12 A, un ampere sotto il limite del cavo);
+- l'auto non accetta meno di 5 A (circa 1,1 kW): se la quota dei pannelli non ci arriva, il sistema non preleva da rete o batteria di casa ma chiede il consenso, con una notifica al giorno;
 - il consenso vale fino a fine giornata e si può revocare: con il consenso l'auto carica al minimo anche senza sole;
 - una nuvola di passaggio non ferma la carica: senza consenso lo stop arriva dopo più letture consecutive insufficienti;
+- appena collegata l'auto, il sistema aspetta qualche minuto prima di avviare la carica, perché nei primi istanti Octopus prende in carico l'auto e annulla una carica immediata appena richiesta; se Octopus non conferma l'avvio, il sistema riprova al ciclo successivo;
 - la carica si ferma a fine giornata, a carica completata o a cavo scollegato, e la corrente torna al massimo, così la carica notturna di Octopus non resta rallentata.
 
-Dopo la fascia diurna il sistema non carica: la batteria di casa resta alla casa, e l'auto si carica di notte con Octopus a prezzo scontato.
+### La domanda della sera
 
-Durante le finestre di carica notturna di Octopus il sistema può tenere a riposo la batteria di casa, con la modalità remota "solo carica" dell'inverter Solax: così l'auto non la svuota e prende dalla rete a prezzo scontato. Il blocco dura quanto la finestra e l'inverter torna da solo al funzionamento normale. Si attiva e disattiva dalla webapp.
+Quando l'auto è collegata dopo le 18, il sistema chiede con una notifica come comportarsi per la notte:
 
-Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata. L'auto viene interrogata solo quando serve, perché le letture hanno un costo e la tengono sveglia.
+- **Nessuna carica**: il livello chiesto a Octopus scende al 10%, sotto quello dell'auto, e di notte non parte nulla;
+- **Domani a casa**: carica fino al livello del piano "Domani a casa" (50% se non modificato), lasciando spazio al sole del giorno dopo;
+- **Automatico**: carica fino al livello del piano "Automatico".
+
+I due piani hanno ciascuno il proprio livello e la propria ora di fine carica, che si regolano dalla webapp. Il sistema suggerisce una delle due risposte guardando un piano settimanale delle ore in cui l'auto è di solito a casa (`HOME_PLAN`) e la previsione del sole. Finché non c'è risposta la carica resta sospesa; alle 22, senza risposta, viene applicato il suggerimento. La domanda resta aperta fino all'inizio della fascia diurna successiva, e quando l'auto riparte dopo una notte a livello ridotto torna in vigore il piano "Automatico".
+
+### La carica notturna
+
+Di notte la carica è di Octopus, nelle finestre a prezzo scontato. Durante quelle finestre il sistema può tenere a riposo la batteria di casa con la modalità remota "solo carica" dell'inverter Solax: il blocco dura quanto la finestra e l'inverter torna da solo al funzionamento normale. Si attiva e disattiva dalla webapp.
+
+Octopus fissa il piano della notte poco dopo il collegamento, con il livello di quel momento, e se il livello scende dopo non sempre lo ricalcola. Quando è stato scelto "Nessuna carica" ma Octopus ha comunque una carica in programma, il sistema ripete il comando e avvisa subito con una notifica: in quel caso la carica si ferma con certezza solo dall'app Tesla o da quella di Octopus.
+
+### Altro
+
+Una carica immediata avviata a mano dall'app di Octopus non viene mai toccata. L'auto viene interrogata solo quando serve, perché le letture hanno un costo e la tengono sveglia. Le notifiche di avvio e stop partono solo quando Octopus conferma che la manovra è avvenuta.
 
 I dati di SolaxCloud si aggiornano ogni 5 minuti, quindi la regolazione procede a passi di 5 minuti e la batteria di casa assorbe le variazioni più rapide.
 
-Le soglie hanno valori predefiniti e si possono cambiare nel file `.env`:
+## Configurazione
+
+Credenziali e dati personali stanno solo nel file `.env`, escluso dal repository: si parte da `.env.example`. Per Solax va creata un'applicazione nel portale sviluppatori, autorizzando i servizi di lettura (Data Monitoring e Information Access); il riposo della batteria richiede anche il permesso di controllo dell'inverter. Per Octopus ed Emmeti si usano le credenziali delle rispettive app.
+
+Le soglie hanno valori predefiniti e si possono cambiare nello stesso file:
 
 | Variabile | Predefinito | Significato |
 | --- | --- | --- |
 | `MIN_AMPS` | 5 | Corrente minima accettata dall'auto |
 | `MAX_AMPS` | 12 | Corrente massima di carica |
-| `DEFICIT_SAMPLES` | 2 | Letture consecutive senza sole prima dello stop, se manca il consenso |
 | `PV_SHARE` | 80 | Quota della produzione dei pannelli destinata all'auto (%) |
+| `DEFICIT_SAMPLES` | 2 | Letture consecutive senza sole prima dello stop, se manca il consenso |
 | `MIN_SWITCH_MINUTES` | 15 | Tempo minimo tra un avvio e uno stop |
 | `DAY_START`, `DAY_END` | 08:30, 19:00 | Fascia della carica diurna |
+| `POLL_SECONDS` | 150 | Intervallo tra due cicli |
+| `CAR_RETRY_MINUTES` | 30 | Attesa prima di risvegliare di nuovo l'auto o ricontrollare il cavo |
+| `EVENING_ASK_HOUR` | 18 | Ora da cui parte la domanda della sera |
+| `EVENING_DEFAULT_HOUR` | 22 | Ora in cui, senza risposta, si applica il suggerimento |
+| `HOME_DAY_TARGET` | 50 | Livello di partenza del piano "Domani a casa" |
+| `HOME_DAY_MIN_KWH` | 5 | Energia solare prevista per l'auto oltre la quale si suggerisce "Domani a casa" |
+| `HOME_PLAN` | vuoto | Ore in cui di solito l'auto è a casa, per giorno (lunedì = 0), per esempio `0:9-18;2:14-19` |
+| `ROOM_NAMES` | vuoto | Nomi delle stanze per indirizzo del termostato, per esempio `11:Salotto,12:Camera` |
 | `PRICE_KWH` | 0.229 | Costo in euro di un kWh in più preso dalla rete, tasse comprese |
 | `FIXED_MONTHLY` | 30.47 | Quote fisse mensili della bolletta in euro, IVA compresa |
 | `NIGHT_DISCOUNT_KWH` | 0.036 | Sconto in euro per kWh nelle ricariche notturne di Octopus |
-| `LIVE` | non impostato | Con `true` i comandi vengono inviati davvero all'auto |
+| `LIVE` | non impostato | Con `true` i comandi vengono inviati davvero all'auto, a Octopus e all'inverter |
 
 ## Uso
 
@@ -107,24 +122,40 @@ Senza `LIVE=true` il sistema resta in modalità di prova: mostra cosa farebbe, s
 
 I comandi all'auto vanno firmati: serve `tesla-http-proxy` del progetto [vehicle-command](https://github.com/teslamotors/vehicle-command) in ascolto in locale, con la chiave privata dell'applicazione, e la chiave va abbinata all'auto dall'app Tesla.
 
+Stato e storico stanno nella cartella indicata da `TESLACHARGER_DATA` (predefinita `data/`): `state.json` con le scelte correnti e `history.db`, un database SQLite con impianto, cariche, collegamenti, risposte alla domanda della sera ed eventi.
+
 ## Installazione su server
 
 La cartella `deploy/` contiene i due servizi systemd (ciclo di controllo e firma dei comandi) e il modello di configurazione nginx. La webapp ascolta solo in locale e nginx la espone in HTTPS. L'accesso richiede la password impostata in `WEB_PASSWORD`, con una sessione che resta valida sul dispositivo.
 
 ## La webapp
 
-Si installa sulla schermata Home del telefono e ha due sezioni: "Ricarica", con stato, modalità, consenso e carica notturna, e "Auto", con i dati dell'auto, lo storico delle ricariche diviso tra sole, giorno e notte, e una stima dei consumi di guida. Invia notifiche push all'avvio e allo stop della carica, quando serve il consenso e in caso di problemi. Su iPhone le notifiche richiedono che l'app sia aggiunta alla schermata Home.
+Si installa sulla schermata Home del telefono e ha quattro sezioni:
 
-Una descrizione completa, pensata per chi ne cura esperienza d'uso e interfaccia, è in [docs/descrizione-app.md](docs/descrizione-app.md).
+- **Ricarica**: stato, domanda della sera, consenso, previsione del sole, modalità, carica notturna con i due piani, notifiche e ultime manovre;
+- **Casa**: impianto fotovoltaico e batteria in tempo reale, energia del giorno, storico di 14 giorni, bollette Octopus con stima dei mesi non ancora fatturati;
+- **Clima**: pompa di calore, stanze, acqua calda e consumi mensili, in sola lettura;
+- **Auto**: dati dell'auto, indicatori della batteria, ricariche divise tra sole, giorno e notte, ricariche ai Supercharger, consumi di guida.
 
-L'interfaccia segue un progetto grafico in stile Material 3 Expressive, con i materiali della Tesla (argento, grafite, nero opaco e lucido). I file del progetto sono in `design/`: `python3 design/build_page.py` ricompone le pagine prendendo da lì colori, forme e animazioni.
+Su iPhone le notifiche richiedono che l'app sia aggiunta alla schermata Home. Una descrizione completa, pensata per chi ne cura esperienza d'uso e interfaccia, è in [docs/descrizione-app.md](docs/descrizione-app.md).
+
+L'interfaccia segue un progetto grafico in stile Material 3 Expressive, con i materiali della Tesla (argento, grafite, nero opaco e lucido). I file del progetto sono in `design/`: struttura e logica delle pagine sono in `design/page.body.html` e `design/login.body.html`, e `python3 design/build_page.py` rigenera `teslacharger/page.html` e la pagina di accesso prendendo dal progetto colori, forme e animazioni. Le pagine generate non vanno modificate a mano.
+
+## Analisi
+
+La cartella `analysis/` contiene due script usati per valutare l'impianto, non necessari al funzionamento:
+
+- `python3 -m analysis.fetch_history INIZIO FINE` scarica da Solax lo storico a 5 minuti in `data/solax_history.db`;
+- `python3 -m analysis.battery_sizing` rifà i conti dell'anno con batterie di casa di capacità diversa.
 
 Nella cartella `scripts/` restano gli script usati per esplorare le API (richiedono Node.js 20.6 o successivo).
 
-## Credenziali
+## Limiti noti
 
-Le credenziali stanno solo nel file `.env`, escluso dal repository. Per Solax va creata un'applicazione nel portale sviluppatori, autorizzando i servizi di lettura (Data Monitoring e Information Access). Per Octopus si usano email e password dell'app.
+- Octopus non ricalcola sempre il piano della notte quando il livello scende dopo il collegamento: con "Nessuna carica" il sistema avvisa, ma la carica va fermata a mano.
+- Il portale Emmeti non ha un'API ufficiale: se cambia la sua app web, la sezione "Clima" può smettere di funzionare.
+- Solax tiene valido un solo token per applicazione: uno script lanciato in parallelo con le stesse credenziali annulla quello del servizio, che si rinnova da solo al ciclo successivo.
 
 ## Avvertenze
 
-Progetto personale, non affiliato a Tesla, Octopus Energy o Solax. Octopus sconsiglia di affidare a sistemi di terze parti il controllo della ricarica di un veicolo iscritto a Intelligent Octopus: chi riusa questo codice lo fa a proprio rischio e dovrebbe verificare le condizioni del proprio contratto.
+Progetto personale, non affiliato a Tesla, Octopus Energy, Solax o Emmeti. Octopus sconsiglia di affidare a sistemi di terze parti il controllo della ricarica di un veicolo iscritto a Intelligent Octopus: chi riusa questo codice lo fa a proprio rischio e dovrebbe verificare le condizioni del proprio contratto.

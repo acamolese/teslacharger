@@ -115,7 +115,7 @@ Alla prima apertura viene chiesta una password. Una volta entrati, il dispositiv
    - auto: percentuale di batteria e stato del cavo, con l'ora della lettura.
 4. **Previsione del sole**: per oggi e i due giorni seguenti, il meteo previsto, la produzione attesa dei pannelli e quanta energia potrebbe andare all'auto se restasse collegata, con la fascia oraria utile. Sotto, un suggerimento su come regolare la carica notturna in base al sole di domani.
 5. **Modalità**: i tre pulsanti, con quello attivo evidenziato e una riga che spiega cosa fa la modalità selezionata.
-6. **Carica notturna con Octopus**: i due selettori per livello e orario, con una riga di conferma dopo ogni modifica.
+6. **Carica notturna con Octopus**: la scelta del piano da regolare ("Automatico" o "Domani a casa"), i due selettori per livello e orario di quel piano, una riga che dice se è il piano in vigore, la riga di conferma dopo ogni modifica e l'interruttore della batteria di casa a riposo.
 7. **Notifiche**: lo stato delle notifiche sul dispositivo, il pulsante per attivarle e quello per inviare una notifica di prova.
 8. **Ultime manovre**: l'elenco cronologico delle azioni del sistema e dell'utente, con data e ora (avvii, stop, regolazioni, cambi di modalità, consensi, modifiche alla carica notturna).
 
@@ -169,13 +169,17 @@ Lo storico parte dal giorno di attivazione del sistema: non esistono dati preced
 
 Le notifiche arrivano sul telefono anche ad app chiusa. Su iPhone funzionano solo se l'app è stata aggiunta alla schermata Home e aperta da lì: se l'utente la apre dal browser, al posto del pulsante di attivazione trova la spiegazione di come aggiungerla.
 
-Le notifiche inviate sono quattro:
+Le notifiche inviate sono queste:
 
 | Notifica | Quando arriva |
 | --- | --- |
-| Carica avviata | Il sistema ha avviato una carica, con la corrente e il motivo |
-| Carica fermata | Il sistema ha fermato una sua carica, con il motivo |
+| Carica avviata | Octopus ha confermato l'avvio di una carica chiesta dal sistema, con la corrente e il motivo |
+| Carica fermata | Octopus ha confermato lo stop di una carica del sistema, con il motivo |
+| Carica non ancora avviata / fermata | Dopo 10 minuti Octopus non conferma la manovra |
 | Sole insufficiente per l'auto | Serve il consenso per caricare da rete o batteria. Una volta al giorno |
+| Auto collegata | Dopo le 18, con l'auto collegata: la domanda della sera |
+| Ho deciso io per stanotte | Alle 22, senza risposta alla domanda della sera, con il piano applicato |
+| Octopus ha in programma una carica | È stato scelto "Nessuna carica" ma Octopus ha comunque una carica in programma |
 | TeslaCharger ha un problema | Tre cicli consecutivi non sono riusciti |
 
 Toccando una notifica si apre l'app.
@@ -186,7 +190,9 @@ In tutto le azioni disponibili sono poche:
 
 - scegliere una delle tre modalità;
 - autorizzare o revocare, per la giornata, la carica da rete o batteria;
-- impostare livello e orario della carica notturna;
+- rispondere alla domanda della sera (nessuna carica, domani a casa, automatico) e cambiare la risposta;
+- impostare livello e orario dei due piani notturni;
+- tenere a riposo o meno la batteria di casa durante la carica notturna;
 - attivare le notifiche sul dispositivo e inviarne una di prova;
 - aggiornare i dati dell'auto;
 - accedere e uscire.
