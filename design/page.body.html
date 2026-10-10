@@ -59,6 +59,20 @@ html.dark,html.dark body{background:#0e0e0e}
 .sb:active{border-radius:10px}.sb:disabled{opacity:.38;cursor:default}
 .sv{min-width:52px;text-align:center;font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}
 .card .legend{margin-top:10px}
+/* schede dei controlli come nella variante C: fondo pieno senza bordo, pulsanti 68px a larghezza uguale, selezione blu piena */
+#grpR1 .card.ctl{background:var(--scl);border-color:transparent}
+#grpR1 .cbg-b{height:68px;border-radius:10px}
+#grpR1 .cbg-b:first-child{border-radius:22px 10px 10px 22px}#grpR1 .cbg-b:last-child{border-radius:10px 22px 22px 10px}
+#grpR1 .cbg-b.on{border-radius:22px;flex-grow:1;box-shadow:none;background:var(--ctl-v);color:#fff}
+#grpR1 .cbg-b:active{flex-grow:1;border-radius:16px}
+#grpR1 .cbg-b.on .ic{color:#fff!important}
+.app.dark #grpR1 .cbg-b.on,.app.dark .mini button.on{background:#3e6ae1;color:#fff}
+.app.dark #grpR1 .cbg-b{background:#222222}
+.app.dark .mini,.app.dark .dtime,.app.dark .rib{background:#222222}
+.mini button.on{background:var(--ctl-v);color:#fff}
+.app.dark #grpR1 .sld-a,.app.dark #grpR1 .sld-h,.app.dark #grpR1 .sw.on{background:#3e6ae1}
+.app.dark #grpR1 .sw.on{border-color:#3e6ae1}.app.dark #grpR1 .sw.on .sw-h{background:#fff;color:#3e6ae1}
+.app.dark #grpR1 .sld-i{background:#2c2c2c}.app.dark #grpR1 .dr-v{color:#a9bdff}
 <!--CSS-->
 <body>
 <div class="app s-ric" id="app">
