@@ -116,10 +116,11 @@ Alla prima apertura viene chiesta una password. Una volta entrati, il dispositiv
    - consumi di casa: potenza assorbita in quel momento e scambio con la rete;
    - auto: percentuale di batteria e stato del cavo, con l'ora della lettura.
 4. **Previsione del sole**: per oggi e i due giorni seguenti, il meteo previsto, la produzione attesa dei pannelli e quanta energia potrebbe andare all'auto se restasse collegata, con la fascia oraria utile. Sotto, un suggerimento su come regolare la carica notturna in base al sole di domani.
-5. **Modalità**: i tre pulsanti, con quello attivo evidenziato e una riga che spiega cosa fa la modalità selezionata.
-6. **Carica notturna con Octopus**: la scelta del piano da regolare ("Automatico" o "Domani a casa"), i due selettori per livello e orario di quel piano, una riga che dice se è il piano in vigore, la riga di conferma dopo ogni modifica e l'interruttore della batteria di casa a riposo.
-7. **Notifiche**: lo stato delle notifiche sul dispositivo, il pulsante per attivarle e quello per inviare una notifica di prova.
-8. **Ultime manovre**: l'elenco cronologico delle azioni del sistema e dell'utente, con data e ora (avvii, stop, regolazioni, cambi di modalità, consensi, modifiche alla carica notturna).
+5. **La tua giornata di ricarica**: un nastro delle 24 ore con la notte (fino all'orario in cui l'auto deve essere pronta), la finestra in cui Octopus carica, la fascia diurna colorata secondo la modalità scelta e un segno sull'ora attuale, con la legenda sotto.
+6. **Di giorno**: i tre pulsanti della modalità, con quello attivo evidenziato e una riga che spiega cosa fa la modalità selezionata; nell'intestazione la fascia oraria del giorno.
+7. **Di notte**: a righe, il piano da regolare ("Automatico" o "Domani a casa") con l'indicazione se è quello in vigore, il livello da raggiungere, l'orario entro cui l'auto deve essere pronta, l'interruttore della batteria di casa a riposo e la riga di conferma di Octopus; nell'intestazione la fascia oraria della notte.
+8. **Notifiche**: lo stato delle notifiche sul dispositivo, il pulsante per attivarle e quello per inviare una notifica di prova.
+9. **Ultime manovre**: l'elenco cronologico delle azioni del sistema e dell'utente, con data e ora (avvii, stop, regolazioni, cambi di modalità, consensi, modifiche alla carica notturna).
 
 Due avvisi possono comparire in cima alla sezione: uno quando l'ultimo ciclo del sistema non è riuscito, con il motivo, e uno quando il sistema è in modalità di prova, cioè mostra cosa farebbe senza inviare comandi all'auto.
 

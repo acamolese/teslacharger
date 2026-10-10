@@ -454,6 +454,38 @@ html.dark,html.dark body{background:#0e0e0e}
 .fl.on.v::after{left:50%;bottom:-3px;margin-left:-6px;border-top:10px solid var(--fc);border-bottom:0}
 .fl.on.v.rev::after{bottom:auto;top:-3px;border-top:0;border-bottom:10px solid var(--fc)}
 .fn-l{white-space:nowrap}
+/* le tue scelte: variante C del canvas (nastro della giornata, schede a righe) */
+.dh{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.dh h3{flex:1;min-width:0}
+.ddot{width:10px;height:10px;border-radius:5px;flex:none}
+.dtime{font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px;background:var(--sch);color:var(--onsfv);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rib{position:relative;height:48px;border-radius:14px;background:var(--sch);overflow:hidden}
+.rseg{position:absolute;top:0;bottom:0;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;transition:left 450ms var(--sp-fast),width 450ms var(--sp-fast),background-color 300ms var(--ef),color 300ms var(--ef)}
+.rseg.n{background:var(--oct-c)}
+.rseg.w{background:var(--oct-v);color:#fff}
+.app.dark .rseg.w{color:#17102e}
+.rseg.d.boost,.rl-d.boost{background:var(--live-v);color:#fff}
+.rseg.d.solar,.rl-d.solar{background:var(--sun-v);color:#2a1c00}
+.rseg.d.auto,.rl-d.auto{background:var(--schh);color:var(--onsfv)}
+.rnow{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--onsf);border-radius:1px;transition:left 450ms var(--sp-fast)}
+.rscale{position:relative;height:16px;margin-top:6px;font-size:11px;color:var(--onsfv)}
+.rscale span{position:absolute;transform:translateX(-50%)}
+.rl-w{background:var(--oct-v)}.rl-n{background:var(--oct-c)}
+.dr{display:flex;align-items:center;gap:12px;padding:12px 0}
+.dr+.dr{border-top:1px solid var(--olv)}
+.dr.wrap{flex-wrap:wrap;row-gap:8px}
+.dr-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.dr-t{flex:1;font-size:15px;line-height:20px;font-weight:500}
+.dr-b .dr-t{flex:none}
+.dr-v{font-size:20px;font-weight:650;color:var(--ctl);font-variant-numeric:tabular-nums}
+.mini{display:flex;background:var(--sch);border-radius:18px;padding:3px;gap:2px;flex:none}
+.mini button{height:30px;padding:0 12px;border-radius:15px;font-size:13px;font-weight:600;color:var(--onsfv);transition:background-color 250ms var(--ef),color 250ms var(--ef)}
+.mini button.on{background:var(--ctl);color:var(--on-ctl)}
+.stp{display:flex;align-items:center;gap:6px;flex:none}
+.sb{width:36px;height:36px;border-radius:18px;background:var(--ctl-c);color:var(--on-ctl-c);display:grid;place-items:center;transition:border-radius 300ms var(--sp-fast),opacity 200ms}
+.sb:active{border-radius:10px}.sb:disabled{opacity:.38;cursor:default}
+.sv{min-width:52px;text-align:center;font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}
+.card .legend{margin-top:10px}
 
 </style>
 </head>
@@ -648,12 +680,29 @@ html.dark,html.dark body{background:#0e0e0e}
         <div class="gh-t"><span class="gh-e">Controlli</span><h2 id="r1-t">Le tue scelte</h2><span class="t-bs v">Come deve caricare il sistema, di giorno e di notte</span></div>
       </header>
 
-      <section class="card ctl r-top stag" style="animation-delay: 120ms" aria-labelledby="md-t">
-        <div class="ch">
-          <span class="tile-ic sh-cookie4" style="background: var(--ctl-c); color: var(--on-ctl-c)"><span class="ic f s20" aria-hidden="true">toggle_on</span></span>
-          <div class="ch-t"><h3 id="md-t" class="t-tm">Modalità di giorno</h3><span class="t-bs v">Attiva: <span id="modenow">–</span></span></div>
+      <!-- La giornata: nastro delle 24 ore -->
+      <section class="card ctl r-top stag" style="animation-delay: 120ms" aria-labelledby="day-t">
+        <div class="dh" style="margin-bottom: 12px"><h3 id="day-t" class="t-tm" style="flex: 1">La tua giornata di ricarica</h3><span class="t-bs v" id="ribnow">–</span></div>
+        <div class="rib" role="img" id="rib" aria-label="Giornata di ricarica">
+          <span class="rseg n" id="rbn1"></span>
+          <span class="rseg w" id="rbw1">Octopus</span>
+          <span class="rseg w" id="rbw2" hidden>Octopus</span>
+          <span class="rseg d" id="rbd"></span>
+          <span class="rseg n" id="rbe"></span>
+          <span class="rnow" id="rbnow"></span>
         </div>
-        <div class="cbg" role="radiogroup" aria-label="Modalità di carica">
+        <div class="rscale" aria-hidden="true"><span style="left: 0; transform: none">0</span><span style="left: 25%">6</span><span style="left: 50%">12</span><span style="left: 75%">18</span><span style="left: 100%; transform: translateX(-100%)">24</span></div>
+        <div class="legend">
+          <span><i class="rl-w"></i><span id="legw">Carica Octopus</span></span>
+          <span><i id="legdi"></i><span id="legd">Di giorno</span></span>
+          <span><i class="rl-n"></i>Notte, nessuna carica</span>
+        </div>
+      </section>
+
+      <!-- Di giorno -->
+      <section class="card ctl r-mid stag" style="animation-delay: 140ms" aria-labelledby="md-t">
+        <div class="dh"><span class="ddot" style="background: var(--sun-v)" aria-hidden="true"></span><h3 id="md-t" class="t-tm">Di giorno</h3><span class="dtime" id="daytime">–</span></div>
+        <div class="cbg" role="radiogroup" aria-labelledby="md-t">
           <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="boost"><span class="ic" style="color: var(--live)" aria-hidden="true">bolt</span><span class="t-ll">Subito</span></button>
           <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="solar"><span class="ic" style="color: var(--sun)" aria-hidden="true">wb_sunny</span><span class="t-ll">Col sole</span></button>
           <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="auto"><span class="ic" style="color: var(--oct)" aria-hidden="true">schedule</span><span class="t-ll">Automatica</span></button>
@@ -661,50 +710,47 @@ html.dark,html.dark body{background:#0e0e0e}
         <div class="mode-desc"><p class="t-bm v" id="modedesc"></p></div>
       </section>
 
+      <!-- Di notte -->
       <section class="card ctl r-bot stag" style="animation-delay: 160ms" aria-labelledby="nt-t">
-        <div class="ch">
-          <span class="tile-ic sh-clover" style="background: var(--oct-c); color: var(--on-oct-c)"><span class="ic f s20" aria-hidden="true">bedtime</span></span>
-          <div class="ch-t"><h3 id="nt-t" class="t-tm">Carica notturna con Octopus</h3><span class="t-bs v">Nelle ore scontate del 30%, salvo «Nessuna carica»</span></div>
-        </div>
-        <span class="t-lm v" id="plan-l">Piano da regolare</span>
-        <div class="cbg sm" role="radiogroup" aria-labelledby="plan-l" style="margin-top: 8px">
-          <button class="cbg-b sl" role="radio" aria-checked="false" data-plan="night"><span class="ic s20" style="color: var(--oct)" aria-hidden="true">bedtime</span><span class="t-ll">Automatico</span><span class="vig" hidden>In vigore</span></button>
-          <button class="cbg-b sl" role="radio" aria-checked="false" data-plan="home"><span class="ic s20" style="color: var(--sun)" aria-hidden="true">wb_sunny</span><span class="t-ll">Domani a casa</span><span class="vig" hidden>In vigore</span></button>
-        </div>
-        <p class="t-bs v" style="margin: 8px 4px 0" id="plannote"></p>
+        <div class="dh" style="margin-bottom: 4px"><span class="ddot" style="background: var(--oct-v)" aria-hidden="true"></span><h3 id="nt-t" class="t-tm">Di notte</h3><span class="dtime" id="nighttime">–</span></div>
 
-        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: baseline">
-          <label for="lvl" class="t-ts">Livello da raggiungere</label>
-          <span class="t-hs" style="color: var(--ctl); font-variant-numeric: tabular-nums" id="lvlval">–</span>
-        </div>
-        <div class="sld">
-          <input id="lvl" type="range" min="50" max="100" step="5" value="100">
-          <div class="sld-a" id="slda"></div>
-          <div class="sld-i" id="sldi"></div>
-          <span id="sldstops"></span>
-          <div class="sld-h" id="sldh"></div>
-          <div class="sld-bub" id="sldbub"></div>
-        </div>
-        <div class="t-bs v" style="display: flex; justify-content: space-between; margin-top: 4px"><span>50%</span><span>100%</span></div>
-
-        <div style="margin-top: 20px" class="t-ts" id="ready-l">Auto pronta entro</div>
-        <div class="stepper" role="group" aria-labelledby="ready-l">
-          <button class="ibtn sl" id="readydown" aria-label="Mezz'ora prima"><span class="ic" aria-hidden="true">remove</span></button>
-          <output class="step-val" id="readyval" aria-live="polite">–</output>
-          <button class="ibtn sl" id="readyup" aria-label="Mezz'ora dopo"><span class="ic" aria-hidden="true">add</span></button>
-        </div>
-        <div class="t-bs v" style="margin-top: 6px; text-align: center">Tra le 4:00 e le 11:00, limiti fissati da Octopus</div>
-
-        <div class="sw-row">
-          <span class="tile-ic sh-cookie4" style="background: var(--bat-c); color: var(--on-bat-c)"><span class="ic f s20" aria-hidden="true">battery_saver</span></span>
-          <div style="flex: 1; min-width: 0">
-            <div class="t-ts" id="hold-l">Batteria di casa a riposo</div>
-            <div class="t-bs v" id="holdsub">Mentre Octopus carica l'auto, la batteria di casa non si scarica: l'auto prende dalla rete a prezzo scontato.</div>
+        <div class="dr">
+          <div class="dr-b"><span class="dr-t" id="plan-l">Piano</span><span class="t-bs v" id="plannote"></span></div>
+          <div class="mini" role="radiogroup" aria-labelledby="plan-l">
+            <button class="sl" role="radio" aria-checked="false" data-plan="night">Automatico</button>
+            <button class="sl" role="radio" aria-checked="false" data-plan="home">Domani a casa</button>
           </div>
+        </div>
+
+        <div class="dr wrap">
+          <label for="lvl" class="dr-t">Livello da raggiungere</label>
+          <span class="dr-v" id="lvlval">–</span>
+          <div class="sld" style="flex-basis: 100%; margin-top: 0">
+            <input id="lvl" type="range" min="50" max="100" step="5" value="100">
+            <div class="sld-a" id="slda"></div>
+            <div class="sld-i" id="sldi"></div>
+            <span id="sldstops"></span>
+            <div class="sld-h" id="sldh"></div>
+            <div class="sld-bub" id="sldbub"></div>
+          </div>
+        </div>
+
+        <div class="dr">
+          <div class="dr-b"><span class="dr-t" id="ready-l">Pronta entro</span><span class="t-bs v">Tra le 4:00 e le 11:00, limiti di Octopus</span></div>
+          <div class="stp" role="group" aria-labelledby="ready-l">
+            <button class="sb sl" id="readydown" aria-label="Mezz'ora prima"><span class="ic s20" aria-hidden="true">remove</span></button>
+            <output class="sv" id="readyval" aria-live="polite">–</output>
+            <button class="sb sl" id="readyup" aria-label="Mezz'ora dopo"><span class="ic s20" aria-hidden="true">add</span></button>
+          </div>
+        </div>
+
+        <div class="dr">
+          <span class="ic f" style="color: var(--bat)" aria-hidden="true">battery_saver</span>
+          <div class="dr-b"><span class="dr-t" id="hold-l">Batteria di casa a riposo</span><span class="t-bs v" id="holdsub"></span></div>
           <button class="sw" id="holdsw" role="switch" aria-checked="false" aria-labelledby="hold-l"><span class="sw-h"><span class="ic" aria-hidden="true">check</span></span></button>
         </div>
 
-        <div class="confirm t-bs" role="status">
+        <div class="confirm t-bs" role="status" style="margin-top: 8px">
           <span class="mini-li" id="octospin" aria-hidden="true" hidden></span>
           <span class="ic f s20 ok" id="octook" aria-hidden="true" hidden>check_circle</span>
           <span id="octotext"></span>
@@ -1432,7 +1478,7 @@ function renderModes(s) {
     b.classList.toggle("on", on);
     b.setAttribute("aria-checked", String(on));
   });
-  $("modenow").textContent = MODE_L[s.mode] || "–";
+  $("daytime").textContent = hm(s.day_start) + "-" + hm(s.day_end);
   const min = kw(s.min_amps * NOMINAL_V), max = kw(s.max_amps * NOMINAL_V);
   const desc = {
     boost: "Carica alla corrente massima con pannelli, batteria di casa e rete. A carica completa torna da sola alla modalità di prima.",
@@ -1444,6 +1490,7 @@ function renderModes(s) {
     fresh.id = "modedesc";
     $("modedesc").replaceWith(fresh);
   }
+  drawRibbon(s);
 }
 document.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", async () => {
   if (state.status && state.status.mode === b.dataset.mode) return;
@@ -1480,6 +1527,7 @@ function drawReady() {
   $("readyval").textContent = readyLab(state.ready);
   $("readydown").disabled = state.ready <= 0;
   $("readyup").disabled = state.ready >= 14;
+  if (state.status) drawRibbon(state.status);
 }
 function drawOcto() {
   const s = state.status;
@@ -1502,7 +1550,6 @@ function renderNight(s) {
     const on = b.dataset.plan === state.plan;
     b.classList.toggle("on", on);
     b.setAttribute("aria-checked", String(on));
-    b.querySelector(".vig").hidden = s.active_plan !== b.dataset.plan;
   });
   $("plannote").textContent = s.active_plan === state.plan ? "È il piano in vigore: le modifiche vanno subito a Octopus."
     : s.active_plan ? "Non è il piano in vigore: le modifiche valgono da quando lo scegli."
@@ -1514,7 +1561,8 @@ function renderNight(s) {
   $("holdsw").setAttribute("aria-checked", String(!!hold.enabled));
   $("holdsub").textContent = hold.until
     ? "In corso: la batteria di casa è a riposo fino alle " + hold.until + "."
-    : "Mentre Octopus carica l'auto, la batteria di casa non si scarica: l'auto prende dalla rete a prezzo scontato.";
+    : "L'auto prende dalla rete scontata, la batteria resta alla casa.";
+  drawRibbon(s);
 }
 $("holdsw").addEventListener("click", async () => {
   const enabled = !$("holdsw").classList.contains("on");
@@ -1522,6 +1570,38 @@ $("holdsw").addEventListener("click", async () => {
   toast(!r.ok ? "Modifica non riuscita" : enabled ? "Di notte la batteria di casa resterà a riposo" : "Di notte la batteria di casa potrà scaricarsi nell'auto");
   soon();
 });
+// ---- il nastro della giornata ----
+const toH = (t) => { const [h, m] = (t || "0:00").split(":").map(Number); return h + (m || 0) / 60; };
+const pct = (h) => (Math.min(24, Math.max(0, h)) / 24 * 100).toFixed(3) + "%";
+const DAY_SEG = { boost: ["Subito, potenza massima", "Di giorno: carica subito"], solar: ["Col sole", "Di giorno: carica col sole"], auto: ["Solo se lo decidi tu", "Di giorno: nessun avvio automatico"] };
+function drawRibbon(s) {
+  if (!s || !s.day_start) return;
+  const active = s.active_plan, t = s.plans && active ? s.plans[active] : null;
+  const liveEdit = active && state.plan === active && state.ready != null;
+  const readyH = liveEdit ? 4 + state.ready / 2 : t && t.time ? toH(t.time) : null;
+  const readyText = liveEdit ? readyLab(state.ready) : t && t.time ? hm(t.time) : null;
+  const ds = toH(s.day_start), de = toH(s.day_end), nightEnd = readyH != null ? readyH : ds;
+  const seg = (id, a, b) => { const e = $(id); e.style.left = "calc(" + pct(a) + " + 1px)"; e.style.width = "calc(" + pct(b) + " - " + pct(a) + " - 2px)"; };
+  seg("rbn1", 0, nightEnd);
+  const w1 = $("rbw1"), w2 = $("rbw2");
+  if (s.planned) {
+    const a = toH(s.planned.start), b = toH(s.planned.end);
+    if (a <= b) { seg("rbw1", a, b); w2.hidden = true; } else { seg("rbw1", a, 24); seg("rbw2", 0, b); w2.hidden = false; }
+    w1.hidden = false;
+  } else { w1.hidden = true; w2.hidden = true; }
+  const mode = DAY_SEG[s.mode] ? s.mode : "auto", lab = DAY_SEG[mode];
+  seg("rbd", Math.max(ds, nightEnd), de);
+  $("rbd").className = "rseg d " + mode; $("rbd").textContent = lab[0];
+  seg("rbe", de, 24);
+  const now = s.time ? toH(hhmm(s.time)) : null;
+  $("rbnow").hidden = now == null;
+  if (now != null) $("rbnow").style.left = pct(now);
+  $("ribnow").textContent = now != null ? "ora " + hm(hhmm(s.time)) : "";
+  $("legw").textContent = s.planned ? "Carica Octopus " + hm(s.planned.start) + "-" + hm(s.planned.end) : "Octopus: nessuna carica in programma";
+  $("legd").textContent = lab[1]; $("legdi").className = "rl-d " + mode;
+  $("nighttime").textContent = hm(s.day_end) + "-" + (readyText || hm(s.day_start));
+  $("rib").setAttribute("aria-label", "Notte fino alle " + (readyText || hm(s.day_start)) + (s.planned ? " con carica Octopus dalle " + hm(s.planned.start) + " alle " + hm(s.planned.end) : ", nessuna carica Octopus in programma") + "; di giorno dalle " + hm(s.day_start) + " alle " + hm(s.day_end) + ": " + lab[0]);
+}
 let octoTimer;
 function scheduleOcto() {
   state.editing = true;
