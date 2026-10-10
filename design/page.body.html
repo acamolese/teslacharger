@@ -18,7 +18,6 @@ html.dark,html.dark body{background:#0e0e0e}
 .li-body .t-bl,.li-body .t-bs,.tl-t .t-bl,.tl-t .t-bs{overflow-wrap:anywhere}
 .bill .t-bm{grid-column:1/-1}
 [hidden]{display:none!important}
-@media (prefers-reduced-motion:reduce){.app *,.app *::before,.app *::after{animation:none!important;transition:none!important}.ring .ra{stroke-dashoffset:0}}
 <!--CSS-->
 <body>
 <div class="app s-ric" id="app">
@@ -1146,8 +1145,11 @@ function renderLog(s) {
       log.append(el("span", "tl-day", day === today ? "Oggi" : day === yesterday ? "Ieri" : Number(day.slice(8, 10)) + " " + MONTHS[Number(day.slice(5, 7)) - 1]));
     }
     const next = events[i + 1];
-    log.append(tlRow(e.icon, e.title || cap(e.text || ""), e.sub, hhmm(e.time), !next || next.time.slice(0, 10) !== day));
+    const row = tlRow(e.icon, e.title || cap(e.text || ""), e.sub, hhmm(e.time), !next || next.time.slice(0, 10) !== day);
+    if (i === 0 && state.lastEvent && e.time > state.lastEvent) { state.rowFlip = !state.rowFlip; row.classList.add(state.rowFlip ? "row-in-a" : "row-in-b"); }
+    log.append(row);
   });
+  state.lastEvent = events[0].time;
 }
 
 // ---- sezione Auto ----
