@@ -1556,8 +1556,16 @@ function drawOcto() {
     : "Confermato da Octopus" + (s && s.planned ? " · pianificata dalle " + s.planned.start + " alle " + s.planned.end : "");
 }
 function renderNight(s) {
-  // Si regola il piano in vigore, o l'automatico quando stanotte non si carica
-  if (!state.plan) state.plan = s.active_plan || "night";
+  // Si regola il piano in vigore, o l'automatico quando stanotte non si carica.
+  // Segue il piano in vigore finché l'utente non tocca l'altro, e torna a seguirlo
+  // quando cambia (per esempio dopo la risposta alla domanda della sera)
+  const active = s.active_plan || "night";
+  if (!state.plan || !state.planPicked || state.lastActive !== active) {
+    if (state.plan !== active) state.editing = false;
+    state.plan = active;
+    state.planPicked = false;
+  }
+  state.lastActive = active;
   const t = s.plans && s.plans[state.plan];
   if (t && !state.editing) {
     state.level = Math.min(100, Math.max(50, Math.round(t.percent / 5) * 5));
@@ -1640,6 +1648,7 @@ function scheduleOcto() {
 }
 document.querySelectorAll("[data-plan]").forEach((b) => b.addEventListener("click", () => {
   state.plan = b.dataset.plan;
+  state.planPicked = true;
   state.editing = false;
   if (state.status) renderNight(state.status);
 }));
