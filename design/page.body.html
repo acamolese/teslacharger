@@ -18,6 +18,15 @@ html.dark,html.dark body{background:#0e0e0e}
 .li-body .t-bl,.li-body .t-bs,.tl-t .t-bl,.tl-t .t-bs{overflow-wrap:anywhere}
 .bill .t-bm{grid-column:1/-1}
 [hidden]{display:none!important}
+/* flussi di energia: niente riflesso che passa, punte di freccia nel verso del flusso */
+#homehero::after{display:none}
+.fl{position:relative}
+.fl.on::after{content:'';position:absolute;width:0;height:0;border:6px solid transparent}
+.fl.on.h::after{top:50%;right:-3px;margin-top:-6px;border-left:10px solid var(--fc);border-right:0}
+.fl.on.h.rev::after{right:auto;left:-3px;border-left:0;border-right:10px solid var(--fc)}
+.fl.on.v::after{left:50%;bottom:-3px;margin-left:-6px;border-top:10px solid var(--fc);border-bottom:0}
+.fl.on.v.rev::after{bottom:auto;top:-3px;border-top:0;border-bottom:10px solid var(--fc)}
+.fn-l{white-space:nowrap}
 <!--CSS-->
 <body>
 <div class="app s-ric" id="app">
@@ -339,12 +348,12 @@ html.dark,html.dark body{background:#0e0e0e}
           <span class="fl h" id="flgrid" style="grid-column: 4; grid-row: 3; --fc: #777777"></span>
           <div class="fn" style="grid-column: 5; grid-row: 3">
             <span class="fn-c sh-circle" style="background: #8a8a8a; color: #ffffff"><span class="ic f" aria-hidden="true">electrical_services</span></span>
-            <span class="fn-v" id="fgrid">–</span><span class="fn-l">Rete</span>
+            <span class="fn-v" id="fgrid">–</span><span class="fn-l" id="fgridl">Rete</span>
           </div>
           <span class="fl v" id="flcar" style="grid-column: 3; grid-row: 4; --fc: #1fa35a"></span>
           <div class="fn" style="grid-column: 3; grid-row: 5">
             <span class="fn-c sh-circle" style="background: #23a55c; color: #ffffff"><span class="ic f" aria-hidden="true">directions_car</span></span>
-            <span class="fn-v" id="fcar">–</span><span class="fn-l">Auto</span>
+            <span class="fn-v" id="fcar">–</span><span class="fn-l" id="fcarl">Auto</span>
           </div>
         </div>
         <p class="hero-reason" id="homereason" style="font-size: 13px; line-height: 18px">In caricamento</p>
@@ -1374,13 +1383,16 @@ function renderHomeHero() {
   // nodi e linee del diagramma: le linee scorrono nel verso del flusso
   $("fpv").textContent = (p.pv_w < 50 ? "0" : kw(p.pv_w)) + " kW";
   $("flpv").className = "fl v" + (sun ? " on" : "");
-  $("fbat").textContent = charging || discharging ? kw(p.battery_w) + " kW" : "ferma";
-  $("fbatl").textContent = "Batteria " + p.battery_soc + "%";
+  // segno e didascalia dicono il verso: + entra nel nodo, − ne esce
+  $("fbat").textContent = charging ? "+" + kw(p.battery_w) + " kW" : discharging ? "−" + kw(p.battery_w) + " kW" : "ferma";
+  $("fbatl").textContent = "Batteria " + p.battery_soc + "%" + (charging ? " · si carica" : discharging ? " · alimenta" : "");
   $("flbat").className = "fl h" + (discharging ? " on" : charging ? " on rev" : "");
   $("fload").textContent = kw(house) + " kW";
-  $("fgrid").textContent = exporting ? "cedi " + kw(p.grid_w) : importing ? "prelevi " + kw(p.grid_w) : "0 kW";
+  $("fgrid").textContent = exporting ? "+" + kw(p.grid_w) + " kW" : importing ? "−" + kw(p.grid_w) + " kW" : "0 kW";
+  $("fgridl").textContent = exporting ? "Rete · ceduti" : importing ? "Rete · prelevati" : "Rete";
   $("flgrid").className = "fl h" + (exporting ? " on" : importing ? " on rev" : "");
-  $("fcar").textContent = carW ? kw(carW) + " kW" : "ferma";
+  $("fcar").textContent = carW ? "+" + kw(carW) + " kW" : "ferma";
+  $("fcarl").textContent = carW ? "Auto · in carica" : "Auto";
   $("flcar").className = "fl v" + (carW ? " on" : "");
   $("homeflow").setAttribute("aria-label", "Pannelli " + kw(p.pv_w) + " kilowatt; casa " + kw(house) + "; auto " + kw(carW) + "; "
     + (exporting ? kw(p.grid_w) + " ceduti alla rete" : importing ? kw(p.grid_w) + " presi dalla rete" : "nessuno scambio con la rete") + "; batteria "
