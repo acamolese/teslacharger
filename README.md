@@ -47,7 +47,7 @@ Nella fascia diurna, con l'auto collegata:
 - all'auto va l'80% di quello che producono i pannelli: se danno 2 kW, l'auto ne riceve 1,6;
 - il massimo è la corrente massima impostata (12 A, un ampere sotto il limite del cavo);
 - l'auto non accetta meno di 5 A (circa 1,1 kW): se la quota dei pannelli non ci arriva, il sistema non preleva da rete o batteria di casa ma mostra nell'app la richiesta di consenso. Non arriva come notifica: con l'auto collegata la carica parte da sola appena il sole basta;
-- quando il sole arriva a bastare per l'auto lo segnala: con l'auto collegata parte la carica e arriva la notifica di avvio, scollegata arriva una volta al giorno l'invito a collegarla, solo nelle ore in cui di solito è a casa (`HOME_PLAN`);
+- quando il sole arriva a bastare per l'auto, tre casi: con l'auto collegata e «Carica col sole» attiva parte la carica e arriva la notifica di avvio; con l'auto collegata ma «Nessuna carica» scelta la sera prima arriva l'avviso che c'è sole e si decide dall'app; con l'auto scollegata arriva l'invito a collegarla, solo nelle ore in cui di solito è a casa (`HOME_PLAN`). Un avviso al giorno;
 - il consenso vale fino a fine giornata e si può revocare: con il consenso l'auto carica al minimo anche senza sole;
 - una nuvola di passaggio non ferma la carica: senza consenso lo stop arriva dopo più letture consecutive insufficienti;
 - appena collegata l'auto, il sistema aspetta qualche minuto prima di avviare la carica, perché nei primi istanti Octopus prende in carico l'auto e annulla una carica immediata appena richiesta; se Octopus non conferma l'avvio, il sistema riprova al ciclo successivo;
@@ -57,7 +57,7 @@ Nella fascia diurna, con l'auto collegata:
 
 Quando l'auto è collegata dopo le 18, il sistema chiede con una notifica come comportarsi per la notte:
 
-- **Nessuna carica**: il livello chiesto a Octopus scende al 10%, sotto quello dell'auto, e di notte non parte nulla;
+- **Nessuna carica**: il livello chiesto a Octopus scende al 10%, sotto quello dell'auto, e di notte non parte nulla; il giorno dopo nemmeno la carica col sole parte da sola, quando il sole basta arriva un avviso;
 - **Domani a casa**: carica fino al livello del piano "Domani a casa" (50% se non modificato), lasciando spazio al sole del giorno dopo;
 - **Automatico**: carica fino al livello del piano "Automatico".
 

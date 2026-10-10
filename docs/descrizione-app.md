@@ -67,13 +67,13 @@ Quando è attiva "Carica col sole", l'auto è collegata e il sole non basta a ra
 
 Il consenso vale fino alle 19:00 dello stesso giorno e può essere revocato in qualsiasi momento. Con il consenso attivo, l'auto carica al minimo quando il sole non basta e segue i pannelli quando il sole c'è. La richiesta si vede solo nell'app, non arriva come notifica: con l'auto collegata la carica parte da sola appena il sole basta, e chiedere all'alba se caricare da rete era solo rumore.
 
-Il momento in cui il sole arriva a bastare per l'auto viene segnalato. Con l'auto collegata parte la carica e arriva la notifica «C'è sole, carica avviata». Con l'auto scollegata arriva una notifica che invita a collegarla, ma solo nelle ore in cui di solito l'auto è a casa: a chi è al lavoro il sole sul tetto non serve.
+Il momento in cui il sole arriva a bastare per l'auto viene segnalato, in tre modi. Con l'auto collegata e "Carica col sole" attiva parte la carica e arriva la notifica "C'è sole, carica avviata". Con l'auto collegata ma "Nessuna carica" scelta la sera prima arriva "C'è sole per caricare l'auto": si decide dall'app. Con l'auto scollegata arriva l'invito a collegarla, ma solo nelle ore in cui di solito l'auto è a casa: a chi è al lavoro il sole sul tetto non serve. Un avviso al giorno.
 
 ## La domanda della sera
 
 Quando l'auto viene collegata dopo le 18, il sistema chiede all'utente come comportarsi per la notte, con una notifica e con un riquadro in cima alla sezione "Ricarica". Le risposte possibili sono tre:
 
-- **"Nessuna carica"**: di notte l'auto non viene caricata. Il livello chiesto a Octopus scende al minimo (10%), sotto quello dell'auto, così la ricarica non parte.
+- **"Nessuna carica"**: di notte l'auto non viene caricata. Il livello chiesto a Octopus scende al minimo (10%), sotto quello dell'auto, così la ricarica non parte. La scelta vale anche per il giorno dopo: la carica col sole non parte da sola, e quando il sole basta arriva l'avviso "C'è sole per caricare l'auto", da cui si sceglie "Carica col sole" se si vuole.
 - **"Domani a casa"**: di notte l'auto viene caricata solo fino al livello del piano "Domani a casa" (50% se non modificato), così il giorno dopo resta spazio in batteria per l'energia dei pannelli.
 - **"Automatico"**: Octopus carica l'auto fino al livello del piano "Automatico".
 

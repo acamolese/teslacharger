@@ -577,12 +577,19 @@ class Controller:
             self.history.log_car(now, info)
         self.status["car"] = {**asdict(car), "time": now.isoformat(timespec="seconds")} if car else None
 
+    def _no_charge_today(self, now: datetime) -> bool:
+        """Ieri sera è stato scelto «Nessuna carica»: vale anche per il sole di oggi."""
+        q = self.evening
+        return bool(q and q.get("day") == now.date().isoformat() and q.get("choice") == "none")
+
     def _sun_notice(self, now: datetime, plant, vehicle) -> None:
         """Una volta al giorno, quando il sole arriva a bastare per l'auto.
 
-        Con l'auto collegata la carica parte da sola e arriva la sua notifica. Scollegata,
-        si avvisa di collegarla, ma solo nelle ore in cui di solito è a casa (HOME_PLAN):
-        a chi è al lavoro il sole sul tetto non serve.
+        Tre casi. Con l'auto collegata e «Carica col sole» attiva la carica parte da sola e
+        arriva la notifica di avvio, qui non serve nulla. Con l'auto collegata ma la scelta
+        «Nessuna carica» della sera prima, si avvisa che il sole c'è e si lascia decidere.
+        Con l'auto scollegata si avvisa di collegarla, ma solo nelle ore in cui di solito
+        è a casa (HOME_PLAN): a chi è al lavoro il sole sul tetto non serve.
         """
         today = now.date().isoformat()
         in_day = self.settings.day_start <= now.time() < self.settings.day_end
@@ -590,17 +597,21 @@ class Controller:
             return
         self.sun_notified_on = today
         self._event("sunny", "Sole sufficiente per l'auto", f"Pannelli a {plant.pv_w:.0f} W, sopra il minimo")
-        if vehicle.plugged:
+        if vehicle.plugged and self.mode is not Mode.AUTO:
             return
-        plan = _home_plan()
-        if plan and not any(start <= now.hour < end for start, end in plan.get(now.weekday(), ())):
-            return
+        if not vehicle.plugged:
+            plan = _home_plan()
+            if plan and not any(start <= now.hour < end for start, end in plan.get(now.weekday(), ())):
+                return
         kw = f"{plant.pv_w / 1000:.1f}".replace(".", ",")
         end = self.settings.day_end.strftime("%H:%M")
-        self._notify(
-            "C'è abbastanza sole per caricare",
-            f"Pannelli a {kw} kW. Collega l'auto per caricare col sole fino alle {end}.",
-        )
+        if vehicle.plugged:
+            body = f"Pannelli a {kw} kW. Avevi scelto di non caricare: se vuoi approfittarne, tocca e scegli «Carica col sole»."
+        elif self.mode is Mode.SOLAR:
+            body = f"Pannelli a {kw} kW. Collega l'auto e la carica col sole parte da sola, fino alle {end}."
+        else:
+            body = f"Pannelli a {kw} kW. Collega l'auto e scegli «Carica col sole» per caricare fino alle {end}."
+        self._notify("C'è sole per caricare l'auto", body)
 
     def _auto_switch(self, now: datetime, ours: bool) -> None:
         """Passaggi automatici: al mattino a "carica col sole", la sera ad "automatica"."""
@@ -608,7 +619,11 @@ class Controller:
         in_day = self.settings.day_start <= now.time() < self.settings.day_end
         if in_day and self.switched_on != today:
             self.switched_on = today
-            if self.mode is Mode.AUTO:
+            if self.mode is Mode.AUTO and self._no_charge_today(now):
+                # «Nessuna carica» vale anche di giorno: niente avvio automatico col sole,
+                # quando il sole basta arriva un avviso e si decide dall'app
+                self._event("block", "Oggi nessuna carica automatica", "Scelta ieri sera: ti avviso quando c'è sole")
+            elif self.mode is Mode.AUTO:
                 self.mode = Mode.SOLAR
                 self._event("swap_horiz", "Modalità Carica col sole", "Passaggio automatico del mattino")
         elif not in_day and self.mode is Mode.SOLAR and not ours:
@@ -753,6 +768,9 @@ class Controller:
             # Dopo una lettura appena fatta decide il dato fresco dell'auto, non quello ricordato
             None if need_car else car_full,
         )
+        in_day = self.settings.day_start <= now.time() < self.settings.day_end
+        if in_day and self.mode is Mode.AUTO and decision.action is Action.HOLD and self._no_charge_today(now):
+            decision = replace(decision, reason="oggi nessuna carica automatica, come scelto ieri sera: ti avviso quando c'è sole")
         self.status["decision"] = {
             "action": decision.action.value,
             "reason": decision.reason,
