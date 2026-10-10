@@ -3,7 +3,7 @@ from datetime import datetime, time, timedelta
 
 from teslacharger.config import Settings
 from teslacharger.policy import (
-    Action, CarStatus, ControlState, Mode, consent_due, decide, enough_sun, plan_battery_hold, precheck,
+    Action, CarStatus, ControlState, Mode, decide, enough_sun, plan_battery_hold, precheck,
 )
 from teslacharger.solax import PlantSnapshot
 
@@ -281,25 +281,6 @@ class BatteryHoldTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
-class ConsentTiming(unittest.TestCase):
-    MORNING = datetime(2026, 10, 10, 8, 32)
-
-    def test_asks_at_once_without_a_forecast(self):
-        self.assertTrue(consent_due(self.MORNING, None))
-
-    def test_asks_at_once_when_the_sun_will_never_suffice_today(self):
-        self.assertTrue(consent_due(self.MORNING, {"car_from": None}))
-
-    def test_waits_for_the_forecast_hour_plus_grace(self):
-        day = {"car_from": "10:00"}
-        self.assertFalse(consent_due(self.MORNING, day))
-        self.assertFalse(consent_due(self.MORNING.replace(hour=10, minute=30), day))
-        self.assertTrue(consent_due(self.MORNING.replace(hour=11, minute=0), day))
-
-    def test_asks_when_the_forecast_hour_is_already_past(self):
-        self.assertTrue(consent_due(self.MORNING.replace(hour=14), {"car_from": "09:00"}))
 
 
 class EnoughSun(unittest.TestCase):

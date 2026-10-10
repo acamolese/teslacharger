@@ -65,11 +65,9 @@ Senza interventi dell'utente la giornata si svolge così: di notte l'auto carica
 
 Quando è attiva "Carica col sole", l'auto è collegata e il sole non basta a raggiungere la potenza minima, il sistema non carica. Mostra invece una richiesta: l'utente può autorizzare a caricare lo stesso alla potenza minima, prendendo l'energia dalla batteria di casa o dalla rete.
 
-Il consenso vale fino alle 19:00 dello stesso giorno e può essere revocato in qualsiasi momento. Con il consenso attivo, l'auto carica al minimo quando il sole non basta e segue i pannelli quando il sole c'è. La richiesta arriva anche come notifica, una sola volta al giorno.
+Il consenso vale fino alle 19:00 dello stesso giorno e può essere revocato in qualsiasi momento. Con il consenso attivo, l'auto carica al minimo quando il sole non basta e segue i pannelli quando il sole c'è. La richiesta si vede solo nell'app, non arriva come notifica: con l'auto collegata la carica parte da sola appena il sole basta, e chiedere all'alba se caricare da rete era solo rumore.
 
-La richiesta non arriva all'alba solo perché il sole non è ancora alto: se la previsione dice che più tardi basterà, il sistema aspetta quell'ora, più una di tolleranza, e chiede solo se il sole non si presenta. Se la previsione dice che oggi non basterà mai, chiede subito.
-
-Il momento in cui il sole arriva a bastare per l'auto viene segnalato una volta al giorno. Con l'auto collegata parte la carica e arriva la notifica di avvio. Con l'auto scollegata arriva una notifica che invita a collegarla, ma solo nelle ore in cui di solito l'auto è a casa: a chi è al lavoro il sole sul tetto non serve.
+Il momento in cui il sole arriva a bastare per l'auto viene segnalato. Con l'auto collegata parte la carica e arriva la notifica «C'è sole, carica avviata». Con l'auto scollegata arriva una notifica che invita a collegarla, ma solo nelle ore in cui di solito l'auto è a casa: a chi è al lavoro il sole sul tetto non serve.
 
 ## La domanda della sera
 

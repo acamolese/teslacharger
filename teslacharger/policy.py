@@ -82,29 +82,9 @@ class Decision:
 
 
 NO_SUN = "sole insufficiente: serve la tua autorizzazione per caricare da rete o batteria di casa"
-# La previsione è per ora intera: prima di dire che ha sbagliato si aspetta un'ora oltre
-FORECAST_GRACE = timedelta(hours=1)
-
-
 def enough_sun(plant: PlantSnapshot, settings: Settings) -> bool:
     """La quota dei pannelli destinata all'auto arriva alla corrente minima?"""
     return share_amps(plant, settings) >= min(settings.min_amps, settings.max_amps)
-
-
-def consent_due(now: datetime, today: dict | None) -> bool:
-    """Se chiedere adesso il consenso a caricare da rete o batteria di casa.
-
-    `today` è la previsione del giorno (weather.forecast): `car_from` è la prima ora in
-    cui il sole dovrebbe bastare per l'auto. Alle 08:30 di ottobre i pannelli sono
-    sempre sotto il minimo, e chiedere il consenso in quel momento è rumore: se la
-    previsione dà sole sufficiente più tardi, la richiesta aspetta quell'ora più una di
-    tolleranza. Senza previsione, o se oggi il sole non basterà mai, si chiede subito.
-    """
-    if not today or not today.get("car_from"):
-        return True
-    hour, minute = (int(x) for x in today["car_from"].split(":"))
-    expected = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
-    return now >= expected + FORECAST_GRACE
 
 
 def _in_day(now: datetime, settings: Settings) -> bool:

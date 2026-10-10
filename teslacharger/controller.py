@@ -14,7 +14,7 @@ from .emmeti import EmmetiClient, describe
 from .history import History
 from .octopus import MIN_TARGET, READY_TIMES, STATE_PLANNED, OctopusClient
 from .policy import (
-    Action, CarStatus, ControlState, Decision, Mode, consent_due, decide, enough_sun, plan_battery_hold, precheck,
+    Action, CarStatus, ControlState, Decision, Mode, decide, enough_sun, plan_battery_hold, precheck,
 )
 from .push import PushService
 from .solax import MAX_HOLD_SECONDS, SolaxClient
@@ -577,16 +577,6 @@ class Controller:
             self.history.log_car(now, info)
         self.status["car"] = {**asdict(car), "time": now.isoformat(timespec="seconds")} if car else None
 
-    def _today_forecast(self, now: datetime) -> dict | None:
-        """La previsione di oggi, o None se non si riesce a leggerla."""
-        try:
-            days = self.forecast_summary().get("days", [])
-        except Exception as err:
-            log.warning("previsione del sole non letta: %s", err)
-            return None
-        today = now.date().isoformat()
-        return next((d for d in days if d["day"] == today), None)
-
     def _sun_notice(self, now: datetime, plant, vehicle) -> None:
         """Una volta al giorno, quando il sole arriva a bastare per l'auto.
 
@@ -775,25 +765,10 @@ class Controller:
             decision.action.value, decision.reason,
         )
         if decision.ask and self.asked_on != now.date().isoformat():
-            today = self._today_forecast(now)
-            if not consent_due(now, today):
-                # Il 10 ottobre la richiesta è partita alle 08:32 con 244 W: il sole non c'era
-                # ancora, non mancava. Si aspetta l'ora prevista prima di disturbare.
-                sun_from = today["car_from"]
-                log.info("sole insufficiente ma previsto dalle %s: il consenso si chiede dopo", sun_from)
-                self.status["decision"]["reason"] = (
-                    f"sole insufficiente, previsto sufficiente dalle {sun_from}: "
-                    "se non arriva ti chiedo se caricare da rete o batteria di casa"
-                )
-            else:
-                self.asked_on = now.date().isoformat()
-                kw = f"{plant.pv_w / 1000:.1f}".replace(".", ",")
-                end = self.settings.day_end.strftime("%H:%M")
-                self._event("notifications", "Richiesta di consenso", f"Pannelli a {plant.pv_w:.0f} W, sotto il minimo")
-                self._notify(
-                    "Sole insufficiente per l'auto",
-                    f"Pannelli a {kw} kW. Tocca per caricare al minimo da batteria di casa e rete fino alle {end}.",
-                )
+            # Solo nell'app, mai come notifica: con l'auto collegata la carica parte da sola
+            # appena il sole basta, e chi vuole caricare da rete lo stesso lo sceglie da lì.
+            self.asked_on = now.date().isoformat()
+            self._event("notifications", "Richiesta di consenso", f"Pannelli a {plant.pv_w:.0f} W, sotto il minimo")
         if decision.action is Action.START and self._plugged_at and now - self._plugged_at < PLUG_SETTLE:
             # Il 9 ottobre una carica chiesta sei secondi dopo il collegamento è stata annullata da Octopus
             log.info("auto appena collegata: avvio rimandato al prossimo ciclo")
@@ -825,7 +800,11 @@ class Controller:
         self.state = decision.state
         # Il comando è partito, ma l'auto ci mette un po': la notifica aspetta la conferma
         if decision.action is Action.START:
-            self._notice = {"boosting": True, "since": now, "title": "Carica avviata", "body": f"{decision.amps} A all'auto. {reason}"}
+            self._notice = {
+                "boosting": True, "since": now,
+                "title": "C'è sole, carica avviata" if self.mode is Mode.SOLAR else "Carica avviata",
+                "body": f"{decision.amps} A all'auto. {reason}",
+            }
         elif decision.action is Action.STOP:
             self._notice = {"boosting": False, "since": now, "title": "Carica fermata", "body": reason}
             if self.mode is Mode.BOOST:
