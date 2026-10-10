@@ -94,6 +94,7 @@ html.dark,html.dark body{background:#0e0e0e}
           <span class="tile-ic sh-clover" style="background: var(--oct-v); color: #ffffff"><span class="ic f s20" aria-hidden="true">bedtime</span></span>
           <div class="ch-t"><h3 id="eve-t" class="t-tl" style="font-weight: 650">Come carico stanotte?</h3><span class="t-bs" style="opacity: .75" id="evetext"></span></div>
         </div>
+        <div class="facts" id="evefacts"></div>
         <div class="opts" role="group" aria-label="Risposte">
           <button class="opt sl" id="evenone">
             <span class="opt-ic"><span class="ic f s20" aria-hidden="true">block</span></span>
@@ -316,21 +317,50 @@ html.dark,html.dark body{background:#0e0e0e}
         <div class="gh-t"><span class="gh-e">Stato</span><h2 id="c0-t">Adesso</h2><span class="t-bs v">Da dove arriva l'energia e dove va</span></div>
       </header>
       <section class="hero t-idle stag" id="homehero" aria-live="polite">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+        <div style="display: flex; align-items: center; gap: 8px">
           <span class="t-lm" style="opacity: .8">Flusso di energia</span>
           <span class="live-chip" id="homechip"><i></i><span id="homechiptext">In attesa</span></span>
         </div>
-        <div class="hero-row">
-          <div class="hs-wrap" id="homewrap"><div class="hshape sh-pentagon" id="homeshape"><span class="ic s40" id="homeicon" aria-hidden="true">home</span></div></div>
-          <div style="display: flex; flex-direction: column; min-width: 0">
-            <div class="kw t-dl"><span id="homekw">–</span><small>kW</small></div>
-            <span class="t-ll" style="opacity: .86" id="homekwsub">dai pannelli</span>
+        <h2 class="hero-title" style="margin-top: 6px" id="hometitle">La casa</h2>
+        <div class="flow" role="img" id="homeflow" aria-label="Flusso di energia in attesa dei dati">
+          <div class="fn" style="grid-column: 3; grid-row: 1">
+            <span class="fn-c sh-sunny" style="background: linear-gradient(160deg,#ffd166,#f2a900 55%,#c48600); color: #3a2600"><span class="ic f" aria-hidden="true">solar_power</span></span>
+            <span class="fn-v" id="fpv">–</span><span class="fn-l">Pannelli</span>
+          </div>
+          <span class="fl v" id="flpv" style="grid-column: 3; grid-row: 2; --fc: #c48600"></span>
+          <div class="fn" style="grid-column: 1; grid-row: 3">
+            <span class="fn-c sh-cookie4" style="background: var(--bat-v); color: #ffffff"><span class="ic f" aria-hidden="true">home_storage</span></span>
+            <span class="fn-v" id="fbat">–</span><span class="fn-l" id="fbatl">Batteria</span>
+          </div>
+          <span class="fl h" id="flbat" style="grid-column: 2; grid-row: 3; --fc: var(--bat-v)"></span>
+          <div class="fn" style="grid-column: 3; grid-row: 3">
+            <span class="fn-c hub sh-pentagon" style="background: var(--gloss); color: var(--onp)"><span class="ic f" aria-hidden="true">home</span></span>
+            <span class="fn-v" id="fload">–</span><span class="fn-l">Casa</span>
+          </div>
+          <span class="fl h" id="flgrid" style="grid-column: 4; grid-row: 3; --fc: #777777"></span>
+          <div class="fn" style="grid-column: 5; grid-row: 3">
+            <span class="fn-c sh-circle" style="background: #8a8a8a; color: #ffffff"><span class="ic f" aria-hidden="true">electrical_services</span></span>
+            <span class="fn-v" id="fgrid">–</span><span class="fn-l">Rete</span>
+          </div>
+          <span class="fl v" id="flcar" style="grid-column: 3; grid-row: 4; --fc: #1fa35a"></span>
+          <div class="fn" style="grid-column: 3; grid-row: 5">
+            <span class="fn-c sh-circle" style="background: #23a55c; color: #ffffff"><span class="ic f" aria-hidden="true">directions_car</span></span>
+            <span class="fn-v" id="fcar">–</span><span class="fn-l">Auto</span>
           </div>
         </div>
-        <h2 class="hero-title" id="hometitle">La casa</h2>
-        <p class="hero-reason" id="homereason">In caricamento</p>
+        <p class="hero-reason" id="homereason" style="font-size: 13px; line-height: 18px">In caricamento</p>
         <div class="hero-chips" id="homechips"></div>
       </section>
+      <div class="gauges stag" style="animation-delay: 60ms">
+        <div class="gauge-c">
+          <div class="gauge" id="gself" style="--gp: 0; --gc: var(--live-v)"><b id="gselfv">–</b></div>
+          <span class="t-ts">Autosufficienza</span><span class="t-bs v">Consumi coperti senza comprare energia</span>
+        </div>
+        <div class="gauge-c">
+          <div class="gauge" id="gown" style="--gp: 0; --gc: var(--sun-v)"><b id="gownv">–</b></div>
+          <span class="t-ts">Autoconsumo</span><span class="t-bs v">Produzione usata in casa, non ceduta</span>
+        </div>
+      </div>
       <div class="sub-h"><h3 class="t-tm">Oggi</h3><span class="t-bs v" id="hometime">Impianto –</span></div>
       <div class="dgrid stag" style="animation-delay: 60ms" id="hometoday"></div>
     </section>
@@ -342,8 +372,16 @@ html.dark,html.dark body{background:#0e0e0e}
         <div class="gh-t"><span class="gh-e">Stato</span><h2 id="c1-t">Impianto</h2><span class="t-bs v">Pannelli, inverter e batteria adesso</span></div>
       </header>
       <div class="dgrid" id="homelive"></div>
-      <div class="sub-h"><h3 class="t-tm">Batteria di casa</h3></div>
-      <div class="dgrid" id="homebattery"></div>
+      <section class="card stag" style="border-radius: 12px 12px 28px 28px" aria-labelledby="hb-t">
+        <div class="ch">
+          <span class="tile-ic sh-cookie4" style="background: var(--bat-c); color: var(--on-bat-c)"><span class="ic f s20" aria-hidden="true">home_storage</span></span>
+          <div class="ch-t"><h3 id="hb-t" class="t-tm">Batteria di casa</h3><span class="t-bs v" id="hbsub">In attesa dei dati</span></div>
+        </div>
+        <div class="batt">
+          <div class="batt-g" id="hbgauge" role="img" aria-label="Batteria di casa"><i id="hbfill" style="height: 0%"></i><span id="hbpct">–</span></div>
+          <div class="kv" id="hbkv"></div>
+        </div>
+      </section>
     </section>
 
     <!-- C3 · STORICO E COSTI -->
@@ -420,14 +458,14 @@ html.dark,html.dark body{background:#0e0e0e}
       <div class="rooms" id="rooms"></div>
       <section class="card stag" style="margin-top: 2px" aria-labelledby="acs-t">
         <div style="display: flex; gap: 16px; align-items: center">
-          <span class="tile-ic sh-cookie4" style="background: var(--cool-c); color: var(--on-cool-c)"><span class="ic f s20" aria-hidden="true">water_drop</span></span>
+          <div class="tank" id="acstank" role="img" aria-label="Accumulo dell'acqua calda"><i id="acsfill" style="height: 0%"></i></div>
           <div style="flex: 1; min-width: 0">
             <h3 id="acs-t" class="t-tm" style="margin: 0">Acqua calda</h3>
+            <div class="kw"><span class="t-dm" id="acstemp">–</span><small>°</small></div>
             <span class="t-bs v" id="acssub"></span>
           </div>
-          <span class="t-hs" id="acstemp">–</span>
         </div>
-        <div class="sum" id="acsgrid"></div>
+        <div class="slots" id="acsgrid"></div>
       </section>
     </section>
 
@@ -437,9 +475,22 @@ html.dark,html.dark body{background:#0e0e0e}
         <span class="gh-ic"><span class="ic f s20" aria-hidden="true">bar_chart</span></span>
         <div class="gh-t"><span class="gh-e">Archivio</span><h2 id="k1-t">Consumi</h2><span class="t-bs v">Quanto pesano clima e acqua calda</span></div>
       </header>
-      <div class="sub-h"><h3 class="t-tm">Oggi</h3><span class="t-bs v" id="climtoday"></span></div>
-      <div class="dgrid" id="climenergy"></div>
-      <section class="card" style="margin-top: 8px" aria-labelledby="km-t">
+      <section class="card r-top" id="climenergy" aria-labelledby="kt-t" hidden>
+        <div style="display: flex; justify-content: space-between; align-items: baseline">
+          <h3 id="kt-t" class="t-tm" style="margin: 0"><span id="climtoday">Oggi</span></h3>
+          <span class="t-hs"><span id="kttot">–</span> <small class="t-bm">kWh</small></span>
+        </div>
+        <div class="hbar" id="kthbar" role="img" aria-label="Consumi di oggi">
+          <i id="kth1" style="flex: 1; background: var(--heat-v)"></i><i id="kth2" style="flex: 1; background: var(--cool-v); animation-delay: 80ms"></i><i id="kth3" style="flex: 1; background: var(--grid-v); animation-delay: 160ms"></i>
+        </div>
+        <div class="sum" style="grid-template-columns: repeat(3, minmax(0, 1fr))">
+          <div><div class="t-hs" style="color: var(--heat)" id="kts1">–</div><div class="t-bs v">Pompa di calore</div></div>
+          <div><div class="t-hs" style="color: var(--cool)" id="kts2">–</div><div class="t-bs v">Acqua calda</div></div>
+          <div><div class="t-hs" id="kts3">–</div><div class="t-bs v">Resto della casa</div></div>
+        </div>
+        <p class="t-bs v" style="margin: 12px 0 0" id="ktnote"></p>
+      </section>
+      <section class="card r-bot" aria-labelledby="km-t">
         <h3 id="km-t" class="t-tm" style="margin: 0">Consumi per mese</h3>
         <span class="t-bs v">Ultimi 12 mesi, kWh</span>
         <div class="legend">
@@ -859,7 +910,11 @@ function renderEvening(s) {
   const dayName = WEEKDAYS[new Date(q.day + "T12:00:00").getDay()].toLowerCase();
   const sun = q.home_kwh > 0 ? "sono previsti fino a " + fmt(q.home_kwh) + " kWh dal sole per l'auto (circa +" + Math.round(q.home_kwh / BATTERY_KWH * 100) + "%)" : "non è previsto sole utile per l'auto";
   const planLab = (k) => "Fino al " + s.plans[k].percent + "% entro le " + hm(s.plans[k].time) + (k === "home" ? ", il resto lo dà il sole" : " con Octopus");
-  $("evetext").textContent = "Domani è " + dayName + (q.home_day ? ", di solito sei a casa" : ", di solito sei fuori") + " · " + (q.home_kwh > 0 ? "sole per l'auto " + fmt(q.home_kwh) + " kWh (circa +" + Math.round(q.home_kwh / BATTERY_KWH * 100) + "%)" : "sole insufficiente per l'auto");
+  $("evetext").textContent = q.asked_at ? "Auto collegata alle " + hhmm(q.asked_at) : "Auto collegata";
+  const facts = $("evefacts"), fact = (icon, text, color) => { const f = el("span", "fact"), g = el("span", "ic", icon); g.setAttribute("aria-hidden", "true"); if (color) g.style.color = color; f.append(g, text); return f; };
+  facts.textContent = "";
+  facts.append(fact("calendar_today", "Domani è " + dayName), fact("home", q.home_day ? "Di solito sei a casa" : "Di solito sei fuori"),
+    q.home_kwh > 0 ? fact("wb_sunny", "Sole per l'auto " + fmt(q.home_kwh) + " kWh", "#ffba3b") : fact("cloud", "Sole insufficiente per l'auto"));
   $("evehomelab").textContent = planLab("home");
   $("evenightlab").textContent = planLab("night");
   $("evehome").classList.toggle("rec", q.suggestion === "home");
@@ -1139,25 +1194,34 @@ function cell(label, value, unit, sub) {
   c.append(v, el("span", "t-bs v", sub));
   return c;
 }
+function cellWait(label, sub, have, need) {
+  const c = el("div", "dcell wait"), v = el("span", "dval", "–");
+  c.append(el("span", "t-lm v", label), v, el("span", "t-bs v", sub));
+  const lin = el("div", "lin"), fill = el("i", "");
+  lin.style.marginTop = "auto";
+  fill.style.width = Math.min(100, Math.round((have || 0) / Math.max(need || 1, 1) * 100)) + "%";
+  lin.append(fill); c.append(lin);
+  return c;
+}
 function renderInsights() {
   const box = $("insights"), i = state.status && state.status.car_info, n = (state.hist && state.hist.insights) || {};
   box.textContent = "";
   box.append(n.capacity_kwh != null
     ? cell("Capacità della batteria", fmt(n.capacity_kwh), "kWh", "Stima su " + n.capacity_points + " punti caricati sotto osservazione")
-    : cell("Capacità della batteria", "–", "", "Servono " + (n.capacity_points_needed || 10) + " punti di carica osservati, finora " + (n.capacity_points || 0)));
+    : cellWait("Capacità della batteria", "Servono " + (n.capacity_points_needed || 10) + " punti di carica osservati, finora " + (n.capacity_points || 0), n.capacity_points, n.capacity_points_needed || 10));
   const trend = n.full_range_first_km != null && n.full_range_first_km !== n.full_range_km
     ? "Erano " + n.full_range_first_km + " km il " + Number(n.full_range_since.slice(8, 10)) + "/" + Number(n.full_range_since.slice(5, 7))
     : "Quanti km l'auto si attribuisce a batteria piena";
   box.append(cell("Autonomia al 100%", n.full_range_km != null ? String(n.full_range_km) : "–", n.full_range_km != null ? "km" : "", trend));
   box.append(n.efficiency != null
     ? cell("Efficienza di ricarica", n.efficiency + "%", "", "Energia arrivata in batteria su " + fmt(n.efficiency_kwh) + " kWh presi dalla presa")
-    : cell("Efficienza di ricarica", "–", "", "Servono " + (n.efficiency_kwh_needed || 2) + " kWh osservati, finora " + fmt(n.efficiency_kwh || 0)));
+    : cellWait("Efficienza di ricarica", "Servono " + (n.efficiency_kwh_needed || 2) + " kWh osservati, finora " + fmt(n.efficiency_kwh || 0), n.efficiency_kwh, n.efficiency_kwh_needed || 2));
   box.append(n.plug_voltage != null
     ? cell("Presa sotto carico", String(n.plug_voltage), "V", "A " + n.plug_amps + " A, lettura del " + Number(n.plug_time.slice(8, 10)) + "/" + Number(n.plug_time.slice(5, 7)) + " alle " + hhmm(n.plug_time))
     : cell("Presa sotto carico", "–", "", "Tensione misurata dall'auto mentre carica"));
   box.append(n.idle_percent_per_day != null
     ? cell("Consumo da ferma", fmt(n.idle_percent_per_day) + "%", "al giorno", "Su " + n.idle_hours + " ore di sosta tra due letture")
-    : cell("Consumo da ferma", "–", "", "Servono " + (n.idle_hours_needed || 12) + " ore di sosta osservate, finora " + (n.idle_hours || 0)));
+    : cellWait("Consumo da ferma", "Servono " + (n.idle_hours_needed || 12) + " ore di sosta osservate, finora " + (n.idle_hours || 0), n.idle_hours, n.idle_hours_needed || 12));
   if (i && i.usable_level != null) {
     const locked = i.level - i.usable_level;
     box.append(cell("Batteria utilizzabile", i.usable_level + "%", "", locked > 0 ? locked + (locked === 1 ? " punto bloccato" : " punti bloccati") + " dalla batteria fredda" : "Tutta la carica è disponibile"));
@@ -1277,44 +1341,59 @@ function renderHistory(h) {
 const pctOf = (part, whole) => (whole > 0 ? Math.round(Math.min(1, Math.max(0, part / whole)) * 100) + "%" : "–");
 const val = (v, d = 1) => (v == null ? "–" : fmt(v, d));
 function renderHomeHero() {
-  const p = state.status && state.status.plant, h = state.home;
+  const s = state.status, p = s && s.plant, h = state.home;
   if (!p) return;
   const load = Math.max(0, p.inverter_ac_w - p.grid_w), sun = p.pv_w >= 100;
   const exporting = p.grid_w > 100, importing = p.grid_w < -100;
   const charging = p.battery_w > 100, discharging = p.battery_w < -100;
-  let title, tone, icon, shape;
+  const car = carNow(s);
+  const carW = s.octopus === "BOOSTING"
+    ? (car && car.charging && car.amps ? car.amps * (car.voltage > 100 ? car.voltage : NOMINAL_V) : ((s.decision && s.decision.amps) || 0) * NOMINAL_V)
+    : 0;
+  const house = Math.max(0, load - carW);
+  let title, tone;
   if (sun && !importing && !discharging) {
-    title = exporting ? "I pannelli coprono la casa e avanza energia" : charging ? "I pannelli coprono la casa e caricano la batteria" : "I pannelli coprono la casa";
-    tone = "t-sun"; icon = "solar_power"; shape = "sh-sunny";
+    title = carW ? "I pannelli coprono la casa e caricano l'auto" : exporting ? "I pannelli coprono la casa e avanza energia" : charging ? "I pannelli coprono la casa e caricano la batteria" : "I pannelli coprono la casa";
+    tone = "t-sun";
   } else if (importing) {
-    title = sun ? "I pannelli non bastano: la casa prende anche dalla rete" : "La casa prende dalla rete";
-    tone = "t-idle"; icon = "electrical_services"; shape = "sh-pentagon";
+    title = sun ? "I pannelli non bastano: la casa prende anche dalla rete" : carW ? "L'auto carica dalla rete" : "La casa prende dalla rete";
+    tone = "t-idle";
   } else if (discharging) {
     title = sun ? "Pannelli e batteria alimentano la casa" : "La casa va a batteria";
-    tone = "t-night"; icon = "home_storage"; shape = "sh-cookie4";
+    tone = "t-night";
   } else {
-    title = "Casa in equilibrio"; tone = "t-idle"; icon = "home"; shape = "sh-pentagon";
+    title = "Casa in equilibrio"; tone = "t-idle";
   }
   $("homehero").className = "hero stag " + tone;
-  $("homewrap").className = "hs-wrap " + (sun && tone === "t-sun" ? "spin-slow" : "");
-  $("homeshape").className = "hshape " + shape;
-  $("homeicon").textContent = icon;
-  $("homekw").textContent = sun ? kw(p.pv_w) : kw(load);
-  $("homekwsub").textContent = sun ? "dai pannelli" : "consumati dalla casa";
   $("hometitle").textContent = title;
   $("homechiptext").textContent = sun && tone === "t-sun" ? "Sole attivo" : importing ? "Dalla rete" : discharging ? "A batteria" : "In equilibrio";
   $("homechip").classList.toggle("pulse", sun && tone === "t-sun");
   if (sun && tone === "t-sun") $("homechip").style.setProperty("--dot", "#e39e00"); else $("homechip").style.removeProperty("--dot");
-  const parts = ["Casa " + kw(load) + " kW"];
-  parts.push(charging ? "batteria in carica a " + kw(p.battery_w) + " kW" : discharging ? "batteria cede " + kw(p.battery_w) + " kW" : "batteria ferma");
-  parts.push(exporting ? "in rete " + kw(p.grid_w) + " kW" : importing ? "dalla rete " + kw(p.grid_w) + " kW" : "nessuno scambio con la rete");
-  $("homereason").textContent = parts.join(" · ") + ". Dato delle " + p.data_time.slice(11, 16) + ".";
+  // nodi e linee del diagramma: le linee scorrono nel verso del flusso
+  $("fpv").textContent = (p.pv_w < 50 ? "0" : kw(p.pv_w)) + " kW";
+  $("flpv").className = "fl v" + (sun ? " on" : "");
+  $("fbat").textContent = charging || discharging ? kw(p.battery_w) + " kW" : "ferma";
+  $("fbatl").textContent = "Batteria " + p.battery_soc + "%";
+  $("flbat").className = "fl h" + (discharging ? " on" : charging ? " on rev" : "");
+  $("fload").textContent = kw(house) + " kW";
+  $("fgrid").textContent = exporting ? "cedi " + kw(p.grid_w) : importing ? "prelevi " + kw(p.grid_w) : "0 kW";
+  $("flgrid").className = "fl h" + (exporting ? " on" : importing ? " on rev" : "");
+  $("fcar").textContent = carW ? kw(carW) + " kW" : "ferma";
+  $("flcar").className = "fl v" + (carW ? " on" : "");
+  $("homeflow").setAttribute("aria-label", "Pannelli " + kw(p.pv_w) + " kilowatt; casa " + kw(house) + "; auto " + kw(carW) + "; "
+    + (exporting ? kw(p.grid_w) + " ceduti alla rete" : importing ? kw(p.grid_w) + " presi dalla rete" : "nessuno scambio con la rete") + "; batteria "
+    + (charging ? "in carica" : discharging ? "in scarica" : "ferma") + " al " + p.battery_soc + " per cento");
+  $("homereason").textContent = "Dato dell'impianto delle " + p.data_time.slice(11, 16) + ", nuovo alle " + after(p.data_time, 300) + ".";
   const chips = $("homechips");
   chips.textContent = "";
   chips.append(chip("home_storage", "Batteria " + p.battery_soc + "%"));
   if (h && h.days && h.days.length) {
     const d = h.days[h.days.length - 1];
-    chips.append(chip("bolt", "Prodotti oggi " + val(d.pv) + " kWh"), chip("verified", "Autosufficienza " + pctOf(d.load - d.imported, d.load)));
+    chips.append(chip("bolt", "Prodotti oggi " + val(d.pv) + " kWh"));
+    const self = d.load > 0 ? Math.round(Math.min(1, Math.max(0, (d.load - d.imported) / d.load)) * 100) : 0;
+    const own = d.pv > 0 ? Math.round(Math.min(1, Math.max(0, (d.pv - d.exported) / d.pv)) * 100) : 0;
+    $("gself").style.setProperty("--gp", self); $("gselfv").textContent = self + "%";
+    $("gown").style.setProperty("--gp", own); $("gownv").textContent = own + "%";
   }
 }
 function renderHome(h) {
@@ -1329,8 +1408,6 @@ function renderHome(h) {
     cell("Consumata", val(d.load), "kWh", "Casa e auto insieme"),
     cell("Presa dalla rete", val(d.imported), "kWh", "Energia comprata"),
     cell("Ceduta alla rete", val(d.exported), "kWh", "Energia non usata in casa"),
-    cell("Autosufficienza", pctOf(d.load - d.imported, d.load), "", "Consumi coperti senza comprare energia"),
-    cell("Autoconsumo", pctOf(d.pv - d.exported, d.pv), "", "Produzione usata in casa, non ceduta"),
   );
   const l = h.live, live = $("homelive");
   live.textContent = "";
@@ -1339,15 +1416,20 @@ function renderHome(h) {
     cell("Inverter", l.inverter_temp != null ? Math.round(l.inverter_temp) + "°" : "–", "", "Eroga " + kw(l.inverter_w || 0) + " kW"),
     cell("Rete", val(l.grid_v, 0), "V", val(l.grid_hz, 2) + " Hz · " + (Math.abs(l.grid_w || 0) < 50 ? "nessuno scambio" : l.grid_w > 0 ? "cedi " + kw(l.grid_w) + " kW" : "prelevi " + kw(l.grid_w) + " kW")),
   );
-  const b = h.battery, bat = $("homebattery");
-  bat.textContent = "";
-  bat.append(
-    cell("Carica", b.soc != null ? b.soc + "%" : "–", "", val(b.remaining_kwh) + " kWh disponibili"),
-    cell("Potenza", kw(b.power_w || 0), "kW", (b.power_w || 0) > 50 ? "Si sta caricando" : (b.power_w || 0) < -50 ? "Si sta scaricando" : "Ferma"),
-    cell("Salute", b.soh != null ? b.soh + "%" : "–", "", "Capacità rimasta rispetto a nuova"),
-    cell("Cicli", b.cycles != null ? b.cycles.toLocaleString("it-IT") : "–", "", "Cariche e scariche complete"),
-    cell("Temperatura", b.temp != null ? Math.round(b.temp) + "°" : "–", "", val(b.voltage, 0) + " V ai morsetti"),
-    cell("Resa", pctOf(b.discharged_kwh, b.charged_kwh), "", "Energia restituita su " + Math.round(b.charged_kwh || 0).toLocaleString("it-IT") + " kWh immagazzinati"),
+  const b = h.battery, kv = $("hbkv");
+  const soc = b.soc != null ? b.soc : 0;
+  $("hbsub").textContent = val(b.remaining_kwh) + " kWh disponibili · " + ((b.power_w || 0) > 50 ? "in carica a " + kw(b.power_w) + " kW" : (b.power_w || 0) < -50 ? "si scarica a " + kw(b.power_w) + " kW" : "ferma");
+  $("hbfill").style.height = soc + "%";
+  $("hbpct").textContent = b.soc != null ? soc + "%" : "–";
+  $("hbgauge").setAttribute("aria-label", "Batteria di casa al " + soc + " per cento");
+  kv.textContent = "";
+  const kvRow = (label, value, wide) => { const d = el("div", ""); if (wide) d.style.gridColumn = "span 2"; d.append(el("span", "t-bs v", label), el("b", "", value)); return d; };
+  kv.append(
+    kvRow("Salute", b.soh != null ? b.soh + "%" : "–"),
+    kvRow("Cicli", b.cycles != null ? b.cycles.toLocaleString("it-IT") : "–"),
+    kvRow("Temperatura", b.temp != null ? Math.round(b.temp) + "°" : "–"),
+    kvRow("Tensione", b.voltage != null ? val(b.voltage, 0) + " V" : "–"),
+    kvRow("Resa: energia restituita su " + Math.round(b.charged_kwh || 0).toLocaleString("it-IT") + " kWh immagazzinati", pctOf(b.discharged_kwh, b.charged_kwh), true),
   );
   renderHomeChart(h);
   const f = h.lifetime, life = $("homelife");
@@ -1484,25 +1566,23 @@ function renderClimate(k) {
   }
 
   const h = k.hot_water;
-  $("acstemp").textContent = deg(h.temp);
-  $("acssub").textContent = "Temperatura attuale dell'accumulo";
+  $("acstemp").textContent = h.temp != null ? fmt(h.temp, 0) : "–";
+  $("acsfill").style.height = Math.max(0, Math.min(100, Math.round((h.temp || 0) / 65 * 100))) + "%";
+  $("acstank").setAttribute("aria-label", "Accumulo a " + deg(h.temp, 0));
+  $("acssub").textContent = "Accumulo · mantenimento " + deg(h.keep, 0) + (k.today ? " · oggi " + fmt(k.today.hot_water) + " kWh" : "");
   const g = $("acsgrid");
   g.textContent = "";
-  const slot = (label, value) => { const d = el("div", ""); d.append(el("div", "t-hs", value), el("div", "t-bs v", label)); return d; };
-  for (const r of h.requests) if (r.time) g.append(slot("dalle " + r.time, deg(r.temp, 0)));
-  g.append(slot("mantenimento", deg(h.keep, 0)));
-  if (k.today) g.append(slot("consumati oggi", fmt(k.today.hot_water) + " kWh"));
+  for (const r of h.requests) if (r.time) { const s1 = el("span", "slot"), ic1 = el("span", "ic s18", "schedule"); ic1.style.color = "var(--heat)"; ic1.setAttribute("aria-hidden", "true"); s1.append(ic1, "dalle " + r.time + " a " + deg(r.temp, 0)); g.append(s1); }
 
-  const e = k.today, box = $("climenergy");
-  box.textContent = "";
+  const e = k.today;
+  $("climenergy").hidden = !e;
   if (e) {
-    $("climtoday").textContent = "fino alle " + e.to.slice(11, 16);
-    box.append(
-      cell("Pompa di calore", fmt(e.heat_pump), "kWh", "Riscaldamento e raffrescamento"),
-      cell("Acqua calda", fmt(e.hot_water), "kWh", "Produzione sanitaria"),
-      cell("Resto della casa", fmt(e.other), "kWh", "Tutto ciò che non è pompa di calore"),
-      cell("Totale", fmt(e.home), "kWh", pctOf(e.heat_pump + e.hot_water, e.home) + " per clima e acqua calda"),
-    );
+    $("climtoday").textContent = "Oggi, fino alle " + e.to.slice(11, 16);
+    $("kttot").textContent = fmt(e.home);
+    $("kth1").style.flex = String(Math.max(0.02, e.heat_pump)); $("kth2").style.flex = String(Math.max(0.02, e.hot_water)); $("kth3").style.flex = String(Math.max(0.02, e.other));
+    $("kthbar").setAttribute("aria-label", "Pompa di calore " + fmt(e.heat_pump) + ", acqua calda " + fmt(e.hot_water) + ", resto della casa " + fmt(e.other) + " kWh");
+    $("kts1").textContent = fmt(e.heat_pump); $("kts2").textContent = fmt(e.hot_water); $("kts3").textContent = fmt(e.other);
+    $("ktnote").textContent = "Clima e acqua calda valgono il " + pctOf(e.heat_pump + e.hot_water, e.home) + " dei consumi di oggi.";
   }
   renderClimateChart(k);
 
