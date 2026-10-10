@@ -46,7 +46,8 @@ Nella fascia diurna, con l'auto collegata:
 
 - all'auto va l'80% di quello che producono i pannelli: se danno 2 kW, l'auto ne riceve 1,6;
 - il massimo è la corrente massima impostata (12 A, un ampere sotto il limite del cavo);
-- l'auto non accetta meno di 5 A (circa 1,1 kW): se la quota dei pannelli non ci arriva, il sistema non preleva da rete o batteria di casa ma chiede il consenso, con una notifica al giorno;
+- l'auto non accetta meno di 5 A (circa 1,1 kW): se la quota dei pannelli non ci arriva, il sistema non preleva da rete o batteria di casa ma chiede il consenso, con una notifica al giorno. Se la previsione dà sole sufficiente più tardi, la richiesta aspetta quell'ora (più una di tolleranza) invece di arrivare all'alba;
+- quando il sole arriva a bastare per l'auto lo segnala una volta al giorno: con l'auto collegata parte la carica, scollegata arriva una notifica che invita a collegarla, solo nelle ore in cui di solito è a casa (`HOME_PLAN`);
 - il consenso vale fino a fine giornata e si può revocare: con il consenso l'auto carica al minimo anche senza sole;
 - una nuvola di passaggio non ferma la carica: senza consenso lo stop arriva dopo più letture consecutive insufficienti;
 - appena collegata l'auto, il sistema aspetta qualche minuto prima di avviare la carica, perché nei primi istanti Octopus prende in carico l'auto e annulla una carica immediata appena richiesta; se Octopus non conferma l'avvio, il sistema riprova al ciclo successivo;

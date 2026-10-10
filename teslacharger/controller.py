@@ -9,11 +9,13 @@ from dataclasses import asdict, replace
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from .config import Settings
+from .config import Settings, _home_plan
 from .emmeti import EmmetiClient, describe
 from .history import History
 from .octopus import MIN_TARGET, READY_TIMES, STATE_PLANNED, OctopusClient
-from .policy import Action, CarStatus, ControlState, Decision, Mode, decide, plan_battery_hold, precheck
+from .policy import (
+    Action, CarStatus, ControlState, Decision, Mode, consent_due, decide, enough_sun, plan_battery_hold, precheck,
+)
 from .push import PushService
 from .solax import MAX_HOLD_SECONDS, SolaxClient
 from . import weather
@@ -74,6 +76,8 @@ class Controller:
         # Giorni in cui sono già avvenuti il passaggio del mattino e la richiesta di consenso
         self.switched_on: str | None = None
         self.asked_on: str | None = None
+        # Giorno in cui si è già avvisato che il sole basta per l'auto
+        self.sun_notified_on: str | None = None
         # Batteria di casa a riposo durante la carica notturna: scelta dell'utente e blocco in corso
         # Domanda della sera: nessuna carica, domani a casa oppure automatico
         self.evening: dict | None = None
@@ -123,6 +127,7 @@ class Controller:
         self.events = saved.get("events", [])
         self.switched_on = saved.get("switched_on")
         self.asked_on = saved.get("asked_on")
+        self.sun_notified_on = saved.get("sun_notified_on")
         self.evening = saved.get("evening")
         # Prima dei piani esisteva solo il livello pieno
         saved_plans = saved.get("plans") or {"night": {"percent": saved.get("full_target", 100)}}
@@ -146,6 +151,7 @@ class Controller:
                 "events": self.events,
                 "switched_on": self.switched_on,
                 "asked_on": self.asked_on,
+                "sun_notified_on": self.sun_notified_on,
                 "evening": self.evening,
                 "plans": self.plans,
                 "hold_enabled": self.hold_enabled,
@@ -571,6 +577,41 @@ class Controller:
             self.history.log_car(now, info)
         self.status["car"] = {**asdict(car), "time": now.isoformat(timespec="seconds")} if car else None
 
+    def _today_forecast(self, now: datetime) -> dict | None:
+        """La previsione di oggi, o None se non si riesce a leggerla."""
+        try:
+            days = self.forecast_summary().get("days", [])
+        except Exception as err:
+            log.warning("previsione del sole non letta: %s", err)
+            return None
+        today = now.date().isoformat()
+        return next((d for d in days if d["day"] == today), None)
+
+    def _sun_notice(self, now: datetime, plant, vehicle) -> None:
+        """Una volta al giorno, quando il sole arriva a bastare per l'auto.
+
+        Con l'auto collegata la carica parte da sola e arriva la sua notifica. Scollegata,
+        si avvisa di collegarla, ma solo nelle ore in cui di solito è a casa (HOME_PLAN):
+        a chi è al lavoro il sole sul tetto non serve.
+        """
+        today = now.date().isoformat()
+        in_day = self.settings.day_start <= now.time() < self.settings.day_end
+        if self.sun_notified_on == today or not in_day or not enough_sun(plant, self.settings):
+            return
+        self.sun_notified_on = today
+        self._event("sunny", "Sole sufficiente per l'auto", f"Pannelli a {plant.pv_w:.0f} W, sopra il minimo")
+        if vehicle.plugged:
+            return
+        plan = _home_plan()
+        if plan and not any(start <= now.hour < end for start, end in plan.get(now.weekday(), ())):
+            return
+        kw = f"{plant.pv_w / 1000:.1f}".replace(".", ",")
+        end = self.settings.day_end.strftime("%H:%M")
+        self._notify(
+            "C'è abbastanza sole per caricare",
+            f"Pannelli a {kw} kW. Collega l'auto per caricare col sole fino alle {end}.",
+        )
+
     def _auto_switch(self, now: datetime, ours: bool) -> None:
         """Passaggi automatici: al mattino a "carica col sole", la sera ad "automatica"."""
         today = now.date().isoformat()
@@ -695,6 +736,7 @@ class Controller:
         self.status["planned"] = self._planned_window(vehicle.device_id, now)
         self._check_skipped_night(now, vehicle, self.status["planned"])
         self._auto_switch(now, vehicle.boosting and self.state.started_by_us)
+        self._sun_notice(now, plant, vehicle)
 
         if not vehicle.plugged:
             self._car_stale = True
@@ -733,14 +775,25 @@ class Controller:
             decision.action.value, decision.reason,
         )
         if decision.ask and self.asked_on != now.date().isoformat():
-            self.asked_on = now.date().isoformat()
-            kw = f"{plant.pv_w / 1000:.1f}".replace(".", ",")
-            end = self.settings.day_end.strftime("%H:%M")
-            self._event("notifications", "Richiesta di consenso", f"Pannelli a {plant.pv_w:.0f} W, sotto il minimo")
-            self._notify(
-                "Sole insufficiente per l'auto",
-                f"Pannelli a {kw} kW. Tocca per caricare al minimo da batteria di casa e rete fino alle {end}.",
-            )
+            today = self._today_forecast(now)
+            if not consent_due(now, today):
+                # Il 10 ottobre la richiesta è partita alle 08:32 con 244 W: il sole non c'era
+                # ancora, non mancava. Si aspetta l'ora prevista prima di disturbare.
+                sun_from = today["car_from"]
+                log.info("sole insufficiente ma previsto dalle %s: il consenso si chiede dopo", sun_from)
+                self.status["decision"]["reason"] = (
+                    f"sole insufficiente, previsto sufficiente dalle {sun_from}: "
+                    "se non arriva ti chiedo se caricare da rete o batteria di casa"
+                )
+            else:
+                self.asked_on = now.date().isoformat()
+                kw = f"{plant.pv_w / 1000:.1f}".replace(".", ",")
+                end = self.settings.day_end.strftime("%H:%M")
+                self._event("notifications", "Richiesta di consenso", f"Pannelli a {plant.pv_w:.0f} W, sotto il minimo")
+                self._notify(
+                    "Sole insufficiente per l'auto",
+                    f"Pannelli a {kw} kW. Tocca per caricare al minimo da batteria di casa e rete fino alle {end}.",
+                )
         if decision.action is Action.START and self._plugged_at and now - self._plugged_at < PLUG_SETTLE:
             # Il 9 ottobre una carica chiesta sei secondi dopo il collegamento è stata annullata da Octopus
             log.info("auto appena collegata: avvio rimandato al prossimo ciclo")

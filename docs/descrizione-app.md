@@ -67,6 +67,10 @@ Quando è attiva "Carica col sole", l'auto è collegata e il sole non basta a ra
 
 Il consenso vale fino alle 19:00 dello stesso giorno e può essere revocato in qualsiasi momento. Con il consenso attivo, l'auto carica al minimo quando il sole non basta e segue i pannelli quando il sole c'è. La richiesta arriva anche come notifica, una sola volta al giorno.
 
+La richiesta non arriva all'alba solo perché il sole non è ancora alto: se la previsione dice che più tardi basterà, il sistema aspetta quell'ora, più una di tolleranza, e chiede solo se il sole non si presenta. Se la previsione dice che oggi non basterà mai, chiede subito.
+
+Il momento in cui il sole arriva a bastare per l'auto viene segnalato una volta al giorno. Con l'auto collegata parte la carica e arriva la notifica di avvio. Con l'auto scollegata arriva una notifica che invita a collegarla, ma solo nelle ore in cui di solito l'auto è a casa: a chi è al lavoro il sole sul tetto non serve.
+
 ## La domanda della sera
 
 Quando l'auto viene collegata dopo le 18, il sistema chiede all'utente come comportarsi per la notte, con una notifica e con un riquadro in cima alla sezione "Ricarica". Le risposte possibili sono tre:
