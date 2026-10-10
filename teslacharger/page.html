@@ -19,10 +19,41 @@
 body{margin:0}
 a{color:#3b3b3b}a:hover{color:#000000}
 /* ===== M3 color roles · Scheme Monochrome · materiali Tesla: argento, grafite, nero opaco, nero lucido ===== */
-.app{--p:#111111;--onp:#f5f5f5;--pc:#d9d9d9;--onpc:#1b1b1b;--s:#5e5e5e;--sc:#e2e2e2;--onsc:#1b1b1b;--t:#3b3b3b;--ont:#f1f1f1;--tc:#cfcfcf;--ontc:#1b1b1b;--e:#ba1a1a;--one:#ffffff;--ec:#ffdad6;--onec:#410002;--sf:#f9f9f9;--onsf:#1b1b1b;--onsfv:#474747;--sclo:#ffffff;--scl:#f3f3f3;--sco:#eeeeee;--sch:#e8e8e8;--schh:#e2e2e2;--ol:#777777;--olv:#c6c6c6;--inv:#303030;--oninv:#f1f1f1;--invp:#c6c6c6;--pf:#c9c9c9;--onpf:#111111;--n:#5e5e5e;--onn:#f1f1f1;--nc:#1c1c1c;--onnc:#e2e2e2;--c-sun:#a8a8a8;--c-day:#6a6a6a;--c-night:#1b1b1b;--scrim:rgba(0,0,0,.4);
+.app{--p:#111111;--onp:#f5f5f5;--pc:#d9d9d9;--onpc:#1b1b1b;--s:#5e5e5e;--sc:#e2e2e2;--onsc:#1b1b1b;--t:#3b3b3b;--ont:#f1f1f1;--tc:#cfcfcf;--ontc:#1b1b1b;--e:#ba1a1a;--one:#ffffff;--ec:#ffdad6;--onec:#410002;--sf:#f9f9f9;--onsf:#1b1b1b;--onsfv:#474747;--sclo:#ffffff;--scl:#f3f3f3;--sco:#eeeeee;--sch:#e8e8e8;--schh:#e2e2e2;--ol:#777777;--olv:#c6c6c6;--inv:#303030;--oninv:#f1f1f1;--invp:#c6c6c6;--pf:#c9c9c9;--onpf:#111111;--n:#5e5e5e;--onn:#f1f1f1;--nc:#1c1c1c;--onnc:#e2e2e2;--scrim:rgba(0,0,0,.4);
 --silver:linear-gradient(135deg,#f4f4f4 0%,#cfcfcf 34%,#e9e9e9 52%,#b9b9b9 78%,#dedede 100%);--gloss:linear-gradient(160deg,#3a3a3a 0%,#0c0c0c 38%,#000000 62%,#262626 100%)}
-.app.dark{--p:#ededed;--onp:#111111;--pc:#2e2e2e;--onpc:#f1f1f1;--s:#c6c6c6;--sc:#3d3d3d;--onsc:#e2e2e2;--t:#d4d4d4;--ont:#1b1b1b;--tc:#3b3b3b;--ontc:#f1f1f1;--e:#ffb4ab;--one:#690005;--ec:#93000a;--onec:#ffdad6;--sf:#0e0e0e;--onsf:#e2e2e2;--onsfv:#c6c6c6;--sclo:#000000;--scl:#181818;--sco:#1f1f1f;--sch:#242424;--schh:#303030;--ol:#919191;--olv:#3f3f3f;--inv:#e2e2e2;--oninv:#303030;--invp:#5e5e5e;--pf:#d4d4d4;--onpf:#111111;--n:#9e9e9e;--onn:#111111;--nc:#050505;--onnc:#e2e2e2;--c-sun:#e2e2e2;--c-day:#8a8a8a;--c-night:#4a4a4a;--scrim:rgba(0,0,0,.6);
+.app.dark{--p:#ededed;--onp:#111111;--pc:#2e2e2e;--onpc:#f1f1f1;--s:#c6c6c6;--sc:#3d3d3d;--onsc:#e2e2e2;--t:#d4d4d4;--ont:#1b1b1b;--tc:#3b3b3b;--ontc:#f1f1f1;--e:#ffb4ab;--one:#690005;--ec:#93000a;--onec:#ffdad6;--sf:#0e0e0e;--onsf:#e2e2e2;--onsfv:#c6c6c6;--sclo:#000000;--scl:#181818;--sco:#1f1f1f;--sch:#242424;--schh:#303030;--ol:#919191;--olv:#3f3f3f;--inv:#e2e2e2;--oninv:#303030;--invp:#5e5e5e;--pf:#d4d4d4;--onpf:#111111;--n:#9e9e9e;--onn:#111111;--nc:#050505;--onnc:#e2e2e2;--scrim:rgba(0,0,0,.6);
 --silver:linear-gradient(135deg,#5a5a5a 0%,#2c2c2c 34%,#474747 52%,#232323 78%,#3c3c3c 100%);--gloss:linear-gradient(160deg,#f6f6f6 0%,#cfcfcf 40%,#e8e8e8 58%,#b4b4b4 100%)}
+/* ===== Colori funzionali (M3 custom colors, palette tonali da seme) =====
+   live = stato e carica · ctl = controlli · sun = sole · bat = batteria di casa · oct = notte Octopus · heat = riscaldamento · cool = acqua e raffrescamento */
+.app{--live:#007b40;--live-c:#def0dd;--on-live-c:#004521;--live-v:#23a55c;
+--ctl:#2455cc;--on-ctl:#ffffff;--ctl-c:#e7eaff;--on-ctl-c:#003392;--ctl-v:#3e6ae1;
+--sun:#7f5700;--sun-c:#ffe8c8;--on-sun-c:#513600;--sun-v:#e39e00;
+--bat:#00696e;--bat-c:#d8eff1;--on-bat-c:#004346;--bat-v:#0fa0a7;
+--oct:#6142d5;--oct-c:#eee8fe;--on-oct-c:#3c0cb1;--oct-v:#7a5eef;
+--heat:#a63b00;--heat-c:#ffe6dd;--on-heat-c:#6c2400;--heat-v:#f56218;
+--cool:#006689;--cool-c:#d9eefc;--on-cool-c:#004058;--cool-v:#209bcc;
+--grid-c:#e8e8e8;--on-grid-c:#474747;--grid-v:#8a8a8a}
+.app.dark{--live:#65dd8d;--live-c:#29382c;--on-live-c:#7df5a2;--live-v:#47c174;
+--ctl:#b4c4ff;--on-ctl:#00297a;--ctl-c:#303444;--on-ctl-c:#d4dbff;--ctl-v:#8da8ff;
+--sun:#ffba3b;--sun-c:#40331d;--on-sun-c:#ffd79a;--sun-v:#ffba3b;
+--bat:#62d7de;--bat-c:#243839;--on-bat-c:#7beef5;--bat-v:#41bbc2;
+--oct:#cabeff;--oct-c:#363343;--on-oct-c:#e0d8ff;--oct-v:#af9eff;
+--heat:#ffb598;--heat-c:#492e24;--on-heat-c:#ffd4c4;--heat-v:#ff8c5c;
+--cool:#79d1ff;--cool-c:#243742;--on-cool-c:#b6e3ff;--cool-v:#4ab6e9;
+--grid-c:#2a2a2a;--on-grid-c:#c6c6c6;--grid-v:#7a7a7a}
+.app{--c-sun:var(--sun-v);--c-day:#6e6e6e;--c-night:#5434c8}
+.app.dark{--c-day:#6a6a6a;--c-night:#af9eff}
+/* tipo di parte: colore guida di intestazione e indice */
+.app .k-live{--g:var(--live);--g-on:#ffffff}
+.app .k-ctl{--g:var(--ctl);--g-on:var(--on-ctl)}
+.app .k-arc{--g:#3b3b3b;--g-on:#f1f1f1}
+.app.dark .k-live{--g-on:#00391a}
+.app.dark .k-arc{--g:#c6c6c6;--g-on:#1b1b1b}
+/* colore d'identità della sezione: pillola della barra di navigazione e titolo */
+.app .s-ric{--sec:var(--live);--sec-c:var(--live-c);--on-sec-c:var(--on-live-c)}
+.app .s-casa{--sec:var(--sun);--sec-c:var(--sun-c);--on-sec-c:var(--on-sun-c)}
+.app .s-clima{--sec:var(--heat);--sec-c:var(--heat-c);--on-sec-c:var(--on-heat-c)}
+.app .s-auto{--sec:var(--p);--sec-c:var(--gloss);--on-sec-c:var(--onp)}
 /* ===== M3 Expressive motion · springs as CSS linear() ===== */
 .app{--sp-fast:linear(0,.033,.119,.236,.369,.504,.634,.75,.849,.931,.993,1.039,1.07,1.087,1.094,1.093,1.087,1.077,1.064,1.052,1.039,1.028,1.018,1.009,1.003,.998,.994,.992,.991,.991,.991,.992,.993,.995,.996,.997,1);--sp-def:linear(0,.022,.078,.156,.246,.34,.433,.522,.604,.678,.744,.8,.848,.887,.92,.946,.967,.982,.994,1.003,1.008,1.012,1.014,1.015,1.015,1.014,1.013,1.012,1.011,1.009,1.008,1.007,1.005,1.004,1.003,1.003,1);--ef:linear(0,.024,.082,.158,.243,.329,.413,.491,.562,.626,.682,.731,.773,.81,.841,.868,.89,.909,.925,.938,.949,.958,.965,.972,.977,.981,.984,.987,.99,.992,.993,.994,.995,.996,.997,.998,1);--emph:cubic-bezier(.2,0,0,1)}
 /* ===== Shell ===== */
@@ -52,44 +83,89 @@ a{color:#3b3b3b}a:hover{color:#000000}
 .sl::before{content:'';position:absolute;left:50%;top:50%;width:220%;aspect-ratio:1;border-radius:50%;background:currentColor;opacity:0;transform:translate(-50%,-50%) scale(0);transition:transform 550ms var(--emph),opacity 400ms var(--ef);pointer-events:none;z-index:-1}
 .sl:active::before{opacity:.12;transform:translate(-50%,-50%) scale(1);transition:transform 450ms var(--emph),opacity 0ms}
 button{font:inherit;border:0;background:none;color:inherit;margin:0;padding:0}
-button:focus-visible,a:focus-visible,input:focus-visible+.sl-focus{outline:3px solid var(--s);outline-offset:2px}
-/* ===== Top app bar + tabs ===== */
+button:focus-visible,a:focus-visible{outline:3px solid var(--s);outline-offset:2px}
+/* ===== Top app bar con titolo di sezione ===== */
 .bar{flex:none;background:var(--sf);transition:background-color 300ms var(--ef);position:relative;z-index:3}
 .bar.scrolled{background:var(--sco)}
-.bar-top{height:64px;display:flex;align-items:center;gap:12px;padding:0 8px 0 16px}
+.bar-top{min-height:76px;display:flex;align-items:center;gap:12px;padding:10px 12px 4px 20px}
 .bar-title{flex:1;min-width:0;display:flex;flex-direction:column}
-.bar-title .t-tl{font-weight:600;font-variation-settings:'wdth' 108}
+.bar-h{font-size:30px;line-height:36px;font-weight:650;font-variation-settings:'wdth' 110;letter-spacing:-.2px;animation:fadeThrough 420ms var(--emph) both}
+.bar-app{font-size:11px;line-height:14px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--sec)}
 .chip-dry{display:flex;align-items:center;gap:6px;height:32px;padding:0 12px 0 8px;border-radius:8px;background:var(--tc);color:var(--ontc)}
-.tabs{position:relative;display:flex;height:48px;border-bottom:1px solid var(--olv)}
-.tab{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--onsfv);transition:color 200ms var(--ef)}
-.tab.on{color:var(--p)}
-.tab-ind{position:absolute;bottom:0;left:0;height:3px;width:104px;border-radius:3px 3px 0 0;background:var(--p);transition:transform 500ms var(--sp-def)}
-.scroller{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.scroller{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative}
 .app.full .scroller{overflow:visible}
-.page{padding:16px 16px 112px;display:flex;flex-direction:column;gap:24px}
+.page{padding:4px 16px 40px;display:flex;flex-direction:column;gap:36px}
+/* ===== Barra di navigazione inferiore (M3 Expressive, 4 destinazioni) ===== */
+.nav{flex:none;height:80px;display:flex;align-items:stretch;padding:0 8px;background:var(--sco);border-top:1px solid var(--olv);position:relative;z-index:4}
+.nav-b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--onsfv);font-size:12px;line-height:16px;font-weight:600;letter-spacing:.3px;border-radius:16px}
+.nav-p{position:relative;width:56px;height:32px;display:grid;place-items:center;isolation:isolate}
+.nav-p::before{content:'';position:absolute;inset:0;border-radius:16px;background:var(--sec-c);z-index:-1;transform:scaleX(0);opacity:0;transition:transform 500ms var(--sp-fast),opacity 150ms var(--ef)}
+.nav-b.on{color:var(--onsf)}
+.nav-b.on .nav-p{color:var(--on-sec-c)}
+.nav-b.on .nav-p::before{transform:scaleX(1);opacity:1}
+.nav-b.on .ic{font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
+.nav-b:active .nav-p::before{transform:scaleX(.86)}
+.app.full .nav{display:none}
+/* ===== Struttura per parti: indice, intestazioni, card collegate ===== */
+.idx{display:flex;gap:8px;padding:6px 16px 10px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--olv)}
+.idx-c{flex:none;height:36px;padding:0 14px 0 10px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--olv);border-radius:10px;color:var(--onsfv);font-size:13px;font-weight:600;letter-spacing:.1px;white-space:nowrap;transition:background-color 250ms var(--ef),color 250ms var(--ef),border-radius 400ms var(--sp-fast),border-color 250ms var(--ef)}
+.idx-c.on{background:var(--g);color:var(--g-on);border-color:transparent;border-radius:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.idx-c i{width:8px;height:8px;border-radius:4px;background:var(--g);flex:none;transition:transform 400ms var(--sp-fast)}
+.idx-c.on i{background:var(--g-on);transform:scale(.75)}
+.grp{display:flex;flex-direction:column;gap:6px;scroll-margin-top:8px}
+.gh{display:flex;align-items:center;gap:14px;padding:12px 4px 10px}
+.gh-ic{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;background:var(--g);color:var(--g-on);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.gh-e{font-size:11px;line-height:14px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--g)}
+.gh-t{display:flex;flex-direction:column;min-width:0}
+.gh-t h2{margin:0;font-size:24px;line-height:30px;font-weight:650;font-variation-settings:'wdth' 108}
+/* CONTROLLI: card a contorno, controlli in blu */
+.card.ctl{background:var(--sf);border:1.5px solid var(--olv)}
+.app.dark .card.ctl{background:var(--sclo)}
+.card.ctl .li-ic{background:var(--ctl-c);color:var(--on-ctl-c)}
+/* ARCHIVIO: timeline e righe compatte */
+.tl{display:flex;flex-direction:column}
+.tl-day{display:inline-flex;align-self:flex-start;align-items:center;height:24px;padding:0 10px;margin:14px 0 6px 6px;border-radius:12px;background:var(--sch);color:var(--onsfv);font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase}
+.tl-day:first-child{margin-top:0}
+.tl-i{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:start;padding:6px 0 14px}
+.tl-i::before{content:'';position:absolute;left:21px;top:40px;bottom:-6px;width:2px;border-radius:1px;background:var(--olv)}
+.tl-i.last::before{display:none}
+.tl-n{width:44px;height:36px;border-radius:12px;display:grid;place-items:center;position:relative;z-index:1}
+.tl-t{padding-top:2px;min-width:0}
+.tl-time{padding-top:6px;font-variant-numeric:tabular-nums;color:var(--onsfv);text-align:right}
+.notif-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:20px;background:var(--sch)}
+.live-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px 0 10px;border-radius:14px;font-size:12px;font-weight:700;letter-spacing:.3px;background:rgba(255,255,255,.55);color:#1b1b1b;align-self:flex-start;margin-left:auto}
+.live-chip i{width:8px;height:8px;border-radius:4px;background:var(--dot,#777)}
+.live-chip.pulse i{animation:pulse 1.6s var(--ef) infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--dot) 70%,transparent)}100%{box-shadow:0 0 0 9px transparent}}
+.t-boost .live-chip,.t-night .live-chip,.t-tert .live-chip{background:rgba(255,255,255,.12);color:inherit}
+.app.dark .live-chip{background:rgba(255,255,255,.1);color:inherit}
+.app.dark .t-boost .live-chip{background:rgba(0,0,0,.08)}
+.ch{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.ch-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.ch-t h3{margin:0}
+.card.r-top{border-radius:28px 28px 8px 8px}.card.r-bot{border-radius:8px 8px 28px 28px}.card.r-mid{border-radius:8px}
 .fade-through{animation:fadeThrough 420ms var(--emph) both}
 @keyframes fadeThrough{0%{opacity:0;transform:scale(.94)}35%{opacity:0}100%{opacity:1;transform:none}}
 .stag{animation:rise 650ms var(--sp-def) both}
 @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-.sec-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 4px;margin-bottom:12px}
+.sub-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 4px 8px}
+.sub-h h3{margin:0}
 /* ===== Hero ===== */
 .hero{position:relative;overflow:hidden;isolation:isolate;border-radius:32px;padding:20px;display:flex;flex-direction:column;gap:6px;transition:background-color 500ms var(--ef),color 500ms var(--ef)}
 .hero>*{position:relative;z-index:1}
-/* argento metallico: carica col sole */
-.t-sun{background:var(--silver);color:#1b1b1b;--hs:var(--gloss);--onhs:#f5f5f5;--wave:#111111;--track:rgba(0,0,0,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(0,0,0,.08)}
-.app.dark .t-sun{color:#f1f1f1;--hs:linear-gradient(160deg,#f6f6f6,#bdbdbd);--onhs:#111111;--wave:#ededed;--track:rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
-/* nero lucido: carica subito */
-.t-boost{background:var(--gloss);color:var(--onp);--hs:var(--silver);--onhs:#111111;--wave:var(--onp);--track:color-mix(in srgb,var(--onp) 26%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 24px rgba(0,0,0,.28)}
-.app.dark .t-boost{--hs:linear-gradient(160deg,#3a3a3a,#000);--onhs:#f1f1f1;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
-/* riflesso che scorre sulle superfici lucide mentre l'auto carica */
+.t-sun{background:var(--silver);color:#1b1b1b;--hs:linear-gradient(160deg,#ffd166 0%,#f2a900 52%,#c48600 100%);--onhs:#3a2600;--wave:#b87d00;--track:rgba(0,0,0,.16);--dot:#1fa35a;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(0,0,0,.08)}
+.app.dark .t-sun{color:#f1f1f1;--hs:linear-gradient(160deg,#ffd166 0%,#f2a900 60%,#c48600 100%);--onhs:#3a2600;--wave:#ffba3b;--track:rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.t-boost{background:var(--gloss);color:var(--onp);--hs:var(--silver);--onhs:#111111;--wave:#47c174;--track:color-mix(in srgb,var(--onp) 26%,transparent);--dot:#47c174;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 24px rgba(0,0,0,.28)}
+.app.dark .t-boost{--hs:linear-gradient(160deg,#3a3a3a,#000);--onhs:#f1f1f1;--wave:#007b40;--dot:#007b40;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
 .t-sun::after,.t-boost::after{content:'';position:absolute;top:-20%;bottom:-20%;left:-60%;width:45%;z-index:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.38),transparent);transform:skewX(-18deg);animation:sheen 4.8s var(--emph) infinite;pointer-events:none}
 @keyframes sheen{0%,55%{left:-60%}100%{left:130%}}
-/* grafite satinata: carica con consenso */
-.t-tert{background:var(--t);color:var(--ont);--hs:var(--silver);--onhs:#111111;--wave:var(--ont);--track:color-mix(in srgb,var(--ont) 24%,transparent)}
-/* nero opaco: notte e Automatica */
-.t-night{background:var(--nc);color:var(--onnc);--hs:var(--n);--onhs:var(--onn);--wave:var(--onnc);--track:color-mix(in srgb,var(--onnc) 22%,transparent);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
-.t-idle{background:var(--sch);color:var(--onsf);--hs:var(--schh);--onhs:var(--onsfv);--wave:var(--onsfv);--track:var(--olv)}
-.t-wait{background:var(--sc);color:var(--onsc);--hs:var(--p);--onhs:var(--onp);--wave:var(--s);--track:color-mix(in srgb,var(--s) 24%,transparent)}
+.t-tert{background:var(--t);color:var(--ont);--hs:linear-gradient(160deg,#62d7de,#0fa0a7 60%,#00777c);--onhs:#002022;--wave:#41bbc2;--track:color-mix(in srgb,var(--ont) 24%,transparent);--dot:#41bbc2}
+.app.dark .t-tert{--wave:#00696e;--dot:#00777c}
+.t-night{background:var(--nc);color:var(--onnc);--hs:linear-gradient(160deg,#af9eff,#7a5eef 55%,#5434c8);--onhs:#ffffff;--wave:#af9eff;--dot:#af9eff;--track:color-mix(in srgb,var(--onnc) 22%,transparent);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.t-idle{background:var(--sch);color:var(--onsf);--hs:var(--schh);--onhs:var(--onsfv);--wave:var(--onsfv);--track:var(--olv);--dot:#8a8a8a}
+.t-wait{background:var(--ctl-c);color:var(--on-ctl-c);--hs:var(--ctl);--onhs:var(--on-ctl);--wave:var(--ctl);--track:color-mix(in srgb,var(--ctl) 24%,transparent);--dot:var(--ctl-v)}
+.t-heat{background:var(--heat-c);color:var(--on-heat-c);--hs:linear-gradient(160deg,#ffb598,#f56218 55%,#a63b00);--onhs:#ffffff;--dot:var(--heat-v)}
+.t-cool{background:var(--cool-c);color:var(--on-cool-c);--hs:linear-gradient(160deg,#79d1ff,#209bcc 55%,#006689);--onhs:#ffffff;--dot:var(--cool-v)}
 .hero-row{display:flex;align-items:center;gap:16px;margin-bottom:10px}
 .hs-wrap{width:96px;height:96px;flex:none}
 .spin-slow{animation:spin 24s linear infinite}.spin-fast{animation:spin 7s linear infinite}
@@ -101,17 +177,19 @@ button:focus-visible,a:focus-visible,input:focus-visible+.sl-focus{outline:3px s
 .kw small{font-size:22px;line-height:28px;font-weight:500}
 .hero-title{margin:0;font-size:28px;line-height:36px;font-weight:600;font-variation-settings:'wdth' 106;text-wrap:balance}
 .hero-reason{margin:0;font-size:15px;line-height:22px;opacity:.86;text-wrap:pretty}
+.hero-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.hchip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 8px;border-radius:10px;background:rgba(255,255,255,.5);font-size:12px;font-weight:600}
+.app.dark .hchip,.t-night .hchip,.t-boost .hchip{background:rgba(255,255,255,.1)}
 .prog{position:relative;height:20px;margin-top:14px;display:flex;align-items:center}
 .wclip{height:20px;overflow:hidden;flex:none;transition:width 650ms var(--sp-def)}
 .wclip svg{display:block;animation:wave 1.1s linear infinite}
 .wclip.flat svg{animation:none}
-.wclip path{fill:none;stroke:var(--wave);stroke-width:4;stroke-linecap:round;transition:d 600ms var(--sp-def)}
+.wclip path{fill:none;stroke:var(--wave);stroke-width:4;stroke-linecap:round}
 @keyframes wave{to{transform:translateX(-20px)}}
 .wtrack{flex:1;height:4px;margin-left:6px;border-radius:2px;background:var(--track);position:relative}
 .wtrack::after{content:'';position:absolute;right:0;top:0;width:4px;height:4px;border-radius:2px;background:var(--wave)}
 .wlimit{position:absolute;top:2px;width:3px;height:16px;border-radius:2px;background:currentColor;opacity:.7}
 .prog-lab{display:flex;justify-content:space-between;margin-top:6px;opacity:.86}
-/* contained loading indicator: shape-morph sequence */
 .hshape.loading{background:var(--hs);animation:liMorph 3.4s infinite}
 .hs-wrap.lwrap{animation:spin 2.2s linear infinite;padding:14px}
 @keyframes liMorph{
@@ -133,66 +211,90 @@ button:focus-visible,a:focus-visible,input:focus-visible+.sl-focus{outline:3px s
 .sh-circle{clip-path:var(--sh-circle)}.sh-sunny{clip-path:var(--sh-sunny)}.sh-cookie9{clip-path:var(--sh-cookie9)}.sh-cookie4{clip-path:var(--sh-cookie4)}.sh-clover{clip-path:var(--sh-clover)}.sh-burst{clip-path:var(--sh-burst)}.sh-pentagon{clip-path:var(--sh-pentagon)}.sh-oval{clip-path:var(--sh-oval)}
 /* ===== Cards, tiles ===== */
 .card{background:var(--scl);border-radius:24px;padding:20px}
-.card.hi{background:var(--sch)}
-.card.out{background:transparent;border:1px solid var(--olv)}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.tile{background:var(--scl);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:156px;transition:transform 400ms var(--sp-fast)}
-.tile:first-child{border-radius:28px 12px 12px 12px}.tile:nth-child(2){border-radius:12px 28px 12px 12px}.tile:nth-child(3){border-radius:12px 12px 12px 28px}.tile:nth-child(4){border-radius:12px 12px 28px 12px}
-.tile-ic{width:40px;height:40px;display:grid;place-items:center}
+.tile{background:var(--scl);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:156px}
+.tiles>.tile:nth-child(1){border-radius:28px 12px 12px 12px}.tiles>.tile:nth-child(2){border-radius:12px 28px 12px 12px}.tiles>.tile:nth-child(3){border-radius:12px 12px 12px 28px}.tiles>.tile:nth-child(4){border-radius:12px 12px 28px 12px}
+.tile-ic{width:40px;height:40px;flex:none;display:grid;place-items:center}
 .tile-val{display:flex;align-items:baseline;gap:3px;font-size:32px;line-height:38px;font-weight:550;font-variation-settings:'wdth' 104}
 .tile-val small{font-size:15px;font-weight:550}
 .meter{height:8px;border-radius:4px;background:var(--schh);overflow:hidden;margin-top:auto}
-.meter i{display:block;height:100%;border-radius:4px;background:var(--p);transition:width 700ms var(--sp-def)}
+.meter i{display:block;height:100%;border-radius:4px;transition:width 700ms var(--sp-def)}
 .chip-a{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px 0 8px;border:1px solid var(--olv);border-radius:8px;color:var(--onsfv)}
 /* ===== Connected button group (Expressive) ===== */
 .cbg{display:flex;gap:2px}
 .cbg-b{flex:1 1 0;min-width:0;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--sch);color:var(--onsfv);border-radius:12px;transition:border-radius 450ms var(--sp-fast),flex-grow 450ms var(--sp-fast),background-color 250ms var(--ef),color 250ms var(--ef)}
 .cbg-b:first-child{border-radius:40px 12px 12px 40px}.cbg-b:last-child{border-radius:12px 40px 40px 12px}
-.cbg-b.on{background:var(--gloss);color:var(--onp);border-radius:40px;flex-grow:1.25;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(0,0,0,.22)}
+.cbg-b.on{background:var(--ctl);color:var(--on-ctl);border-radius:40px;flex-grow:1.25;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 8px color-mix(in srgb,var(--ctl) 35%,transparent)}
 .cbg-b:active{flex-grow:1.45;border-radius:20px}
 .cbg-b .ic{transition:transform 450ms var(--sp-fast),font-variation-settings 300ms var(--ef)}
 .cbg-b.on .ic{transform:scale(1.12);font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
+.cbg.sm .cbg-b{height:52px;flex-direction:row;gap:8px}
+.cbg.sm .cbg-b:first-child{border-radius:26px 10px 10px 26px}.cbg.sm .cbg-b:last-child{border-radius:10px 26px 26px 10px}.cbg.sm .cbg-b.on{border-radius:26px}
+.vig{font-size:10px;line-height:14px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:1px 6px;border-radius:6px;background:var(--live-c);color:var(--on-live-c)}
+.cbg-b.on .vig{background:rgba(255,255,255,.22);color:inherit}
 .mode-desc{margin:12px 4px 0;min-height:60px}
 .mode-desc p{margin:0;animation:fadeThrough 380ms var(--emph) both}
 /* ===== Buttons ===== */
 .btn{height:48px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:24px;font-size:15px;font-weight:600;letter-spacing:.1px;transition:border-radius 350ms var(--sp-fast),background-color 200ms var(--ef);text-decoration:none}
 .btn:active{border-radius:12px}
 .btn.fill{background:var(--gloss);color:var(--onp);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 1px 3px rgba(0,0,0,.25)}
-.btn.tonal{background:var(--sc);color:var(--onsc)}
 .btn.outl{border:1px solid var(--ol);color:var(--onsfv)}
 .btn.text{padding:0 12px;color:var(--p)}
-.btn.err{background:var(--e);color:var(--one)}
 .btn.block{width:100%}
-.ibtn{width:56px;height:56px;display:grid;place-items:center;border-radius:28px;background:var(--sc);color:var(--onsc);transition:border-radius 350ms var(--sp-fast),opacity 200ms}
+.btn:disabled{opacity:.38;cursor:default}
+.ibtn{width:56px;height:56px;display:grid;place-items:center;border-radius:28px;background:var(--ctl-c);color:var(--on-ctl-c);transition:border-radius 350ms var(--sp-fast),opacity 200ms}
 .ibtn:active{border-radius:14px}
 .ibtn:disabled{opacity:.38;cursor:default}
-/* consent */
+/* consenso */
 .consent{border-radius:28px;padding:20px;background:var(--silver);color:var(--onsf);box-shadow:inset 0 1px 0 rgba(255,255,255,.6);display:flex;flex-direction:column;gap:12px;animation:popIn 600ms var(--sp-fast) both;transform-origin:top center}
-.consent.ok{background:var(--sch);color:var(--onsf);flex-direction:row;align-items:center;gap:12px;padding:12px 12px 12px 16px}
+.consent.ok{background:var(--sch);color:var(--onsf);flex-direction:row;align-items:center;gap:12px;padding:12px 12px 12px 16px;box-shadow:none}
 @keyframes popIn{from{opacity:0;transform:scale(.88) translateY(-12px)}to{opacity:1;transform:none}}
-.consent .btn.fill{background:var(--gloss);color:var(--onp)}
-.consent.ok{box-shadow:none}
+/* domanda della sera: nero opaco con viola notte */
+.eve{border-radius:28px;padding:20px;background:var(--nc);color:var(--onnc);display:flex;flex-direction:column;gap:14px;animation:popIn 600ms var(--sp-fast) both;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.facts{display:flex;flex-wrap:wrap;gap:6px}
+.fact{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px 0 8px;border-radius:14px;background:rgba(255,255,255,.1);font-size:12px;font-weight:600}
+.fact .ic{font-size:16px}
+.opts{display:flex;flex-direction:column;gap:4px}
+.opt{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;text-align:left;background:rgba(255,255,255,.07);color:inherit;border-radius:8px;transition:border-radius 400ms var(--sp-fast),background-color 200ms var(--ef)}
+.opts .opt:first-child{border-radius:20px 20px 8px 8px}.opts .opt:last-child{border-radius:8px 8px 20px 20px}
+.opt:active{border-radius:24px}
+.opt.rec{background:var(--oct-c);color:var(--on-oct-c)}
+.app.dark .opt.rec{background:#4823bc;color:#e6deff}
+.opt-ic{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.1)}
+.opt.rec .opt-ic{background:var(--oct);color:#ffffff}
+.badge{font-size:10px;line-height:16px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:2px 8px;border-radius:8px;background:var(--oct);color:#ffffff;white-space:nowrap}
+.app.dark .badge{background:#cabeff;color:#31009a}
+/* previsione del sole */
+.fc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.fc-d{background:var(--scl);border-radius:10px;padding:14px 12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.fc .fc-d:first-child{border-radius:24px 10px 10px 24px}.fc .fc-d:last-child{border-radius:10px 24px 24px 10px}
+.fc-d.best{background:var(--sun-c);color:var(--on-sun-c)}
+.fc-d .big{font-size:24px;line-height:30px;font-weight:600;font-variation-settings:'wdth' 104}
+.fc-bar{height:6px;border-radius:3px;background:color-mix(in srgb,currentColor 14%,transparent);overflow:hidden;margin:4px 0 2px}
+.fc-bar i{display:block;height:100%;border-radius:3px;background:var(--sun-v)}
+.hint{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:var(--sch);margin-top:6px}
 /* ===== Slider (Expressive) ===== */
 .sld{position:relative;height:44px;margin-top:8px}
 .sld input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:2}
-.sld-a{position:absolute;left:0;top:6px;height:32px;border-radius:16px 4px 4px 16px;background:var(--p);transition:width 200ms var(--sp-fast)}
-.sld-i{position:absolute;right:0;top:6px;height:32px;border-radius:4px 16px 16px 4px;background:var(--sc);transition:left 200ms var(--sp-fast)}
-.sld-h{position:absolute;top:0;width:4px;height:44px;margin-left:-2px;border-radius:2px;background:var(--p);transition:left 200ms var(--sp-fast),width 250ms var(--sp-fast),margin-left 250ms var(--sp-fast)}
+.sld-a{position:absolute;left:0;top:6px;height:32px;border-radius:16px 4px 4px 16px;background:var(--ctl);transition:width 200ms var(--sp-fast)}
+.sld-i{position:absolute;right:0;top:6px;height:32px;border-radius:4px 16px 16px 4px;background:var(--ctl-c);transition:left 200ms var(--sp-fast)}
+.sld-h{position:absolute;top:0;width:4px;height:44px;margin-left:-2px;border-radius:2px;background:var(--ctl);transition:left 200ms var(--sp-fast),width 250ms var(--sp-fast),margin-left 250ms var(--sp-fast)}
 .sld:active .sld-h{width:2px;margin-left:-1px}
-.sld-stop{position:absolute;top:20px;width:4px;height:4px;border-radius:2px;background:var(--onsc);margin-left:-2px;pointer-events:none}
+.sld-stop{position:absolute;top:20px;width:4px;height:4px;border-radius:2px;background:var(--on-ctl-c);margin-left:-2px;pointer-events:none}
 .sld-bub{position:absolute;bottom:52px;margin-left:-28px;width:56px;height:44px;border-radius:22px;background:var(--inv);color:var(--oninv);display:grid;place-items:center;font-size:14px;font-weight:600;opacity:0;transform:translateY(8px) scale(.6);transition:opacity 150ms var(--ef),transform 350ms var(--sp-fast),left 200ms var(--sp-fast);pointer-events:none}
 .sld:active .sld-bub,.sld:focus-within .sld-bub{opacity:1;transform:none}
 .stepper{display:flex;align-items:center;gap:12px;margin-top:8px}
-.step-val{flex:1;height:56px;border-radius:16px;background:var(--sch);display:grid;place-items:center;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+.step-val{flex:1;height:56px;border-radius:16px;background:var(--sch);color:var(--ctl);display:grid;place-items:center;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
 .confirm{display:flex;align-items:center;gap:8px;margin-top:16px;color:var(--onsfv);min-height:24px}
-.confirm .ok{color:var(--t)}
-.mini-li{width:20px;height:20px;background:var(--p);animation:liMorph 3.4s infinite,spin 2.2s linear infinite}
+.confirm .ok{color:var(--live)}
+.mini-li{width:20px;height:20px;background:var(--ctl);animation:liMorph 3.4s infinite,spin 2.2s linear infinite}
+.sw-row{display:flex;align-items:center;gap:16px;margin-top:20px;padding-top:16px;border-top:1px solid var(--olv)}
 /* ===== Switch ===== */
 .sw{flex:none;width:52px;height:32px;border-radius:16px;border:2px solid var(--ol);background:var(--schh);position:relative;transition:background-color 250ms var(--ef),border-color 250ms var(--ef);cursor:pointer}
-.sw-h{position:absolute;top:50%;left:6px;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--ol);color:var(--p);display:grid;place-items:center;transition:all 450ms var(--sp-fast)}
+.sw-h{position:absolute;top:50%;left:6px;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--ol);color:var(--ctl);display:grid;place-items:center;transition:all 450ms var(--sp-fast)}
 .sw-h .ic{font-size:16px;opacity:0;transition:opacity 200ms}
-.sw.on{background:var(--p);border-color:var(--p)}
-.sw.on .sw-h{left:22px;width:24px;height:24px;margin-top:-12px;background:var(--onp)}
+.sw.on{background:var(--ctl);border-color:var(--ctl)}
+.sw.on .sw-h{left:22px;width:24px;height:24px;margin-top:-12px;background:var(--on-ctl);color:var(--ctl)}
 .sw.on .sw-h .ic{opacity:1}
 .sw:active .sw-h{width:28px;height:28px;margin-top:-14px}
 .sw.on:active .sw-h{left:18px}
@@ -200,10 +302,9 @@ button:focus-visible,a:focus-visible,input:focus-visible+.sl-focus{outline:3px s
 .li{display:flex;align-items:center;gap:16px;min-height:64px;padding:8px 16px}
 .li-ic{width:40px;height:40px;border-radius:20px;display:grid;place-items:center;background:var(--sch);color:var(--onsfv);flex:none}
 .li-body{flex:1;min-width:0}
-.li-time{font-variant-numeric:tabular-nums;color:var(--onsfv)}
-.group{background:var(--scl);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;gap:2px}
-.group .li{background:var(--scl)}
-.grp-h{padding:12px 16px 4px;color:var(--p)}
+.list{background:var(--scl);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:6px 0}
+.list .li+.li{border-top:1px solid var(--olv)}
+.list.dense .li{min-height:48px;padding:6px 16px}
 .row-in-a{animation:rowIn 650ms var(--sp-def) both}.row-in-b{animation:rowIn2 650ms var(--sp-def) both}
 @keyframes rowIn{from{opacity:0;transform:translateX(-32px);max-height:0}to{opacity:1;transform:none;max-height:80px}}
 @keyframes rowIn2{from{opacity:0;transform:translateX(-32px);max-height:0}to{opacity:1;transform:none;max-height:80px}}
@@ -211,49 +312,50 @@ button:focus-visible,a:focus-visible,input:focus-visible+.sl-focus{outline:3px s
 .banner.err{background:var(--ec);color:var(--onec)}
 .banner.dry{border:1px solid var(--olv);background:var(--scl)}
 /* ===== Snackbar, dialog, FAB ===== */
-.snack{position:absolute;left:16px;right:16px;bottom:16px;z-index:10;min-height:48px;padding:14px 16px;border-radius:12px;background:var(--inv);color:var(--oninv);display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.18);animation:snackIn 500ms var(--sp-fast) both}
-.snack.fab-up{bottom:96px}
+.snack{position:absolute;left:16px;right:16px;bottom:96px;z-index:10;min-height:48px;padding:14px 16px;border-radius:12px;background:var(--inv);color:var(--oninv);display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.18);animation:snackIn 500ms var(--sp-fast) both}
+.snack.fab-up{bottom:168px}
 @keyframes snackIn{from{opacity:0;transform:translateY(24px) scale(.92)}to{opacity:1;transform:none}}
 .scrim{position:absolute;inset:0;z-index:20;background:var(--scrim);display:grid;place-items:center;padding:24px;animation:fadeIn 220ms var(--ef) both}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .dialog{width:100%;max-width:312px;border-radius:28px;background:var(--sch);padding:24px;display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center;animation:dlgIn 550ms var(--sp-def) both;transform-origin:center}
 @keyframes dlgIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
 .dlg-actions{display:flex;justify-content:flex-end;gap:8px;align-self:stretch}
-.fab{position:absolute;right:16px;bottom:16px;z-index:5;height:56px;min-width:56px;padding:0 16px;border-radius:16px;background:var(--gloss);color:var(--onp);display:flex;align-items:center;gap:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 3px 8px rgba(0,0,0,.2),0 1px 3px rgba(0,0,0,.24);transition:border-radius 350ms var(--sp-fast),padding 450ms var(--sp-def)}
+.fab{position:absolute;right:16px;bottom:96px;z-index:5;height:56px;min-width:56px;padding:0 16px;border-radius:16px;background:var(--gloss);color:var(--onp);display:flex;align-items:center;gap:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 3px 8px rgba(0,0,0,.2),0 1px 3px rgba(0,0,0,.24);transition:border-radius 350ms var(--sp-fast),padding 450ms var(--sp-def)}
 .fab:active{border-radius:28px}
 .fab-l{max-width:120px;overflow:hidden;white-space:nowrap;padding-left:12px;font-size:15px;font-weight:600;transition:max-width 450ms var(--sp-def),padding 450ms var(--sp-def),opacity 200ms var(--ef)}
 .fab.small .fab-l{max-width:0;padding-left:0;opacity:0}
 .fab-li{width:24px;height:24px;background:var(--onp);animation:liMorph 3.4s infinite,spin 2.2s linear infinite}
 .app.full .fab{display:none}
-/* ===== Auto tab ===== */
+/* ===== Dati: celle, anelli, grafici ===== */
 .car-hero{border-radius:32px;background:var(--scl);padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px}
 .ring{position:relative;width:232px;height:232px}
 .ring svg{position:absolute;inset:0}
-.ring .ra{fill:none;stroke:var(--p);stroke-width:10;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;animation:draw 1400ms var(--sp-def) 150ms forwards}
+.ring .ra{fill:none;stroke:var(--live-v);stroke-width:10;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;animation:draw 1400ms var(--sp-def) 150ms forwards}
 .ring .rt{fill:none;stroke:var(--sc);stroke-width:10;stroke-linecap:round}
 .ring .rl{fill:var(--onsf)}
 @keyframes draw{to{stroke-dashoffset:0}}
 .ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .dgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.dcell{background:var(--scl);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:4px;min-height:112px}
+.dcell{background:var(--scl);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:4px;min-height:112px;min-width:0}
 .dcell.wide{grid-column:span 2}
+.dcell.wait{background:transparent;border:1.5px dashed var(--olv)}
 .dval{font-size:26px;line-height:32px;font-weight:550;font-variation-settings:'wdth' 104}
-.tyres{display:grid;grid-template-columns:1fr 64px 1fr;align-items:center;gap:12px;margin-top:8px}
-.tyre-col{display:flex;flex-direction:column;gap:28px}
-.tyre-col.r{text-align:right}
-.carbody{height:120px;border-radius:30px 30px 22px 22px;border:2px solid var(--ol);position:relative}
-.carbody i{position:absolute;width:10px;height:24px;border-radius:4px;background:var(--onsfv)}
+.dval small{font-size:14px;font-weight:550;color:var(--onsfv)}
 .chart{position:relative;height:150px;margin-top:16px;display:flex;align-items:flex-end;gap:5px;padding-left:28px}
+.chart.m12{gap:4px}
 .gl{position:absolute;left:28px;right:0;border-top:1px dashed var(--olv)}
 .gl span{position:absolute;left:-28px;top:-8px;font-size:11px;color:var(--onsfv)}
 .bcol{flex:1;display:flex;flex-direction:column-reverse;align-items:center;gap:2px;height:100%;justify-content:flex-start;cursor:pointer;position:relative;z-index:1;padding:0;border-radius:6px}
 .bseg{width:14px;border-radius:3px;transform-origin:bottom;animation:grow 800ms var(--sp-def) both}
+.m12 .bseg{width:16px}
 .bseg.sun{background:var(--c-sun)}.bseg.day{background:var(--c-day)}.bseg.night{background:var(--c-night)}
+.bseg.heat{background:var(--heat-v)}.bseg.water{background:var(--cool-v)}.bseg.rest{background:var(--grid-v)}
 .bseg.empty{height:24px;border:1.5px dashed var(--olv);background:transparent;animation:none}
 @keyframes grow{from{transform:scaleY(0)}to{transform:none}}
 .bcol.sel .bseg{width:18px}
 .bcol.sel::before{content:'';position:absolute;inset:-6px -2px -6px;border-radius:10px;background:var(--sch);z-index:-1;animation:fadeIn 200ms both}
 .xlab{display:flex;gap:5px;padding-left:28px;margin-top:6px}
+.m12+.xlab{gap:4px}
 .xlab span{flex:1;text-align:center;font-size:11px;color:var(--onsfv);font-variant-numeric:tabular-nums}
 .xlab span.sel{color:var(--onsf);font-weight:700}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px}
@@ -262,53 +364,103 @@ button:focus-visible,a:focus-visible,input:focus-visible+.sl-focus{outline:3px s
 .detail{margin-top:16px;padding:12px 16px;border-radius:16px;background:var(--sch);display:flex;flex-direction:column;gap:2px}
 .sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px;margin-top:16px}
 .lin{height:8px;border-radius:4px;background:var(--sc);overflow:hidden;margin-top:12px}
-.lin i{display:block;height:100%;border-radius:4px;background:var(--p)}
-.pwa{border-radius:24px;padding:20px;background:var(--sch);display:flex;flex-direction:column;gap:12px}
+.lin i{display:block;height:100%;border-radius:4px;background:var(--bat-v)}
+.pwa{border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:12px}
 .pwa ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+/* flusso di energia della casa */
+.flow{display:grid;grid-template-columns:80px minmax(0,1fr) 80px minmax(0,1fr) 80px;grid-template-rows:auto 22px auto 22px auto;justify-items:center;align-items:start;margin:6px 0 2px}
+.fn{display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center}
+.fn-c{width:52px;height:52px;display:grid;place-items:center}
+.fn-c.hub{width:60px;height:60px}
+.fn-v{font-size:15px;line-height:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.fn-l{font-size:11px;line-height:14px;font-weight:600;opacity:.75}
+.fl{border-radius:2px;background:color-mix(in srgb,currentColor 16%,transparent)}
+.fl.h{align-self:start;margin-top:28px;width:100%;height:4px}
+.fl.v{width:4px;height:100%}
+.fl.on.h{background:repeating-linear-gradient(90deg,var(--fc) 0 7px,transparent 7px 12px);background-size:12px 4px;animation:flowx .7s linear infinite}
+.fl.on.v{background:repeating-linear-gradient(180deg,var(--fc) 0 7px,transparent 7px 12px);background-size:4px 12px;animation:flowy .7s linear infinite}
+.fl.rev{animation-direction:reverse}
+@keyframes flowx{to{background-position:12px 0}}
+@keyframes flowy{to{background-position:0 12px}}
+/* anelli percentuali (autosufficienza, salute) */
+.gauges{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.gauge-c{background:var(--scl);border-radius:20px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.gauges .gauge-c:first-child{border-radius:28px 12px 12px 12px}.gauges .gauge-c:last-child{border-radius:12px 28px 12px 12px}
+.gauge{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gc) calc(var(--gp) * 1%),var(--schh) 0);animation:gaugeIn 1200ms var(--sp-def) both}
+.gauge b{width:84px;height:84px;border-radius:50%;background:var(--scl);display:grid;place-items:center;font-size:24px;font-weight:650;font-variation-settings:'wdth' 104}
+@keyframes gaugeIn{from{transform:rotate(-90deg) scale(.7);opacity:0}to{transform:none;opacity:1}}
+/* batteria di casa */
+.batt{display:flex;gap:16px;align-items:stretch}
+.batt-g{width:64px;flex:none;border-radius:16px;background:var(--schh);position:relative;overflow:hidden;min-height:150px}
+.batt-g::before{content:'';position:absolute;top:-6px;left:22px;width:20px;height:10px;border-radius:4px;background:var(--schh)}
+.batt-g i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,var(--bat),var(--bat-v));transition:height 800ms var(--sp-def)}
+.batt-g span{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;font-weight:700;color:#ffffff;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.kv{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px;align-content:start}
+.kv b{display:block;font-size:18px;line-height:24px;font-weight:600}
+/* bollette */
+.bill{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 16px}
+.bill+.bill{border-top:1px solid var(--olv)}
+.amt{font-size:18px;font-weight:650;text-align:right;font-variant-numeric:tabular-nums}
+.st{justify-self:end;font-size:10px;line-height:16px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:1px 8px;border-radius:8px}
+.st.paid{background:var(--live-c);color:var(--on-live-c)}
+.st.est{border:1.5px dashed var(--ol);color:var(--onsfv)}
+.st.due{background:var(--heat-c);color:var(--on-heat-c)}
+/* clima: stanze, accumulo, barra consumi */
+.rooms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.room{background:var(--scl);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-height:118px;transition:background-color 300ms var(--ef)}
+.room.call{background:var(--heat-c);color:var(--on-heat-c)}
+.room.call .v{color:inherit;opacity:.85}
+.room .rt{font-size:30px;line-height:36px;font-weight:600;font-variation-settings:'wdth' 104}
+.room .rt small{font-size:14px;font-weight:600}
+.room.call .ic{animation:breathe 2s var(--ef) infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.delta{font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;background:color-mix(in srgb,currentColor 12%,transparent)}
+.tank{width:58px;height:110px;flex:none;border-radius:18px;background:var(--cool-c);position:relative;overflow:hidden}
+.tank i{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,var(--heat),var(--heat-v));animation:fill 1200ms var(--sp-def) both}
+@keyframes fill{from{transform:translateY(100%)}to{transform:none}}
+.slots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.slot{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:10px;background:var(--sch);font-size:12px;font-weight:600}
+.hbar{display:flex;gap:3px;height:18px;margin-top:14px}
+.hbar i{display:block;height:100%;border-radius:4px;animation:growx 900ms var(--sp-def) both;transform-origin:left}
+.hbar i:first-child{border-radius:9px 4px 4px 9px}.hbar i:last-child{border-radius:4px 9px 9px 4px}
+@keyframes growx{from{transform:scaleX(0)}to{transform:none}}
+.ro{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--onsfv)}
 /* ===== Adattamenti del progetto alla pagina reale ===== */
 html,body{background:#f9f9f9}
 html.dark,html.dark body{background:#0e0e0e}
 .app{width:100%;max-width:520px;margin:0 auto;height:auto;min-height:100dvh;overflow:visible}
 .bar{position:sticky;top:0;padding-top:env(safe-area-inset-top)}
+.bar-h{margin:0}
 .scroller{overflow:visible}
-.page{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
-.tab-ind{width:64px}
-.tab{gap:6px}
-.room{background:var(--scl);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-height:104px}
-.room.call{background:var(--sc)}
-.consent .btn{padding:0 10px}
-.consent .btn.rec{background:var(--gloss);color:var(--onp);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 1px 3px rgba(0,0,0,.25)}
-.consent .btn:not(.rec){border:1px solid var(--ol);color:inherit}
-.fab{position:fixed;right:max(16px,calc(50vw - 244px));bottom:calc(16px + env(safe-area-inset-bottom))}
-.snack{position:fixed;left:max(16px,calc(50vw - 244px));right:max(16px,calc(50vw - 244px));bottom:calc(16px + env(safe-area-inset-bottom))}
-.snack.fab-up{bottom:calc(96px + env(safe-area-inset-bottom))}
+.page{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+.nav{position:fixed;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;height:calc(80px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom)}
+.fab{position:fixed;right:max(16px,calc(50vw - 244px));bottom:calc(96px + env(safe-area-inset-bottom))}
+.snack{position:fixed;left:max(16px,calc(50vw - 244px));right:max(16px,calc(50vw - 244px));bottom:calc(96px + env(safe-area-inset-bottom))}
+.snack.fab-up{bottom:calc(168px + env(safe-area-inset-bottom))}
 .scrim{position:fixed}
 .wclip svg{width:600px}
-.btn:disabled{opacity:.38;cursor:default}
+.hero-title{font-size:28px}
+.consent .btn:disabled{opacity:.38}
 .sld-a,.sld-i,.sld-h,.sld-bub{transition-duration:120ms}
-.li-body .t-bl,.li-body .t-bs{overflow-wrap:anywhere}
+.li-body .t-bl,.li-body .t-bs,.tl-t .t-bl,.tl-t .t-bs{overflow-wrap:anywhere}
+.bill .t-bm{grid-column:1/-1}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){.app *,.app *::before,.app *::after{animation:none!important;transition:none!important}.ring .ra{stroke-dashoffset:0}}
 
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <header class="bar" id="bar">
+<div class="app s-ric" id="app">
+  <header class="bar s-ric" id="bar">
     <div class="bar-top">
       <div class="bar-title">
-        <span class="t-tl">TeslaCharger</span>
+        <span class="bar-app">TeslaCharger</span>
+        <h1 class="bar-h" id="barh" style="margin: 0">Ricarica</h1>
         <span class="t-bs v" id="clock">In caricamento</span>
       </div>
       <span class="chip-dry t-lm" id="chipdry" hidden><span class="ic s18" aria-hidden="true">science</span>Prova</span>
     </div>
-    <nav class="tabs" aria-label="Sezioni">
-      <button class="tab sl on" id="tabR" aria-current="page"><span class="ic f" aria-hidden="true">bolt</span><span class="t-ts">Ricarica</span></button>
-      <button class="tab sl" id="tabC" aria-current="false"><span class="ic" aria-hidden="true">home</span><span class="t-ts">Casa</span></button>
-      <button class="tab sl" id="tabK" aria-current="false"><span class="ic" aria-hidden="true">thermostat</span><span class="t-ts">Clima</span></button>
-      <button class="tab sl" id="tabA" aria-current="false"><span class="ic" aria-hidden="true">directions_car</span><span class="t-ts">Auto</span></button>
-      <span class="tab-ind" id="tabind"></span>
-    </nav>
+    <nav class="idx" id="idx" aria-label="Parti della sezione"></nav>
   </header>
 
   <div class="scroller">
@@ -316,128 +468,143 @@ html.dark,html.dark body{background:#0e0e0e}
   <!-- ================= RICARICA ================= -->
   <main class="page fade-through" id="viewR">
 
-    <section class="banner err" id="errbanner" role="alert" hidden>
-      <span class="ic f" aria-hidden="true">error</span>
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
-        <span class="t-ts">Ultimo ciclo non riuscito</span>
-        <span class="t-bm" id="errtext"></span>
-      </div>
-    </section>
-    <section class="banner dry" id="drybanner" hidden>
-      <span class="ic" style="color: var(--t)" aria-hidden="true">science</span>
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
-        <span class="t-ts">Modalità di prova attiva</span>
-        <span class="t-bm v">Il sistema mostra cosa farebbe, senza inviare comandi all'auto.</span>
-      </div>
-    </section>
+    <!-- R1 · ADESSO -->
+    <section class="grp k-live" id="grpR0" aria-labelledby="r0-t">
+      <header class="gh stag">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">electric_bolt</span></span>
+        <div class="gh-t"><span class="gh-e">Stato</span><h2 id="r0-t">Adesso</h2><span class="t-bs v" id="solax">Cosa succede ora</span></div>
+      </header>
 
-    <!-- Stato attuale -->
-    <section class="hero t-idle stag" id="hero" aria-live="polite">
-      <div class="hero-row">
-        <div class="hs-wrap" id="hswrap">
-          <div class="hshape sh-circle" id="hshape"><span class="ic s40" id="hicon" aria-hidden="true">bolt</span></div>
+      <section class="banner err" id="errbanner" role="alert" hidden>
+        <span class="ic f" aria-hidden="true">error</span>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+          <span class="t-ts">Ultimo ciclo non riuscito</span>
+          <span class="t-bm" id="errtext"></span>
         </div>
-        <div style="display: flex; flex-direction: column; min-width: 0">
-          <div class="kw t-dl"><span id="hval">–</span><small id="hunit">%</small></div>
-          <span class="t-ll" style="opacity: .86" id="hsub">batteria dell'auto</span>
+      </section>
+      <section class="banner dry" id="drybanner" hidden>
+        <span class="ic" style="color: var(--ctl)" aria-hidden="true">science</span>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+          <span class="t-ts">Modalità di prova attiva</span>
+          <span class="t-bm v">Il sistema mostra cosa farebbe, senza inviare comandi all'auto.</span>
         </div>
-      </div>
-      <h1 class="hero-title" id="htitle">In attesa dei dati</h1>
-      <p class="hero-reason" id="hreason"></p>
-      <div class="prog" aria-hidden="true">
-        <div class="wclip flat" id="wclip" style="width: 8px">
-          <svg height="20" viewBox="0 0 600 20"><path id="wpath" d="M2 10 L600 10"></path></svg>
-        </div>
-        <div class="wtrack"></div>
-        <span class="wlimit" id="wlimit" style="left: 100%"></span>
-      </div>
-      <div class="prog-lab t-lm"><span id="plab1">Auto –</span><span id="plab2"></span></div>
-    </section>
+      </section>
 
-    <!-- Domanda della sera -->
-    <section class="consent" id="evening" aria-labelledby="eve-t" hidden>
-      <div style="display: flex; gap: 12px; align-items: flex-start">
-        <span class="ic f s32" aria-hidden="true">help</span>
-        <div style="display: flex; flex-direction: column; gap: 4px">
-          <h2 id="eve-t" class="t-tm" style="margin: 0">Come carico stanotte?</h2>
-          <p class="t-bm" style="margin: 0" id="evetext"></p>
+      <!-- Stato attuale -->
+      <section class="hero t-idle stag" id="hero" aria-live="polite">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+          <span class="t-lm" style="opacity: .8">Stato della carica</span>
+          <span class="live-chip" id="hchip"><i></i><span id="hchiptext">In attesa</span></span>
         </div>
-      </div>
-      <div style="display: grid; gap: 8px">
-        <button class="btn sl" id="evenone"><span class="ic s20" aria-hidden="true">block</span>Nessuna carica</button>
-        <button class="btn sl" id="evehome"><span class="ic s20" aria-hidden="true">wb_sunny</span><span id="evehomelab">Domani a casa</span></button>
-        <button class="btn sl" id="evenight"><span class="ic s20" aria-hidden="true">bedtime</span><span id="evenightlab">Automatico</span></button>
-      </div>
-    </section>
-    <section class="consent ok" id="evedone" hidden>
-      <span class="ic f" style="color: var(--t)" id="evedoneic" aria-hidden="true">bedtime</span>
-      <div style="flex: 1; display: flex; flex-direction: column">
-        <span class="t-ts" id="evedonetitle"></span>
-        <span class="t-bs v" id="evedonesub"></span>
-      </div>
-      <button class="btn text sl" id="evechange">Cambia</button>
-    </section>
-
-    <!-- Consenso -->
-    <section class="consent" id="ask" aria-labelledby="ask-t" hidden>
-      <div style="display: flex; gap: 12px; align-items: flex-start">
-        <span class="ic f s32" aria-hidden="true">partly_cloudy_day</span>
-        <div style="display: flex; flex-direction: column; gap: 4px">
-          <h2 id="ask-t" class="t-tm" style="margin: 0">Il sole non basta per l'auto</h2>
-          <p class="t-bm" style="margin: 0" id="asktext"></p>
+        <div class="hero-row">
+          <div class="hs-wrap" id="hswrap">
+            <div class="hshape sh-circle" id="hshape"><span class="ic s40" id="hicon" aria-hidden="true">bolt</span></div>
+          </div>
+          <div style="display: flex; flex-direction: column; min-width: 0">
+            <div class="kw t-dl"><span id="hval">–</span><small id="hunit">%</small></div>
+            <span class="t-ll" style="opacity: .86" id="hsub">batteria dell'auto</span>
+          </div>
         </div>
-      </div>
-      <button class="btn fill block sl" id="grant"><span class="ic s20" aria-hidden="true">check</span><span id="granttext">Autorizza fino a sera</span></button>
-    </section>
-    <section class="consent ok" id="granted" hidden>
-      <span class="ic f" style="color: var(--t)" aria-hidden="true">verified_user</span>
-      <div style="flex: 1; display: flex; flex-direction: column">
-        <span class="t-ts">Rete e batteria autorizzate</span>
-        <span class="t-bs v" id="grantedtext"></span>
-      </div>
-      <button class="btn text sl" id="revoke">Revoca</button>
-    </section>
-
-    <!-- C'è sole, ma ieri sera «Nessuna carica»: decide l'utente -->
-    <section class="consent" id="sunnow" aria-labelledby="sun-t" hidden>
-      <div style="display: flex; gap: 12px; align-items: flex-start">
-        <span class="ic f s32" aria-hidden="true">wb_sunny</span>
-        <div style="display: flex; flex-direction: column; gap: 4px">
-          <h2 id="sun-t" class="t-tm" style="margin: 0">C'è sole per caricare l'auto</h2>
-          <p class="t-bm" style="margin: 0" id="suntext"></p>
+        <h2 class="hero-title" id="htitle">In attesa dei dati</h2>
+        <p class="hero-reason" id="hreason"></p>
+        <div class="prog" aria-hidden="true">
+          <div class="wclip flat" id="wclip" style="width: 8px">
+            <svg height="20" viewBox="0 0 600 20"><path id="wpath" d="M2 10 L600 10"></path></svg>
+          </div>
+          <div class="wtrack"></div>
+          <span class="wlimit" id="wlimit" style="left: 100%"></span>
         </div>
-      </div>
-      <button class="btn fill block sl" id="sungo"><span class="ic s20" aria-hidden="true">wb_sunny</span><span id="sungotext">Carica col sole adesso</span></button>
-    </section>
+        <div class="prog-lab t-lm"><span id="plab1">Auto –</span><span id="plab2"></span></div>
+      </section>
 
-    <!-- Casa e auto -->
-    <section class="stag" style="animation-delay: 60ms">
-      <div class="sec-h">
-        <h2 class="t-tm" style="margin: 0">Casa e auto</h2>
-        <span class="chip-a t-lm"><span class="ic s18" aria-hidden="true">schedule</span><span id="solax">Impianto –</span></span>
-      </div>
-      <div class="tiles">
+      <!-- Domanda della sera -->
+      <section class="eve" id="evening" aria-labelledby="eve-t" hidden>
+        <div style="display: flex; align-items: center; gap: 12px">
+          <span class="tile-ic sh-clover" style="background: var(--oct-v); color: #ffffff"><span class="ic f s20" aria-hidden="true">bedtime</span></span>
+          <div class="ch-t"><h3 id="eve-t" class="t-tl" style="font-weight: 650">Come carico stanotte?</h3><span class="t-bs" style="opacity: .75" id="evetext"></span></div>
+        </div>
+        <div class="opts" role="group" aria-label="Risposte">
+          <button class="opt sl" id="evenone">
+            <span class="opt-ic"><span class="ic f s20" aria-hidden="true">block</span></span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span class="t-ts">Nessuna carica</span><span class="t-bs" style="opacity: .8">Octopus al 10%, domani niente avvio automatico col sole</span></span>
+          </button>
+          <button class="opt sl" id="evehome">
+            <span class="opt-ic"><span class="ic f s20" aria-hidden="true">wb_sunny</span></span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span class="t-ts">Domani a casa</span><span class="t-bs" style="opacity: .8" id="evehomelab"></span></span>
+            <span class="badge" id="evehomerec" hidden>Consigliato</span>
+          </button>
+          <button class="opt sl" id="evenight">
+            <span class="opt-ic"><span class="ic f s20" aria-hidden="true">bedtime</span></span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span class="t-ts">Automatico</span><span class="t-bs" style="opacity: .8" id="evenightlab"></span></span>
+            <span class="badge" id="evenightrec" hidden>Consigliato</span>
+          </button>
+        </div>
+        <p class="t-bs" style="margin: 0; opacity: .75" id="evenote">Finché non rispondi la carica resta sospesa.</p>
+      </section>
+      <section class="consent ok" id="evedone" hidden>
+        <span class="tile-ic sh-clover" style="background: var(--oct-c); color: var(--on-oct-c)"><span class="ic f s20" id="evedoneic" aria-hidden="true">bedtime</span></span>
+        <div style="flex: 1; display: flex; flex-direction: column">
+          <span class="t-ts" id="evedonetitle"></span>
+          <span class="t-bs v" id="evedonesub"></span>
+        </div>
+        <button class="btn text sl" id="evechange">Cambia</button>
+      </section>
+
+      <!-- Consenso -->
+      <section class="consent" id="ask" aria-labelledby="ask-t" hidden>
+        <div style="display: flex; gap: 12px; align-items: flex-start">
+          <span class="ic f s32" style="color: var(--sun)" aria-hidden="true">partly_cloudy_day</span>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <h3 id="ask-t" class="t-tm" style="margin: 0">Il sole non basta per l'auto</h3>
+            <p class="t-bm" style="margin: 0" id="asktext"></p>
+          </div>
+        </div>
+        <button class="btn fill block sl" id="grant"><span class="ic s20" aria-hidden="true">check</span><span id="granttext">Autorizza fino a sera</span></button>
+      </section>
+      <section class="consent ok" id="granted" hidden>
+        <span class="ic f" style="color: var(--bat)" aria-hidden="true">verified_user</span>
+        <div style="flex: 1; display: flex; flex-direction: column">
+          <span class="t-ts">Rete e batteria autorizzate</span>
+          <span class="t-bs v" id="grantedtext"></span>
+        </div>
+        <button class="btn text sl" id="revoke">Revoca</button>
+      </section>
+
+      <!-- C'è sole, ma ieri sera «Nessuna carica»: decide l'utente -->
+      <section class="consent" id="sunnow" aria-labelledby="sun-t" hidden>
+        <div style="display: flex; gap: 12px; align-items: flex-start">
+          <span class="ic f s32" style="color: var(--sun)" aria-hidden="true">wb_sunny</span>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <h3 id="sun-t" class="t-tm" style="margin: 0">C'è sole per caricare l'auto</h3>
+            <p class="t-bm" style="margin: 0" id="suntext"></p>
+          </div>
+        </div>
+        <button class="btn fill block sl" id="sungo"><span class="ic s20" aria-hidden="true">wb_sunny</span><span id="sungotext">Carica col sole adesso</span></button>
+      </section>
+
+      <!-- Casa e auto -->
+      <div class="tiles stag" style="animation-delay: 60ms" aria-label="Casa e auto">
         <article class="tile">
           <div style="display: flex; align-items: center; justify-content: space-between">
-            <span class="tile-ic sh-sunny" style="background: var(--pc); color: var(--onpc)"><span class="ic f s20" aria-hidden="true">solar_power</span></span>
+            <span class="tile-ic sh-sunny" style="background: var(--sun-c); color: var(--on-sun-c)"><span class="ic f s20" aria-hidden="true">solar_power</span></span>
             <span class="t-lm v">Pannelli</span>
           </div>
           <div class="tile-val"><span id="t1v">–</span><small>kW</small></div>
           <span class="t-bs v" id="t1s"></span>
-          <div class="meter"><i id="t1m" style="width: 0%; background: var(--p)"></i></div>
+          <div class="meter"><i id="t1m" style="width: 0%; background: var(--sun-v)"></i></div>
         </article>
         <article class="tile">
           <div style="display: flex; align-items: center; justify-content: space-between">
-            <span class="tile-ic sh-cookie4" style="background: var(--tc); color: var(--ontc)"><span class="ic f s20" aria-hidden="true">home_storage</span></span>
+            <span class="tile-ic sh-cookie4" style="background: var(--bat-c); color: var(--on-bat-c)"><span class="ic f s20" aria-hidden="true">home_storage</span></span>
             <span class="t-lm v">Batteria di casa</span>
           </div>
           <div class="tile-val"><span id="t2v">–</span><small>%</small></div>
           <span class="t-bs v" id="t2s"></span>
-          <div class="meter"><i id="t2m" style="width: 0%; background: var(--t)"></i></div>
+          <div class="meter"><i id="t2m" style="width: 0%; background: var(--bat-v)"></i></div>
         </article>
         <article class="tile">
           <div style="display: flex; align-items: center; justify-content: space-between">
-            <span class="tile-ic sh-pentagon" style="background: var(--sc); color: var(--onsc)"><span class="ic f s20" aria-hidden="true">home</span></span>
+            <span class="tile-ic sh-pentagon" style="background: var(--grid-c); color: var(--on-grid-c)"><span class="ic f s20" aria-hidden="true">home</span></span>
             <span class="t-lm v">Consumi di casa</span>
           </div>
           <div class="tile-val"><span id="t3v">–</span><small>kW</small></div>
@@ -445,369 +612,430 @@ html.dark,html.dark body{background:#0e0e0e}
         </article>
         <article class="tile">
           <div style="display: flex; align-items: center; justify-content: space-between">
-            <span class="tile-ic sh-circle" style="background: var(--nc); color: var(--onnc)"><span class="ic f s20" aria-hidden="true">directions_car</span></span>
+            <span class="tile-ic sh-circle" style="background: var(--live-c); color: var(--on-live-c)"><span class="ic f s20" aria-hidden="true">directions_car</span></span>
             <span class="t-lm v">Auto</span>
           </div>
           <div class="tile-val"><span id="t4v">–</span><small>%</small></div>
           <span class="t-bs v" id="t4s">Non ancora letta</span>
-          <div class="meter"><i id="t4m" style="width: 0%; background: var(--n)"></i></div>
+          <div class="meter"><i id="t4m" style="width: 0%; background: var(--live-v)"></i></div>
         </article>
       </div>
-    </section>
 
-    <!-- Previsione -->
-    <section class="stag" style="animation-delay: 90ms" id="forecastsec" hidden>
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Previsione del sole</h2></div>
-      <div class="group" id="forecast"></div>
-      <p class="t-bs v" style="margin: 10px 4px 0" id="forecastnote"></p>
-    </section>
-
-    <!-- Modalità -->
-    <section class="stag" style="animation-delay: 120ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Modalità</h2></div>
-      <div class="cbg" role="radiogroup" aria-label="Modalità di carica">
-        <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="boost"><span class="ic" aria-hidden="true">bolt</span><span class="t-ll">Subito</span></button>
-        <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="solar"><span class="ic" aria-hidden="true">wb_sunny</span><span class="t-ll">Col sole</span></button>
-        <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="auto"><span class="ic" aria-hidden="true">schedule</span><span class="t-ll">Automatica</span></button>
-      </div>
-      <div class="mode-desc"><p class="t-bm v" id="modedesc"></p></div>
-    </section>
-
-    <!-- Carica notturna -->
-    <section class="card stag" style="animation-delay: 180ms">
-      <div style="display: flex; align-items: center; gap: 12px">
-        <span class="tile-ic sh-clover" style="background: var(--nc); color: var(--onnc)"><span class="ic f s20" aria-hidden="true">bedtime</span></span>
-        <div style="flex: 1">
-          <h2 class="t-tm" style="margin: 0">Carica notturna con Octopus</h2>
-          <span class="t-bs v">Sempre attiva, ogni giorno, prezzo scontato del 30%</span>
+      <!-- Previsione del sole -->
+      <div id="forecastsec" hidden>
+        <div class="sub-h"><h3 class="t-tm">Previsione del sole</h3><span class="t-bs v">all'auto se resta collegata</span></div>
+        <div class="fc stag" style="animation-delay: 90ms" id="forecast"></div>
+        <div class="hint">
+          <span class="ic f s20" style="color: var(--sun)" aria-hidden="true">lightbulb</span>
+          <span class="t-bm" id="forecastnote"></span>
         </div>
       </div>
-
-      <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px" role="group" aria-label="Piano da regolare">
-        <button class="btn sl" data-plan="night"><span class="ic s20" aria-hidden="true">bedtime</span>Automatico</button>
-        <button class="btn sl" data-plan="home"><span class="ic s20" aria-hidden="true">wb_sunny</span>Domani a casa</button>
-      </div>
-      <div class="t-bs v" style="margin-top: 8px" id="plannote"></div>
-
-      <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: baseline">
-        <label for="lvl" class="t-ts">Livello da raggiungere</label>
-        <span class="t-hs" style="color: var(--p); font-variant-numeric: tabular-nums" id="lvlval">–</span>
-      </div>
-      <div class="sld">
-        <input id="lvl" type="range" min="50" max="100" step="5" value="100">
-        <div class="sld-a" id="slda"></div>
-        <div class="sld-i" id="sldi"></div>
-        <span id="sldstops"></span>
-        <div class="sld-h" id="sldh"></div>
-        <div class="sld-bub" id="sldbub"></div>
-      </div>
-      <div class="t-bs v" style="display: flex; justify-content: space-between; margin-top: 4px"><span>50%</span><span>100%</span></div>
-
-      <div style="margin-top: 20px" class="t-ts" id="ready-l">Auto pronta entro</div>
-      <div class="stepper" role="group" aria-labelledby="ready-l">
-        <button class="ibtn sl" id="readydown" aria-label="Mezz'ora prima"><span class="ic" aria-hidden="true">remove</span></button>
-        <output class="step-val" id="readyval" aria-live="polite">–</output>
-        <button class="ibtn sl" id="readyup" aria-label="Mezz'ora dopo"><span class="ic" aria-hidden="true">add</span></button>
-      </div>
-      <div class="t-bs v" style="margin-top: 6px; text-align: center">Tra le 4:00 e le 11:00, limiti fissati da Octopus</div>
-
-      <div style="display: flex; align-items: center; gap: 16px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--olv)">
-        <div style="flex: 1; min-width: 0">
-          <div class="t-ts" id="hold-l">Batteria di casa a riposo</div>
-          <div class="t-bs v" id="holdsub">Mentre Octopus carica l'auto, la batteria di casa non si scarica: l'auto prende dalla rete a prezzo scontato.</div>
-        </div>
-        <button class="sw" id="holdsw" role="switch" aria-checked="false" aria-labelledby="hold-l"><span class="sw-h"><span class="ic" aria-hidden="true">check</span></span></button>
-      </div>
-
-      <div class="confirm t-bs" role="status">
-        <span class="mini-li" id="octospin" aria-hidden="true" hidden></span>
-        <span class="ic f s20 ok" id="octook" aria-hidden="true" hidden>check_circle</span>
-        <span id="octotext"></span>
-      </div>
     </section>
 
-    <!-- Notifiche -->
-    <section class="stag" style="animation-delay: 220ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Notifiche</h2></div>
-      <div class="group" id="pushgroup" hidden>
-        <div class="li">
-          <span class="li-ic"><span class="ic" id="pushicon" aria-hidden="true">notifications_off</span></span>
-          <div class="li-body">
-            <div class="t-bl" id="nt-l">Notifiche su questo dispositivo</div>
-            <div class="t-bs v" id="pushsub"></div>
+    <!-- R2 · LE TUE SCELTE -->
+    <section class="grp k-ctl" id="grpR1" aria-labelledby="r1-t">
+      <header class="gh stag" style="animation-delay: 100ms">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">tune</span></span>
+        <div class="gh-t"><span class="gh-e">Controlli</span><h2 id="r1-t">Le tue scelte</h2><span class="t-bs v">Come deve caricare il sistema, di giorno e di notte</span></div>
+      </header>
+
+      <section class="card ctl r-top stag" style="animation-delay: 120ms" aria-labelledby="md-t">
+        <div class="ch">
+          <span class="tile-ic sh-cookie4" style="background: var(--ctl-c); color: var(--on-ctl-c)"><span class="ic f s20" aria-hidden="true">toggle_on</span></span>
+          <div class="ch-t"><h3 id="md-t" class="t-tm">Modalità di giorno</h3><span class="t-bs v">Attiva: <span id="modenow">–</span></span></div>
+        </div>
+        <div class="cbg" role="radiogroup" aria-label="Modalità di carica">
+          <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="boost"><span class="ic" style="color: var(--live)" aria-hidden="true">bolt</span><span class="t-ll">Subito</span></button>
+          <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="solar"><span class="ic" style="color: var(--sun)" aria-hidden="true">wb_sunny</span><span class="t-ll">Col sole</span></button>
+          <button class="cbg-b sl" role="radio" aria-checked="false" data-mode="auto"><span class="ic" style="color: var(--oct)" aria-hidden="true">schedule</span><span class="t-ll">Automatica</span></button>
+        </div>
+        <div class="mode-desc"><p class="t-bm v" id="modedesc"></p></div>
+      </section>
+
+      <section class="card ctl r-bot stag" style="animation-delay: 160ms" aria-labelledby="nt-t">
+        <div class="ch">
+          <span class="tile-ic sh-clover" style="background: var(--oct-c); color: var(--on-oct-c)"><span class="ic f s20" aria-hidden="true">bedtime</span></span>
+          <div class="ch-t"><h3 id="nt-t" class="t-tm">Carica notturna con Octopus</h3><span class="t-bs v">Nelle ore scontate del 30%, salvo «Nessuna carica»</span></div>
+        </div>
+        <span class="t-lm v" id="plan-l">Piano da regolare</span>
+        <div class="cbg sm" role="radiogroup" aria-labelledby="plan-l" style="margin-top: 8px">
+          <button class="cbg-b sl" role="radio" aria-checked="false" data-plan="night"><span class="ic s20" style="color: var(--oct)" aria-hidden="true">bedtime</span><span class="t-ll">Automatico</span><span class="vig" hidden>In vigore</span></button>
+          <button class="cbg-b sl" role="radio" aria-checked="false" data-plan="home"><span class="ic s20" style="color: var(--sun)" aria-hidden="true">wb_sunny</span><span class="t-ll">Domani a casa</span><span class="vig" hidden>In vigore</span></button>
+        </div>
+        <p class="t-bs v" style="margin: 8px 4px 0" id="plannote"></p>
+
+        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: baseline">
+          <label for="lvl" class="t-ts">Livello da raggiungere</label>
+          <span class="t-hs" style="color: var(--ctl); font-variant-numeric: tabular-nums" id="lvlval">–</span>
+        </div>
+        <div class="sld">
+          <input id="lvl" type="range" min="50" max="100" step="5" value="100">
+          <div class="sld-a" id="slda"></div>
+          <div class="sld-i" id="sldi"></div>
+          <span id="sldstops"></span>
+          <div class="sld-h" id="sldh"></div>
+          <div class="sld-bub" id="sldbub"></div>
+        </div>
+        <div class="t-bs v" style="display: flex; justify-content: space-between; margin-top: 4px"><span>50%</span><span>100%</span></div>
+
+        <div style="margin-top: 20px" class="t-ts" id="ready-l">Auto pronta entro</div>
+        <div class="stepper" role="group" aria-labelledby="ready-l">
+          <button class="ibtn sl" id="readydown" aria-label="Mezz'ora prima"><span class="ic" aria-hidden="true">remove</span></button>
+          <output class="step-val" id="readyval" aria-live="polite">–</output>
+          <button class="ibtn sl" id="readyup" aria-label="Mezz'ora dopo"><span class="ic" aria-hidden="true">add</span></button>
+        </div>
+        <div class="t-bs v" style="margin-top: 6px; text-align: center">Tra le 4:00 e le 11:00, limiti fissati da Octopus</div>
+
+        <div class="sw-row">
+          <span class="tile-ic sh-cookie4" style="background: var(--bat-c); color: var(--on-bat-c)"><span class="ic f s20" aria-hidden="true">battery_saver</span></span>
+          <div style="flex: 1; min-width: 0">
+            <div class="t-ts" id="hold-l">Batteria di casa a riposo</div>
+            <div class="t-bs v" id="holdsub">Mentre Octopus carica l'auto, la batteria di casa non si scarica: l'auto prende dalla rete a prezzo scontato.</div>
           </div>
+          <button class="sw" id="holdsw" role="switch" aria-checked="false" aria-labelledby="hold-l"><span class="sw-h"><span class="ic" aria-hidden="true">check</span></span></button>
+        </div>
+
+        <div class="confirm t-bs" role="status">
+          <span class="mini-li" id="octospin" aria-hidden="true" hidden></span>
+          <span class="ic f s20 ok" id="octook" aria-hidden="true" hidden>check_circle</span>
+          <span id="octotext"></span>
+        </div>
+      </section>
+    </section>
+
+    <!-- R3 · AVVISI E STORICO -->
+    <section class="grp k-arc" id="grpR2" aria-labelledby="r2-t">
+      <header class="gh stag" style="animation-delay: 200ms">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">history</span></span>
+        <div class="gh-t"><span class="gh-e">Archivio</span><h2 id="r2-t">Avvisi e storico</h2><span class="t-bs v">Notifiche sul telefono e ultime manovre</span></div>
+      </header>
+      <div id="pushgroup" hidden>
+        <div class="notif-row">
+          <span class="tile-ic sh-cookie9" style="background: var(--sun-c); color: var(--on-sun-c)"><span class="ic s20" id="pushicon" aria-hidden="true">notifications_off</span></span>
+          <div class="ch-t"><h3 class="t-ts" id="nt-l">Notifiche su questo dispositivo</h3><span class="t-bs v" id="pushsub"></span></div>
           <button class="sw" id="pushsw" role="switch" aria-checked="false" aria-labelledby="nt-l"><span class="sw-h"><span class="ic" aria-hidden="true">check</span></span></button>
         </div>
-        <div style="padding: 4px 16px 16px; background: var(--scl)">
-          <button class="btn outl sl" id="pushtest" disabled><span class="ic s20" aria-hidden="true">send</span>Invia una notifica di prova</button>
+        <div style="display: flex; justify-content: flex-end; margin-top: 4px">
+          <button class="btn text sl" style="color: var(--ctl)" id="pushtest" disabled><span class="ic s20" aria-hidden="true">send</span>Invia una notifica di prova</button>
         </div>
       </div>
-      <div class="pwa" id="pwahelp" hidden>
+      <div class="pwa" id="pwahelp" style="background: var(--sun-c); color: var(--on-sun-c)" hidden>
         <div style="display: flex; gap: 12px; align-items: center">
-          <span class="ic" style="color: var(--p)" aria-hidden="true">add_to_home_screen</span>
+          <span class="ic" aria-hidden="true">add_to_home_screen</span>
           <span class="t-ts" id="pwatitle">Aggiungi l'app alla schermata Home</span>
         </div>
-        <p class="t-bm v" style="margin: 0" id="pwatext">Su iPhone le notifiche arrivano solo se TeslaCharger è aperta dalla schermata Home, non da Safari.</p>
+        <p class="t-bm" style="margin: 0" id="pwatext">Su iPhone le notifiche arrivano solo se TeslaCharger è aperta dalla schermata Home, non da Safari.</p>
         <ol class="t-bm" id="pwasteps">
           <li>In Safari tocca Condividi.</li>
           <li>Scegli Aggiungi alla schermata Home.</li>
           <li>Apri TeslaCharger dall'icona e attiva le notifiche.</li>
         </ol>
       </div>
-    </section>
-
-    <!-- Ultime manovre -->
-    <section class="stag" style="animation-delay: 260ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Ultime manovre</h2></div>
-      <div class="group" id="log"></div>
+      <div class="sub-h" style="margin-top: 6px"><h3 class="t-tm">Ultime manovre</h3><span class="t-bs v">dalla più recente</span></div>
+      <div class="tl" id="log"></div>
     </section>
   </main>
 
   <!-- ================= CASA ================= -->
   <main class="page fade-through" id="viewC" hidden>
-    <section class="hero t-idle stag" id="homehero">
-      <div class="hero-row">
-        <div class="hs-wrap" id="homewrap"><div class="hshape sh-pentagon" id="homeshape"><span class="ic s40" id="homeicon" aria-hidden="true">home</span></div></div>
-        <div style="display: flex; flex-direction: column; min-width: 0">
-          <div class="kw t-dl"><span id="homekw">–</span><small>kW</small></div>
-          <span class="t-ll" style="opacity: .86" id="homekwsub">dai pannelli</span>
+    <!-- C1 · ADESSO -->
+    <section class="grp k-live" id="grpC0" aria-labelledby="c0-t">
+      <header class="gh stag">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">electric_bolt</span></span>
+        <div class="gh-t"><span class="gh-e">Stato</span><h2 id="c0-t">Adesso</h2><span class="t-bs v">Da dove arriva l'energia e dove va</span></div>
+      </header>
+      <section class="hero t-idle stag" id="homehero" aria-live="polite">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+          <span class="t-lm" style="opacity: .8">Flusso di energia</span>
+          <span class="live-chip" id="homechip"><i></i><span id="homechiptext">In attesa</span></span>
         </div>
-      </div>
-      <h1 class="hero-title" id="hometitle">La casa</h1>
-      <p class="hero-reason" id="homereason">In caricamento</p>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px" id="homechips"></div>
+        <div class="hero-row">
+          <div class="hs-wrap" id="homewrap"><div class="hshape sh-pentagon" id="homeshape"><span class="ic s40" id="homeicon" aria-hidden="true">home</span></div></div>
+          <div style="display: flex; flex-direction: column; min-width: 0">
+            <div class="kw t-dl"><span id="homekw">–</span><small>kW</small></div>
+            <span class="t-ll" style="opacity: .86" id="homekwsub">dai pannelli</span>
+          </div>
+        </div>
+        <h2 class="hero-title" id="hometitle">La casa</h2>
+        <p class="hero-reason" id="homereason">In caricamento</p>
+        <div class="hero-chips" id="homechips"></div>
+      </section>
+      <div class="sub-h"><h3 class="t-tm">Oggi</h3><span class="t-bs v" id="hometime">Impianto –</span></div>
+      <div class="dgrid stag" style="animation-delay: 60ms" id="hometoday"></div>
     </section>
 
-    <section class="stag">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Oggi</h2><span class="chip-a t-lm"><span class="ic s18" aria-hidden="true">schedule</span><span id="hometime">Impianto –</span></span></div>
-      <div class="dgrid" id="hometoday"></div>
-    </section>
-
-    <section class="stag" style="animation-delay: 60ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Pannelli e inverter adesso</h2></div>
+    <!-- C2 · IMPIANTO -->
+    <section class="grp k-live" id="grpC1" aria-labelledby="c1-t">
+      <header class="gh stag" style="animation-delay: 100ms">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">solar_power</span></span>
+        <div class="gh-t"><span class="gh-e">Stato</span><h2 id="c1-t">Impianto</h2><span class="t-bs v">Pannelli, inverter e batteria adesso</span></div>
+      </header>
       <div class="dgrid" id="homelive"></div>
-    </section>
-
-    <section class="stag" style="animation-delay: 100ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Batteria di casa</h2></div>
+      <div class="sub-h"><h3 class="t-tm">Batteria di casa</h3></div>
       <div class="dgrid" id="homebattery"></div>
     </section>
 
-    <section class="card stag" style="animation-delay: 140ms">
-      <h2 class="t-tm" style="margin: 0">Produzione dei pannelli</h2>
-      <span class="t-bs v">Ultimi 14 giorni, kWh</span>
-      <div class="chart" id="homechart">
-        <div class="gl" style="bottom: 0"><span>0</span></div>
-        <div class="gl" style="bottom: 55px"><span id="hglmid">5</span></div>
-        <div class="gl" style="bottom: 110px"><span id="hglmax">10</span></div>
-      </div>
-      <div class="xlab" id="homexlab"></div>
-      <div class="detail">
-        <span class="t-ts" id="homeseltitle">Nessun dato</span>
-        <span class="t-bs v" id="homeseltext"></span>
-      </div>
-    </section>
-
-    <section class="stag" style="animation-delay: 160ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Bollette</h2><span class="chip-a t-lm"><span class="ic s18" aria-hidden="true">account_balance_wallet</span><span id="billowed">Saldo –</span></span></div>
-      <div class="group" id="bills"><div class="li"><div class="li-body t-bm v">In caricamento</div></div></div>
-      <p class="t-bs v" style="margin: 10px 4px 0" id="billnote"></p>
-    </section>
-
-    <section class="stag" style="animation-delay: 180ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Da quando esiste l'impianto</h2></div>
+    <!-- C3 · STORICO E COSTI -->
+    <section class="grp k-arc" id="grpC2" aria-labelledby="c2-t">
+      <header class="gh stag" style="animation-delay: 200ms">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">receipt_long</span></span>
+        <div class="gh-t"><span class="gh-e">Archivio</span><h2 id="c2-t">Storico e costi</h2><span class="t-bs v">Produzione, bollette e totali</span></div>
+      </header>
+      <section class="card r-top" aria-labelledby="pv-t">
+        <div class="ch" style="margin-bottom: 0">
+          <span class="tile-ic sh-sunny" style="background: var(--sun-c); color: var(--on-sun-c)"><span class="ic f s20" aria-hidden="true">wb_sunny</span></span>
+          <div class="ch-t"><h3 id="pv-t" class="t-tm">Produzione dei pannelli</h3><span class="t-bs v">Ultimi 14 giorni, kWh</span></div>
+        </div>
+        <div class="chart" id="homechart">
+          <div class="gl" style="bottom: 0"><span>0</span></div>
+          <div class="gl" style="bottom: 55px"><span id="hglmid">5</span></div>
+          <div class="gl" style="bottom: 110px"><span id="hglmax">10</span></div>
+        </div>
+        <div class="xlab" id="homexlab"></div>
+        <div class="detail">
+          <span class="t-ts" id="homeseltitle">Nessun dato</span>
+          <span class="t-bs v" id="homeseltext"></span>
+        </div>
+      </section>
+      <section class="card r-mid" style="padding: 8px 0" aria-labelledby="bl-t">
+        <div class="ch" style="padding: 12px 20px 4px; margin: 0">
+          <span class="tile-ic sh-pentagon" style="background: var(--grid-c); color: var(--on-grid-c)"><span class="ic f s20" aria-hidden="true">receipt_long</span></span>
+          <div class="ch-t"><h3 id="bl-t" class="t-tm">Bollette</h3><span class="t-bs v" id="billowed">Saldo –</span></div>
+        </div>
+        <div id="bills"><div class="bill"><span class="t-bm v">In caricamento</span></div></div>
+        <p class="t-bs v" style="margin: 6px 20px 8px" id="billnote"></p>
+      </section>
+      <div class="sub-h"><h3 class="t-tm">Da quando esiste l'impianto</h3></div>
       <div class="dgrid" id="homelife"></div>
-    </section>
-
-    <section class="stag" style="animation-delay: 220ms" id="alarmsec" hidden>
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Ultimi avvisi dell'inverter</h2></div>
-      <div class="group" id="alarms"></div>
+      <div id="alarmsec" hidden>
+        <div class="sub-h" style="margin-top: 6px"><h3 class="t-tm">Ultimi avvisi dell'inverter</h3><span class="t-bs v">eventi anomali</span></div>
+        <div class="tl" id="alarms"></div>
+      </div>
     </section>
   </main>
 
   <!-- ================= CLIMA ================= -->
   <main class="page fade-through" id="viewK" hidden>
-    <section class="banner err" id="climalarm" role="alert" hidden>
-      <span class="ic f" aria-hidden="true">error</span>
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
-        <span class="t-ts">Allarme della pompa di calore</span>
-        <span class="t-bm" id="climalarmtext"></span>
-      </div>
-    </section>
-
-    <section class="hero t-idle stag" id="climhero">
-      <div class="hero-row">
-        <div class="hs-wrap" id="climwrap"><div class="hshape sh-cookie9" id="climshape"><span class="ic s40" id="climicon" aria-hidden="true">mode_heat_cool</span></div></div>
-        <div style="display: flex; flex-direction: column; min-width: 0">
-          <div class="kw t-dl"><span id="climkw">–</span><small>kW</small></div>
-          <span class="t-ll" style="opacity: .86" id="climkwsub">assorbiti ora</span>
+    <!-- K1 · ADESSO -->
+    <section class="grp k-live" id="grpK0" aria-labelledby="k0-t">
+      <header class="gh stag">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">thermostat</span></span>
+        <div class="gh-t"><span class="gh-e">Stato</span><h2 id="k0-t">Adesso</h2><span class="t-bs v">Pompa di calore, stanze e acqua calda · sola lettura</span></div>
+      </header>
+      <section class="banner err" id="climalarm" role="alert" hidden>
+        <span class="ic f" aria-hidden="true">error</span>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+          <span class="t-ts">Allarme della pompa di calore</span>
+          <span class="t-bm" id="climalarmtext"></span>
         </div>
-      </div>
-      <h1 class="hero-title" id="climtitle">Pompa di calore</h1>
-      <p class="hero-reason" id="climreason">In caricamento</p>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px" id="climchips"></div>
-    </section>
-
-    <section class="stag" style="animation-delay: 60ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Stanze</h2><span class="t-bs v" id="roomsnote"></span></div>
-      <div class="dgrid" id="rooms"></div>
-    </section>
-
-    <section class="card stag" style="animation-delay: 100ms">
-      <div style="display: flex; align-items: center; gap: 12px">
-        <span class="tile-ic sh-cookie4" style="background: var(--tc); color: var(--ontc)"><span class="ic f s20" aria-hidden="true">water_drop</span></span>
-        <div style="flex: 1">
-          <h2 class="t-tm" style="margin: 0">Acqua calda</h2>
-          <span class="t-bs v" id="acssub"></span>
+      </section>
+      <section class="hero t-idle stag" id="climhero">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+          <span class="t-lm" style="opacity: .8">Pompa di calore</span>
+          <span class="live-chip" id="climchip"><i></i><span id="climchiptext">In attesa</span></span>
         </div>
-        <span class="t-hs" id="acstemp">–</span>
-      </div>
-      <div class="sum" id="acsgrid"></div>
+        <div class="hero-row">
+          <div class="hs-wrap" id="climwrap"><div class="hshape sh-cookie9" id="climshape"><span class="ic s40" id="climicon" aria-hidden="true">mode_heat_cool</span></div></div>
+          <div style="display: flex; flex-direction: column; min-width: 0">
+            <div class="kw t-dl"><span id="climkw">–</span><small>kW</small></div>
+            <span class="t-ll" style="opacity: .86" id="climkwsub">assorbiti ora</span>
+          </div>
+        </div>
+        <h2 class="hero-title" id="climtitle">Pompa di calore</h2>
+        <p class="hero-reason" id="climreason">In caricamento</p>
+        <div class="hero-chips" id="climchips"></div>
+      </section>
+      <div class="sub-h"><h3 class="t-tm">Stanze</h3><span class="t-bs" style="color: var(--heat); font-weight: 700" id="roomsnote"></span></div>
+      <div class="rooms" id="rooms"></div>
+      <section class="card stag" style="margin-top: 2px" aria-labelledby="acs-t">
+        <div style="display: flex; gap: 16px; align-items: center">
+          <span class="tile-ic sh-cookie4" style="background: var(--cool-c); color: var(--on-cool-c)"><span class="ic f s20" aria-hidden="true">water_drop</span></span>
+          <div style="flex: 1; min-width: 0">
+            <h3 id="acs-t" class="t-tm" style="margin: 0">Acqua calda</h3>
+            <span class="t-bs v" id="acssub"></span>
+          </div>
+          <span class="t-hs" id="acstemp">–</span>
+        </div>
+        <div class="sum" id="acsgrid"></div>
+      </section>
     </section>
 
-    <section class="stag" style="animation-delay: 140ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Consumi di oggi</h2><span class="t-bs v" id="climtoday"></span></div>
+    <!-- K2 · CONSUMI -->
+    <section class="grp k-arc" id="grpK1" aria-labelledby="k1-t">
+      <header class="gh stag" style="animation-delay: 100ms">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">bar_chart</span></span>
+        <div class="gh-t"><span class="gh-e">Archivio</span><h2 id="k1-t">Consumi</h2><span class="t-bs v">Quanto pesano clima e acqua calda</span></div>
+      </header>
+      <div class="sub-h"><h3 class="t-tm">Oggi</h3><span class="t-bs v" id="climtoday"></span></div>
       <div class="dgrid" id="climenergy"></div>
+      <section class="card" style="margin-top: 8px" aria-labelledby="km-t">
+        <h3 id="km-t" class="t-tm" style="margin: 0">Consumi per mese</h3>
+        <span class="t-bs v">Ultimi 12 mesi, kWh</span>
+        <div class="legend">
+          <span><i style="background: var(--c-night)"></i>Pompa di calore</span>
+          <span><i style="background: var(--c-day)"></i>Acqua calda</span>
+          <span><i style="background: var(--c-sun)"></i>Resto della casa</span>
+        </div>
+        <div class="chart m12" id="climchart">
+          <div class="gl" style="bottom: 0"><span>0</span></div>
+          <div class="gl" style="bottom: 55px"><span id="kglmid"></span></div>
+          <div class="gl" style="bottom: 110px"><span id="kglmax"></span></div>
+        </div>
+        <div class="xlab" id="climxlab"></div>
+        <div class="detail">
+          <span class="t-ts" id="climseltitle">In caricamento</span>
+          <span class="t-bs v" id="climseltext">La prima lettura dei mesi richiede circa un minuto.</span>
+        </div>
+      </section>
     </section>
 
-    <section class="card stag" style="animation-delay: 180ms">
-      <h2 class="t-tm" style="margin: 0">Consumi per mese</h2>
-      <span class="t-bs v">Ultimi 12 mesi, kWh</span>
-      <div class="legend">
-        <span><i style="background: var(--c-night)"></i>Pompa di calore</span>
-        <span><i style="background: var(--c-day)"></i>Acqua calda</span>
-        <span><i style="background: var(--c-sun)"></i>Resto della casa</span>
-      </div>
-      <div class="chart" id="climchart">
-        <div class="gl" style="bottom: 0"><span>0</span></div>
-        <div class="gl" style="bottom: 55px"><span id="kglmid"></span></div>
-        <div class="gl" style="bottom: 110px"><span id="kglmax"></span></div>
-      </div>
-      <div class="xlab" id="climxlab"></div>
-      <div class="detail">
-        <span class="t-ts" id="climseltitle">In caricamento</span>
-        <span class="t-bs v" id="climseltext">La prima lettura dei mesi richiede circa un minuto.</span>
-      </div>
-    </section>
-
-    <section class="stag" style="animation-delay: 220ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Impostazioni dell'impianto</h2><span class="t-bs v">sola lettura</span></div>
-      <div class="group" id="climsettings"></div>
+    <!-- K3 · IMPOSTAZIONI -->
+    <section class="grp k-arc" id="grpK2" aria-labelledby="k2-t">
+      <header class="gh stag" style="animation-delay: 200ms">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">settings</span></span>
+        <div class="gh-t"><span class="gh-e">Archivio</span><h2 id="k2-t">Impostazioni</h2><span class="ro"><span class="ic s18" aria-hidden="true">lock</span>Sola lettura, si cambiano dal portale Emmeti</span></div>
+      </header>
+      <div class="list" id="climsettings"></div>
     </section>
   </main>
 
   <!-- ================= AUTO ================= -->
   <main class="page fade-through" id="viewA" hidden>
-    <section class="car-hero stag">
-      <div style="align-self: stretch; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
-        <div>
-          <h1 class="t-tl" style="margin: 0" id="carname">Model 3</h1>
-          <span class="t-bs v" id="carread">Nessuna lettura disponibile</span>
+    <!-- A1 · L'AUTO -->
+    <section class="grp k-live" id="grpA0" aria-labelledby="a0-t">
+      <header class="gh stag">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">directions_car</span></span>
+        <div class="gh-t"><span class="gh-e">Stato</span><h2 id="a0-t">L'auto</h2><span class="t-bs v" id="carread">Nessuna lettura disponibile</span></div>
+      </header>
+      <section class="car-hero stag">
+        <div style="align-self: stretch; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+          <div><h3 class="t-tl" style="margin: 0" id="carname">Model 3</h3><span class="t-bs v">Batteria e autonomia</span></div>
+          <span class="chip-a t-lm" id="lockchip" hidden><span class="ic s18" id="lockchipic" aria-hidden="true">lock</span><span id="lockchiptext">Chiusa</span></span>
         </div>
-        <span class="chip-a t-lm" id="lockchip" hidden><span class="ic s18" id="lockchipic" aria-hidden="true">lock</span><span id="lockchiptext">Chiusa</span></span>
-      </div>
-      <div class="banner dry" id="standby" style="align-self: stretch; padding: 12px 16px; align-items: center" hidden>
-        <span class="ic s20" style="color: var(--n)" aria-hidden="true">bedtime</span>
-        <span class="t-bm">L'auto non ha risposto al risveglio: i dati sono dell'ultima lettura.</span>
-      </div>
-      <div class="ring" id="ring" role="img" aria-label="Batteria dell'auto">
-        <svg width="232" height="232" viewBox="0 0 232 232">
-          <path class="rt" id="ringt" d=""></path>
-          <path class="ra" id="ringa" d=""></path>
-          <circle class="rl" id="ringl" cx="116" cy="32" r="4"></circle>
-        </svg>
-        <div class="ring-c">
-          <div class="kw t-dl"><span id="ringpct">–</span><small>%</small></div>
-          <span class="t-bm v" id="ringrange"></span>
+        <div class="banner dry" id="standby" style="align-self: stretch; padding: 12px 16px; align-items: center" hidden>
+          <span class="ic s20" style="color: var(--oct)" aria-hidden="true">bedtime</span>
+          <span class="t-bm">L'auto non ha risposto al risveglio: i dati sono dell'ultima lettura.</span>
         </div>
+        <div class="ring" id="ring" role="img" aria-label="Batteria dell'auto">
+          <svg width="232" height="232" viewBox="0 0 232 232">
+            <path class="rt" id="ringt" d=""></path>
+            <path class="ra" id="ringa" d=""></path>
+            <circle class="rl" id="ringl" cx="116" cy="32" r="4"></circle>
+          </svg>
+          <div class="ring-c">
+            <div class="kw t-dl"><span id="ringpct">–</span><small>%</small></div>
+            <span class="t-bm v" id="ringrange"></span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center">
+          <span class="chip-a t-lm" style="border-color: transparent; background: var(--live-c); color: var(--on-live-c)"><span class="ic f s18" aria-hidden="true">battery_charging_80</span><span id="chiplimit">Limite –</span></span>
+          <span class="chip-a t-lm"><span class="ic s18" style="color: var(--live)" aria-hidden="true">power</span><span id="chipcable">Cavo –</span></span>
+        </div>
+      </section>
+      <div class="dgrid stag" style="animation-delay: 60ms">
+        <div class="dcell"><span class="t-lm v">Chilometri totali</span><span class="dval" id="dodo">–</span><span class="t-bs v">km</span></div>
+        <div class="dcell"><span class="t-lm v">Temperatura</span><span class="dval" id="dtemp">–</span><span class="t-bs v" id="dtempsub">dentro</span></div>
+        <div class="dcell"><span class="t-lm v">Software</span><span class="dval" style="font-size: 20px" id="dsw">–</span><span class="t-bs v">versione installata</span></div>
+        <div class="dcell"><span class="t-lm v">Chiusura</span><span class="dval" style="display: flex; align-items: center; gap: 6px"><span class="ic f" id="dlockic" aria-hidden="true">lock</span><span id="dlock">–</span></span><span class="t-bs v">porte e bagagliai</span></div>
       </div>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center">
-        <span class="chip-a t-lm"><span class="ic s18" aria-hidden="true">battery_charging_80</span><span id="chiplimit">Limite –</span></span>
-        <span class="chip-a t-lm"><span class="ic s18" aria-hidden="true">power</span><span id="chipcable">Cavo –</span></span>
+      <div id="rowssec" hidden>
+        <div class="sub-h" style="margin-top: 6px"><h3 class="t-tm">Stato dell'auto</h3></div>
+        <div class="list dense" id="rows"></div>
       </div>
     </section>
 
-    <section class="dgrid stag" style="animation-delay: 60ms">
-      <div class="dcell"><span class="t-lm v">Chilometri totali</span><span class="dval" id="dodo">–</span><span class="t-bs v">km</span></div>
-      <div class="dcell"><span class="t-lm v">Temperatura</span><span class="dval" id="dtemp">–</span><span class="t-bs v" id="dtempsub">dentro</span></div>
-      <div class="dcell"><span class="t-lm v">Software</span><span class="dval" style="font-size: 20px" id="dsw">–</span><span class="t-bs v">versione installata</span></div>
-      <div class="dcell"><span class="t-lm v">Chiusura</span><span class="dval" style="display: flex; align-items: center; gap: 6px"><span class="ic f" id="dlockic" aria-hidden="true">lock</span><span id="dlock">–</span></span><span class="t-bs v">porte e bagagliai</span></div>
-    </section>
-
-    <section class="stag" style="animation-delay: 90ms">
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Batteria e ricarica</h2></div>
+    <!-- A2 · BATTERIA E RICARICHE -->
+    <section class="grp k-arc" id="grpA1" aria-labelledby="a1-t">
+      <header class="gh stag" style="animation-delay: 100ms">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">battery_profile</span></span>
+        <div class="gh-t"><span class="gh-e">Archivio</span><h2 id="a1-t">Batteria e ricariche</h2><span class="t-bs v">Indicatori calcolati dalle letture nel tempo</span></div>
+      </header>
       <div class="dgrid" id="insights"></div>
-    </section>
 
-    <section class="stag" style="animation-delay: 100ms" id="rowssec" hidden>
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Stato dell'auto</h2></div>
-      <div class="group" id="rows"></div>
-    </section>
-
-    <section class="card stag" style="animation-delay: 120ms">
-      <h2 class="t-tm" style="margin: 0">Ricariche a casa</h2>
-      <span class="t-bs v">Ultimi 14 giorni, kWh</span>
-      <div class="legend">
-        <span><i style="background: var(--c-sun)"></i>Sole</span>
-        <span><i style="background: var(--c-day)"></i>Giorno da rete o batteria</span>
-        <span><i style="background: var(--c-night)"></i>Notte con Octopus</span>
-      </div>
-      <div class="chart" id="chart">
-        <div class="gl" style="bottom: 0"><span>0</span></div>
-        <div class="gl" style="bottom: 55px"><span id="glmid">5</span></div>
-        <div class="gl" style="bottom: 110px"><span id="glmax">10</span></div>
-      </div>
-      <div class="xlab" id="xlab"></div>
-      <div class="detail">
-        <span class="t-ts" id="seltitle">Nessun dato</span>
-        <span class="t-bs v" id="seltext"></span>
-      </div>
-      <p class="t-bs v" style="margin: 12px 0 0" id="since" hidden></p>
-      <div style="margin-top: 20px; border-top: 1px solid var(--olv); padding-top: 16px">
-        <span class="t-ts" id="monthtitle">Questo mese</span>
+      <section class="card r-top" style="margin-top: 2px" aria-labelledby="rc-t">
+        <div class="ch" style="margin-bottom: 0">
+          <span class="tile-ic sh-sunny" style="background: var(--live-c); color: var(--on-live-c)"><span class="ic f s20" aria-hidden="true">ev_station</span></span>
+          <div class="ch-t"><h3 id="rc-t" class="t-tm">Ricariche a casa</h3><span class="t-bs v">Ultimi 14 giorni, kWh</span></div>
+        </div>
+        <div class="legend">
+          <span><i style="background: var(--c-sun)"></i>Sole</span>
+          <span><i style="background: var(--c-day)"></i>Giorno da rete o batteria</span>
+          <span><i style="background: var(--c-night)"></i>Notte con Octopus</span>
+        </div>
+        <div class="chart" id="chart">
+          <div class="gl" style="bottom: 0"><span>0</span></div>
+          <div class="gl" style="bottom: 55px"><span id="glmid">5</span></div>
+          <div class="gl" style="bottom: 110px"><span id="glmax">10</span></div>
+        </div>
+        <div class="xlab" id="xlab"></div>
+        <div class="detail">
+          <span class="t-ts" id="seltitle">Nessun dato</span>
+          <span class="t-bs v" id="seltext"></span>
+        </div>
+        <p class="t-bs v" style="margin: 12px 0 0" id="since" hidden></p>
+      </section>
+      <section class="card r-mid" aria-labelledby="ms-t">
+        <h3 id="ms-t" class="t-tm" style="margin: 0"><span id="monthtitle">Questo mese</span></h3>
         <div class="sum">
           <div><div class="t-hs"><span id="mtot">–</span> <small class="t-bm">kWh</small></div><div class="t-bs v">Totale</div></div>
-          <div><div class="t-hs" style="color: var(--p)" id="msun">–</div><div class="t-bs v">Dal sole, stima</div></div>
-          <div><div class="t-hs"><span id="mnight">–</span> <small class="t-bm">kWh</small></div><div class="t-bs v">Notte con Octopus</div></div>
+          <div><div class="t-hs" style="color: var(--sun)" id="msun">–</div><div class="t-bs v">Dal sole, stima</div></div>
+          <div><div class="t-hs" style="color: var(--oct)"><span id="mnight">–</span> <small class="t-bm">kWh</small></div><div class="t-bs v">Notte con Octopus</div></div>
           <div><div class="t-hs"><span id="mday">–</span> <small class="t-bm">kWh</small></div><div class="t-bs v">Giorno non solare</div></div>
           <div><div class="t-hs"><span id="mcost">–</span> <small class="t-bm">€</small></div><div class="t-bs v">Spesa stimata</div></div>
-          <div><div class="t-hs" style="color: var(--p)"><span id="msaved">–</span> <small class="t-bm">€</small></div><div class="t-bs v">Risparmiati col sole, stima</div></div>
+          <div><div class="t-hs" style="color: var(--live)"><span id="msaved">–</span> <small class="t-bm">€</small></div><div class="t-bs v">Risparmiati col sole, stima</div></div>
           <div><div class="t-hs"><span id="msuper">–</span> <small class="t-bm">kWh</small></div><div class="t-bs v" id="msupersub">Supercharger</div></div>
           <div><div class="t-hs"><span id="mkm">–</span> <small class="t-bm">km</small></div><div class="t-bs v" id="mkmsub">Percorsi nel mese</div></div>
         </div>
         <p class="t-bs v" style="margin: 12px 0 0" id="mprices"></p>
+      </section>
+      <section class="card r-bot" aria-labelledby="cg-t">
+        <div class="ch" style="margin-bottom: 0">
+          <span class="tile-ic sh-cookie4" style="background: var(--bat-c); color: var(--on-bat-c)"><span class="ic f s20" aria-hidden="true">route</span></span>
+          <div class="ch-t"><h3 id="cg-t" class="t-tm">Consumi di guida</h3><span class="t-bs v">Stima in kWh ogni 100 km</span></div>
+        </div>
+        <div id="consready" hidden>
+          <div class="kw" style="margin-top: 16px"><span class="t-dm" id="consval">–</span><small class="t-tm">kWh/100 km</small></div>
+          <span class="t-bs v" id="conssub"></span>
+        </div>
+        <div id="conswait">
+          <p class="t-bm" style="margin: 16px 0 0">La stima compare dopo 50 km registrati.</p>
+          <div class="lin" id="consbar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="50" aria-label="Chilometri registrati"><i id="consfill" style="width: 0%"></i></div>
+          <span class="t-bs v" style="display: block; margin-top: 6px" id="conskm">0 km su 50</span>
+        </div>
+      </section>
+      <div id="supersec" hidden>
+        <div class="sub-h" style="margin-top: 6px"><h3 class="t-tm">Ricariche fuori casa</h3><span class="t-bs v">Supercharger</span></div>
+        <div class="tl" id="supers"></div>
       </div>
     </section>
 
-    <section class="card stag" style="animation-delay: 180ms">
-      <div style="display: flex; align-items: center; gap: 12px">
-        <span class="tile-ic sh-cookie4" style="background: var(--tc); color: var(--ontc)"><span class="ic f s20" aria-hidden="true">route</span></span>
-        <h2 class="t-tm" style="margin: 0">Consumi di guida</h2>
+    <!-- A3 · DETTAGLI -->
+    <section class="grp k-arc" id="grpA2" aria-labelledby="a2-t">
+      <header class="gh stag" style="animation-delay: 200ms">
+        <span class="gh-ic"><span class="ic f s20" aria-hidden="true">info</span></span>
+        <div class="gh-t"><span class="gh-e">Archivio</span><h2 id="a2-t">Dettagli</h2><span class="t-bs v">Codici interni di Tesla e accesso all'app</span></div>
+      </header>
+      <div id="specssec" hidden>
+        <div class="list dense" id="specs"></div>
       </div>
-      <div id="consready" hidden>
-        <div class="kw" style="margin-top: 16px"><span class="t-dm" id="consval">–</span><small class="t-tm">kWh/100 km</small></div>
-        <span class="t-bs v" id="conssub"></span>
-      </div>
-      <div id="conswait">
-        <p class="t-bm" style="margin: 16px 0 0">La stima compare dopo 50 km registrati.</p>
-        <div class="lin" id="consbar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="50" aria-label="Chilometri registrati"><i id="consfill" style="width: 0%"></i></div>
-        <span class="t-bs v" style="display: block; margin-top: 6px" id="conskm">0 km su 50</span>
-      </div>
+      <section class="card ctl" style="padding: 8px; margin-top: 8px">
+        <button class="li sl" style="width: 100%; border-radius: 20px; text-align: left" id="asklogout">
+          <span class="li-ic"><span class="ic s20" aria-hidden="true">logout</span></span>
+          <span class="li-body"><span class="t-bl" style="display: block">Esci da questo dispositivo</span><span class="t-bs v" style="display: block">Dovrai reinserire la password</span></span>
+          <span class="ic s20 v" aria-hidden="true">chevron_right</span>
+        </button>
+      </section>
     </section>
-
-    <section class="stag" id="supersec" hidden>
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Ricariche fuori casa</h2><span class="t-bs v">Supercharger</span></div>
-      <div class="group" id="supers"></div>
-    </section>
-
-    <section class="stag" id="specssec" hidden>
-      <div class="sec-h"><h2 class="t-tm" style="margin: 0">Sotto il cofano</h2><span class="t-bs v">codici interni di Tesla</span></div>
-      <div class="group" id="specs"></div>
-    </section>
-
-    <button class="btn text sl" style="align-self: center" id="asklogout"><span class="ic s20" aria-hidden="true">logout</span>Esci da questo dispositivo</button>
   </main>
   </div>
+
+  <!-- Barra di navigazione -->
+  <nav class="nav" aria-label="Sezioni">
+    <button class="nav-b sl s-ric on" id="navR" aria-current="page"><span class="nav-p"><span class="ic" aria-hidden="true">bolt</span></span><span>Ricarica</span></button>
+    <button class="nav-b sl s-casa" id="navC" aria-current="false"><span class="nav-p"><span class="ic" aria-hidden="true">home</span></span><span>Casa</span></button>
+    <button class="nav-b sl s-clima" id="navK" aria-current="false"><span class="nav-p"><span class="ic" aria-hidden="true">thermostat</span></span><span>Clima</span></button>
+    <button class="nav-b sl s-auto" id="navA" aria-current="false"><span class="nav-p"><span class="ic" aria-hidden="true">directions_car</span></span><span>Auto</span></button>
+  </nav>
 
   <button class="fab sl" id="fab" aria-label="Aggiorna i dati dell'auto" hidden>
     <span class="fab-li" id="fabspin" aria-hidden="true" hidden></span>
@@ -850,45 +1078,77 @@ const dayKey = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
-const state = { status: null, hist: null, tab: "R", bar: 13, level: null, ready: null, octo: "ok", editing: false };
+const state = { status: null, hist: null, tab: "R", sec: 0, bar: 13, level: null, ready: null, octo: "ok", editing: false };
 
 // ---- tema, barra, schede ----
 const mq = matchMedia("(prefers-color-scheme: dark)");
 const theme = () => { $("app").classList.toggle("dark", mq.matches); document.documentElement.classList.toggle("dark", mq.matches); };
 theme(); mq.addEventListener("change", theme);
 
-const TABS = { R: "tabR", C: "tabC", K: "tabK", A: "tabA" };
-function placeIndicator() {
-  const tab = $(TABS[state.tab]);
-  $("tabind").style.transform = "translateX(" + (tab.offsetLeft + tab.offsetWidth / 2 - 32) + "px)";
+const SECTIONS = {
+  R: { label: "Ricarica", cls: "s-ric", parts: [["k-live", "Adesso"], ["k-ctl", "Le tue scelte"], ["k-arc", "Avvisi e storico"]] },
+  C: { label: "Casa", cls: "s-casa", parts: [["k-live", "Adesso"], ["k-live", "Impianto"], ["k-arc", "Storico e costi"]] },
+  K: { label: "Clima", cls: "s-clima", parts: [["k-live", "Adesso"], ["k-arc", "Consumi"], ["k-arc", "Impostazioni"]] },
+  A: { label: "Auto", cls: "s-auto", parts: [["k-live", "L'auto"], ["k-arc", "Batteria e ricariche"], ["k-arc", "Dettagli"]] },
+};
+let spyLock = 0;
+function groups() { return [0, 1, 2].map((i) => $("grp" + state.tab + i)); }
+function drawIdx() {
+  const box = $("idx"), sec = SECTIONS[state.tab];
+  box.textContent = "";
+  sec.parts.forEach((part, i) => {
+    const b = el("button", "idx-c sl " + part[0] + (i === (state.sec || 0) ? " on" : ""));
+    b.setAttribute("aria-current", i === (state.sec || 0) ? "true" : "false");
+    b.append(el("i", ""), document.createTextNode(part[1]));
+    b.firstChild.setAttribute("aria-hidden", "true");
+    b.addEventListener("click", () => {
+      const g = groups()[i];
+      spyLock = Date.now() + 700;
+      state.sec = i; drawIdx();
+      window.scrollTo({ top: Math.max(0, g.getBoundingClientRect().top + window.scrollY - $("bar").offsetHeight - 8), behavior: "smooth" });
+    });
+    box.append(b);
+  });
+}
+function drawBarSub() {
+  const s = state.status, t = state.tab;
+  $("clock").textContent = t === "R" ? (state.clockR || "In caricamento")
+    : t === "C" ? (state.home && state.home.time ? "Impianto alle " + state.home.time.slice(11, 16) + " · ogni 5 minuti" : "Impianto fotovoltaico e batteria")
+    : t === "K" ? (state.climate && state.climate.power && state.climate.power.time ? "Pompa di calore alle " + state.climate.power.time.slice(11, 16) + " · ogni 2 minuti" : "Pompa di calore, sola lettura")
+    : (s && s.car_info ? "Auto letta alle " + readAt(s.car_info.time) : "Dati dell'auto");
 }
 function switchTab(t) {
   if (t === state.tab) return;
-  state.tab = t;
-  for (const key in TABS) {
-    const on = key === t, tab = $(TABS[key]);
+  state.tab = t; state.sec = 0;
+  for (const key in SECTIONS) {
+    const on = key === t, nav = $("nav" + key);
     $("view" + key).hidden = !on;
-    tab.classList.toggle("on", on);
-    tab.querySelector(".ic").classList.toggle("f", on);
-    tab.setAttribute("aria-current", on ? "page" : "false");
+    nav.classList.toggle("on", on);
+    nav.setAttribute("aria-current", on ? "page" : "false");
   }
+  const sec = SECTIONS[t];
+  $("bar").className = "bar " + sec.cls + ($("bar").classList.contains("scrolled") ? " scrolled" : "");
+  $("app").className = "app " + sec.cls + ($("app").classList.contains("dark") ? " dark" : "");
+  $("barh").textContent = sec.label;
+  drawIdx(); drawBarSub();
   $("fab").hidden = t !== "A";
   $("snack").classList.toggle("fab-up", t === "A");
   window.scrollTo(0, 0);
-  placeIndicator();
   if (t === "A") refreshHistory();
   if (t === "C") refreshHome();
   if (t === "K") refreshClimate();
 }
-$("tabR").addEventListener("click", () => switchTab("R"));
-$("tabC").addEventListener("click", () => switchTab("C"));
-$("tabK").addEventListener("click", () => switchTab("K"));
-$("tabA").addEventListener("click", () => switchTab("A"));
-window.addEventListener("resize", placeIndicator);
+for (const key in SECTIONS) $("nav" + key).addEventListener("click", () => switchTab(key));
 window.addEventListener("scroll", () => {
   const scrolled = window.scrollY > 4;
   $("bar").classList.toggle("scrolled", scrolled);
   $("fab").classList.toggle("small", scrolled);
+  if (Date.now() < spyLock) return;
+  const line = window.scrollY + $("bar").offsetHeight + 120, gs = groups();
+  let cur = 0;
+  gs.forEach((g, i) => { if (g && g.getBoundingClientRect().top + window.scrollY <= line) cur = i; });
+  if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 8) cur = 2;
+  if (cur !== (state.sec || 0)) { state.sec = cur; drawIdx(); }
 }, { passive: true });
 
 // ---- snackbar ----
@@ -938,6 +1198,7 @@ function phase(s) {
       ? "Oggi nessuna carica automatica, come hai scelto ieri sera" + (s.sun_enough ? ". Ora il sole basta: decidi tu se caricare" : ": ti avviso quando c'è sole")
       : "Automatica: oggi niente carica col sole. Stanotte carica Octopus";
     const text = s.mode === "auto" && inDay(s) ? noCharge : plan || reason;
+    if (s.mode === "auto" && inDay(s) && s.no_charge_today) return { title: "Nessuna carica in corso", reason: text, shape: "sh-circle", tone: "t-idle", icon: "wb_sunny", chip: "Ferma, decidi tu" };
     return { title: "Nessuna carica in corso", reason: text, shape: "sh-clover", tone: "t-night", icon: "bedtime" };
   }
   return { title: "Nessuna carica in corso", reason, shape: "sh-circle", tone: "t-idle", icon: "ev_station" };
@@ -956,6 +1217,8 @@ function renderHero(s) {
   }
   $("htitle").textContent = ph.title;
   $("hreason").textContent = ph.reason;
+  $("hchiptext").textContent = ph.chip || (ph.charging ? "In carica" : ph.loading ? "In corso" : ph.tone === "t-night" ? "Notte con Octopus" : "Ferma");
+  $("hchip").classList.toggle("pulse", !!(ph.charging || ph.loading));
   const pct = car ? car.pct : 0;
   $("wclip").classList.toggle("flat", !ph.charging);
   $("wclip").style.width = "max(8px, calc(" + pct + "% - 3px))";
@@ -972,7 +1235,7 @@ function renderTiles(s) {
   const p = s.plant, car = carNow(s);
   if (p) {
     // SolaxCloud pubblica un dato nuovo ogni 5 minuti
-    $("solax").textContent = "Impianto " + p.data_time.slice(11, 16) + " · nuovo alle " + after(p.data_time, 300);
+    $("solax").textContent = "Cosa succede ora · impianto alle " + p.data_time.slice(11, 16) + ", nuovo dato alle " + after(p.data_time, 300);
     const share = p.pv_w * s.pv_share / 100, min = s.min_amps * NOMINAL_V, max = s.max_amps * NOMINAL_V;
     $("t1v").textContent = p.pv_w < 50 ? "0" : kw(p.pv_w);
     $("t1s").textContent = p.pv_w < 50 ? "Nessuna produzione"
@@ -1024,12 +1287,15 @@ function renderEvening(s) {
   if (!q) return;
   const dayName = WEEKDAYS[new Date(q.day + "T12:00:00").getDay()].toLowerCase();
   const sun = q.home_kwh > 0 ? "sono previsti fino a " + fmt(q.home_kwh) + " kWh dal sole per l'auto (circa +" + Math.round(q.home_kwh / BATTERY_KWH * 100) + "%)" : "non è previsto sole utile per l'auto";
-  const planLab = (k) => PLAN_L[k] + " · " + s.plans[k].percent + "% entro le " + hm(s.plans[k].time);
-  $("evetext").textContent = "Domani è " + dayName + (q.home_day ? ", di solito sei a casa" : ", di solito sei fuori") + ": " + sun + ". Finché non rispondi la carica resta sospesa; senza risposta, alle 22 scelgo «" + PLAN_L[q.suggestion].toLowerCase() + "». Livello e ora dei due piani si cambiano più sotto, in «Carica notturna».";
+  const planLab = (k) => "Fino al " + s.plans[k].percent + "% entro le " + hm(s.plans[k].time) + (k === "home" ? ", il resto lo dà il sole" : " con Octopus");
+  $("evetext").textContent = "Domani è " + dayName + (q.home_day ? ", di solito sei a casa" : ", di solito sei fuori") + " · " + (q.home_kwh > 0 ? "sole per l'auto " + fmt(q.home_kwh) + " kWh (circa +" + Math.round(q.home_kwh / BATTERY_KWH * 100) + "%)" : "sole insufficiente per l'auto");
   $("evehomelab").textContent = planLab("home");
   $("evenightlab").textContent = planLab("night");
   $("evehome").classList.toggle("rec", q.suggestion === "home");
   $("evenight").classList.toggle("rec", q.suggestion !== "home");
+  $("evehomerec").hidden = q.suggestion !== "home";
+  $("evenightrec").hidden = q.suggestion === "home";
+  $("evenote").textContent = "Finché non rispondi la carica resta sospesa. Senza risposta, alle 22 scelgo «" + PLAN_L[q.suggestion === "home" ? "home" : "night"] + "».";
   $("evedoneic").textContent = q.choice === "none" ? "block" : q.choice === "home" ? "wb_sunny" : "bedtime";
   $("evedonetitle").textContent = q.choice === "none" ? "Stanotte nessuna carica" : PLAN_L[q.choice] + ": carico fino al " + q.percent + "% entro le " + hm(q.time);
   $("evedonesub").textContent = q.by_user ? "Scelto da te" : "Scelto dal sistema, senza risposta";
@@ -1062,24 +1328,32 @@ function renderForecast(f) {
   if ($("forecastsec").hidden) return;
   const box = $("forecast"), today = dayKey(new Date());
   box.textContent = "";
-  const battery = (kwh) => Math.round(kwh / BATTERY_KWH * 100);
-  f.days.forEach((d, i) => {
-    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
-    const g = el("span", "ic s20", d.icon);
-    g.setAttribute("aria-hidden", "true");
-    ic.append(g);
+  const best = f.days.reduce((m, d) => (d.car_kwh > m.car_kwh ? d : m), f.days[0]);
+  const ICON = { sunny: "wb_sunny", partly_cloudy_day: "partly_cloudy_day", cloud: "cloud", foggy: "foggy", rainy: "rainy", weather_snowy: "weather_snowy", thunderstorm: "thunderstorm" };
+  f.days.slice(0, 3).forEach((d, i) => {
     const name = d.day === today ? "Oggi" : i === 1 ? "Domani" : WEEKDAYS[new Date(d.day + "T12:00:00").getDay()];
-    body.append(el("div", "t-bl", name + " · " + d.text + ", " + Math.round(d.temp_min) + "°/" + Math.round(d.temp_max) + "°"));
-    body.append(el("div", "t-bs v", d.car_kwh > 0
-      ? "All'auto fino a " + fmt(d.car_kwh) + " kWh (circa +" + battery(d.car_kwh) + "%), tra le " + d.car_from + " e le " + d.car_to
-      : "Sole insufficiente per caricare l'auto"));
-    const right = el("span", "t-ts", fmt(d.pv_kwh, 0) + " kWh");
-    row.append(ic, body, right);
-    box.append(row);
+    const card = el("article", "fc-d" + (d === best && d.car_kwh > 0 ? " best" : ""));
+    const g = el("span", "ic f s32", ICON[d.icon] || "partly_cloudy_day");
+    g.style.color = d.car_kwh > 0 ? "var(--sun-v)" : "var(--cool-v)";
+    g.setAttribute("aria-hidden", "true");
+    const big = el("span", "big", fmt(d.car_kwh));
+    big.append(el("small", "t-bs", " kWh"));
+    const bar = el("div", "fc-bar"), fill = el("i", "");
+    fill.style.width = Math.min(100, Math.round(d.car_kwh / 10 * 100)) + "%";
+    bar.append(fill);
+    const sub = el("span", "t-bs", d.car_kwh > 0 ? "+" + Math.round(d.car_kwh / BATTERY_KWH * 100) + "% · " + d.car_from + "-" + d.car_to : "Sole insufficiente");
+    sub.style.opacity = ".8";
+    const pv = el("span", "t-bs", "Pannelli " + fmt(d.pv_kwh, 0) + " kWh");
+    pv.style.opacity = ".65";
+    const head = el("span", "t-lm", name + " · " + Math.round(d.temp_min) + "°/" + Math.round(d.temp_max) + "°");
+    head.style.opacity = ".8";
+    card.title = d.text;
+    card.append(head, g, big, bar, sub, pv);
+    box.append(card);
   });
   const tomorrow = f.days[1];
-  $("forecastnote").textContent = "A destra la produzione prevista dei pannelli. La stima per l'auto vale se resta collegata tutto il giorno." +
-    (tomorrow ? (tomorrow.car_kwh >= 6 ? " Domani c'è sole: se l'auto resta a casa, stanotte puoi tenere basso il livello di Octopus." : " Domani il sole è scarso: conviene caricare stanotte con Octopus.") : "");
+  $("forecastnote").textContent = "La stima per l'auto vale se resta collegata tutto il giorno." +
+    (tomorrow ? (tomorrow.car_kwh >= 6 ? " Domani c'è sole: se l'auto resta a casa, stanotte puoi tenere basso il livello di Octopus con il piano «Domani a casa»." : " Domani il sole è scarso: conviene caricare stanotte con Octopus.") : "");
 }
 async function refreshForecast() {
   try {
@@ -1095,6 +1369,7 @@ function renderModes(s) {
     b.classList.toggle("on", on);
     b.setAttribute("aria-checked", String(on));
   });
+  $("modenow").textContent = MODE_L[s.mode] || "–";
   const min = kw(s.min_amps * NOMINAL_V), max = kw(s.max_amps * NOMINAL_V);
   const desc = {
     boost: "Carica alla corrente massima con pannelli, batteria di casa e rete. A carica completa torna da sola alla modalità di prima.",
@@ -1162,9 +1437,9 @@ function renderNight(s) {
   }
   document.querySelectorAll("[data-plan]").forEach((b) => {
     const on = b.dataset.plan === state.plan;
-    b.classList.toggle("tonal", on);
-    b.classList.toggle("outl", !on);
-    b.setAttribute("aria-pressed", String(on));
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-checked", String(on));
+    b.querySelector(".vig").hidden = s.active_plan !== b.dataset.plan;
   });
   $("plannote").textContent = s.active_plan === state.plan ? "È il piano in vigore: le modifiche vanno subito a Octopus."
     : s.active_plan ? "Non è il piano in vigore: le modifiche valgono da quando lo scegli."
@@ -1213,35 +1488,40 @@ $("readydown").addEventListener("click", () => { if (state.ready > 0) { state.re
 $("readyup").addEventListener("click", () => { if (state.ready < 14) { state.ready++; drawReady(); scheduleOcto(); } });
 
 // ---- manovre ----
+const EVENT_TONE = { play_circle: "live", stop_circle: "grid", pause: "grid", tune: "ctl", swap_horiz: "ctl", power_settings_new: "ctl", help: "oct", verified_user: "bat", gpp_bad: "bat", battery_lock: "bat", battery_saver: "bat", bedtime: "oct", block: "oct", hourglass_top: "oct", notifications: "sun", sunny: "sun", wb_sunny: "sun", science: "ctl", error: "err", event_busy: "err", warning: "heat", ev_station: "heat" };
+function tlRow(icon, title, sub, right, last) {
+  const tone = EVENT_TONE[icon] || "grid";
+  const row = el("div", "tl-i" + (last ? " last" : "")), n = el("span", "tl-n"), body = el("div", "tl-t");
+  n.style.background = tone === "err" ? "var(--ec)" : "var(--" + tone + "-c)";
+  n.style.color = tone === "err" ? "var(--onec)" : "var(--on-" + tone + "-c)";
+  const glyph = el("span", "ic f s20", icon || "info");
+  glyph.setAttribute("aria-hidden", "true");
+  n.append(glyph);
+  body.append(el("div", "t-bl", title));
+  if (sub) body.append(el("div", "t-bs v", sub));
+  row.append(n, body, el("span", "tl-time t-lm", right || ""));
+  return row;
+}
 function renderLog(s) {
   const log = $("log");
   log.textContent = "";
   const events = (s.events || []).slice(0, 14);
   if (!events.length) {
-    const row = el("div", "li");
-    row.append(el("div", "li-body t-bm v", "Nessuna manovra registrata"));
-    log.append(row);
+    log.append(el("div", "t-bm v", "Nessuna manovra registrata"));
     return;
   }
   const today = dayKey(new Date()), y = new Date(); y.setDate(y.getDate() - 1);
   const yesterday = dayKey(y);
   let group = null;
-  for (const e of events) {
+  events.forEach((e, i) => {
     const day = e.time.slice(0, 10);
     if (day !== group) {
       group = day;
-      const label = day === today ? "Oggi" : day === yesterday ? "Ieri" : Number(day.slice(8, 10)) + " " + MONTHS[Number(day.slice(5, 7)) - 1];
-      log.append(el("div", "grp-h t-lm", label));
+      log.append(el("span", "tl-day", day === today ? "Oggi" : day === yesterday ? "Ieri" : Number(day.slice(8, 10)) + " " + MONTHS[Number(day.slice(5, 7)) - 1]));
     }
-    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
-    const glyph = el("span", "ic s20", e.icon || "info");
-    glyph.setAttribute("aria-hidden", "true");
-    ic.append(glyph);
-    body.append(el("div", "t-bl", e.title || cap(e.text || "")));
-    if (e.sub) body.append(el("div", "t-bs v", e.sub));
-    row.append(ic, body, el("span", "li-time t-lm", hhmm(e.time)));
-    log.append(row);
-  }
+    const next = events[i + 1];
+    log.append(tlRow(e.icon, e.title || cap(e.text || ""), e.sub, hhmm(e.time), !next || next.time.slice(0, 10) !== day));
+  });
 }
 
 // ---- sezione Auto ----
@@ -1262,7 +1542,7 @@ function renderCar(s) {
   const i = s.car_info;
   if (!i) { drawRingOnce(0, 100); return; }
   $("carname").textContent = i.name || "Model 3";
-  $("carread").textContent = "Letta alle " + readAt(i.time);
+  $("carread").textContent = "Dati dell'ultima lettura, alle " + readAt(i.time);
   $("lockchip").hidden = i.locked == null;
   $("lockchipic").textContent = i.locked ? "lock" : "lock_open";
   $("lockchiptext").textContent = i.locked ? "Chiusa" : "Aperta";
@@ -1403,16 +1683,13 @@ function renderHistory(h) {
   const supers = h.supercharges || [];
   $("supersec").hidden = !supers.length;
   $("supers").textContent = "";
-  for (const s of supers) {
-    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
-    const g = el("span", "ic s20", "ev_station");
-    g.setAttribute("aria-hidden", "true");
-    ic.append(g);
-    body.append(el("div", "t-bl", s.site || "Supercharger"));
-    body.append(el("div", "t-bs v", Number(s.start.slice(8, 10)) + " " + MONTHS[Number(s.start.slice(5, 7)) - 1] + " alle " + s.start.slice(11, 16) + " · " + fmt(s.kwh) + " kWh · " + fmt(s.cost / Math.max(s.kwh, 0.1), 2) + " €/kWh"));
-    row.append(ic, body, el("span", "t-ts", fmt(s.cost, 2) + " €"));
+  supers.forEach((sc, i) => {
+    const when = Number(sc.start.slice(8, 10)) + " " + MONTHS[Number(sc.start.slice(5, 7)) - 1] + " alle " + sc.start.slice(11, 16) + " · " + fmt(sc.kwh) + " kWh";
+    const row = tlRow("ev_station", sc.site || "Supercharger", when, fmt(sc.cost, 2) + " €", i === supers.length - 1);
+    row.lastChild.className = "tl-time t-ts";
+    row.lastChild.style.color = "var(--onsf)";
     $("supers").append(row);
-  }
+  });
   const c = h.consumption || { km: 0, percent: 0, ready: false };
   $("consready").hidden = !c.ready; $("conswait").hidden = !!c.ready;
   if (c.ready) {
@@ -1454,6 +1731,9 @@ function renderHomeHero() {
   $("homekw").textContent = sun ? kw(p.pv_w) : kw(load);
   $("homekwsub").textContent = sun ? "dai pannelli" : "consumati dalla casa";
   $("hometitle").textContent = title;
+  $("homechiptext").textContent = sun && tone === "t-sun" ? "Sole attivo" : importing ? "Dalla rete" : discharging ? "A batteria" : "In equilibrio";
+  $("homechip").classList.toggle("pulse", sun && tone === "t-sun");
+  if (sun && tone === "t-sun") $("homechip").style.setProperty("--dot", "#e39e00"); else $("homechip").style.removeProperty("--dot");
   const parts = ["Casa " + kw(load) + " kW"];
   parts.push(charging ? "batteria in carica a " + kw(p.battery_w) + " kW" : discharging ? "batteria cede " + kw(p.battery_w) + " kW" : "batteria ferma");
   parts.push(exporting ? "in rete " + kw(p.grid_w) + " kW" : importing ? "dalla rete " + kw(p.grid_w) + " kW" : "nessuno scambio con la rete");
@@ -1469,7 +1749,8 @@ function renderHomeHero() {
 function renderHome(h) {
   state.home = h;
   renderHomeHero();
-  $("hometime").textContent = h.time ? "Impianto " + h.time.slice(11, 16) : "Impianto –";
+  $("hometime").textContent = h.time ? "impianto alle " + h.time.slice(11, 16) : "";
+  drawBarSub();
   const d = h.days[h.days.length - 1], today = $("hometoday");
   today.textContent = "";
   today.append(
@@ -1509,17 +1790,11 @@ function renderHome(h) {
   );
   $("alarmsec").hidden = !h.alarms.length;
   $("alarms").textContent = "";
-  for (const a of h.alarms) {
-    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
-    const glyph = el("span", "ic s20", "warning");
-    glyph.setAttribute("aria-hidden", "true");
-    ic.append(glyph);
-    const minutes = a.end ? Math.round((new Date(a.end.replace(" ", "T")) - new Date(a.start.replace(" ", "T"))) / 60000) : null;
-    body.append(el("div", "t-bl", a.name));
-    body.append(el("div", "t-bs v", Number(a.start.slice(8, 10)) + " " + MONTHS[Number(a.start.slice(5, 7)) - 1] + " " + a.start.slice(0, 4) + " alle " + a.start.slice(11, 16) + (minutes != null ? ", durata " + minutes + " min" : ", in corso")));
-    row.append(ic, body);
-    $("alarms").append(row);
-  }
+  h.alarms.forEach((al, i) => {
+    const minutes = al.end ? Math.round((new Date(al.end.replace(" ", "T")) - new Date(al.start.replace(" ", "T"))) / 60000) : null;
+    const when = Number(al.start.slice(8, 10)) + " " + MONTHS[Number(al.start.slice(5, 7)) - 1] + " " + al.start.slice(0, 4) + " alle " + al.start.slice(11, 16);
+    $("alarms").append(tlRow("warning", al.name, when, minutes != null ? minutes + " min" : "in corso", i === h.alarms.length - 1));
+  });
 }
 function renderHomeChart(h) {
   const days = h.days, today = dayKey(new Date());
@@ -1547,26 +1822,23 @@ function renderHomeChart(h) {
 const euro = (v) => fmt(v, 2) + " €";
 const dmy = (iso) => Number(iso.slice(8, 10)) + "/" + Number(iso.slice(5, 7));
 function renderBills(b) {
-  $("billowed").textContent = b.owed > 0 ? "Da pagare " + euro(b.owed) : "Nulla da pagare";
+  $("billowed").textContent = b.owed > 0 ? "Da pagare " + euro(b.owed) : "Saldo: nulla da pagare";
   const box = $("bills");
   box.textContent = "";
   for (const r of b.rows) {
-    const row = el("div", "li"), ic = el("span", "li-ic"), body = el("div", "li-body");
-    const glyph = el("span", "ic s20", r.estimated ? "calculate" : "receipt_long");
-    glyph.setAttribute("aria-hidden", "true");
-    ic.append(glyph);
+    const row = el("div", "bill");
     const name = cap(MONTHS[Number(r.month.slice(5, 7)) - 1]) + " " + r.month.slice(0, 4);
-    body.append(el("div", "t-bl", name));
     const kwh = fmt(r.kwh, 0) + " kWh dalla rete";
-    body.append(el("div", "t-bs v", r.estimated
-      ? (r.in_progress ? "Stima finora · " : "Stima, bolletta non ancora arrivata · ") + kwh
-      : kwh + " · " + fmt(r.amount / Math.max(r.kwh, 1), 2) + " €/kWh in media · " + (r.paid ? "pagata il " + dmy(r.paid) : "da pagare")));
-    const amount = el("span", "t-ts", (r.estimated ? "≈ " : "") + euro(r.amount));
+    const sub = r.estimated
+      ? (r.in_progress ? "In corso · " : "Bolletta non ancora arrivata · ") + kwh
+      : kwh + " · " + fmt(r.amount / Math.max(r.kwh, 1), 2) + " €/kWh in media" + (r.paid ? " · pagata il " + dmy(r.paid) : "");
+    const amount = el("span", "amt", (r.estimated ? "≈ " : "") + euro(r.amount));
     if (r.estimated) amount.style.color = "var(--onsfv)";
-    row.append(ic, body, amount);
+    const st = el("span", "st " + (r.estimated ? "est" : r.paid ? "paid" : "due"), r.estimated ? "Stima" : r.paid ? "Pagata" : "Da pagare");
+    row.append(el("span", "t-ts", name), amount, el("span", "t-bs v", sub), st);
     box.append(row);
   }
-  $("billnote").textContent = "Le stime usano " + fmt(b.prices.kwh * 100, 1) + " centesimi per kWh prelevato e " + euro(b.prices.fixed_monthly) + " al mese di quote fisse, ricavati dall'ultima bolletta. I kWh sono quelli misurati dall'inverter.";
+  $("billnote").textContent = "Le stime usano " + fmt(b.prices.kwh * 100, 1) + " centesimi per kWh prelevato e " + euro(b.prices.fixed_monthly) + " al mese di quote fisse, ricavati dall'ultima bolletta.";
 }
 async function refreshBills() {
   try {
@@ -1587,9 +1859,8 @@ async function refreshHome() {
 // ---- sezione Clima ----
 const deg = (v, d = 1) => (v == null ? "–" : fmt(v, d) + "°");
 function chip(icon, text) {
-  const c = el("span", "chip-a t-lm"), g = el("span", "ic s18", icon);
+  const c = el("span", "hchip"), g = el("span", "ic s18", icon);
   g.setAttribute("aria-hidden", "true");
-  c.style.color = "inherit"; c.style.borderColor = "currentColor";
   c.append(g, el("span", "", text));
   return c;
 }
@@ -1606,14 +1877,17 @@ function settingRow(icon, title, sub, value) {
 function renderClimate(k) {
   if (!k.configured) { $("climreason").textContent = "Le credenziali Emmeti non sono configurate sul server."; return; }
   state.climate = k;
+  drawBarSub();
   $("climalarm").hidden = !k.alarms.length;
   $("climalarmtext").textContent = k.alarms.join(", ");
   const p = k.power || {}, w = (p.heat_pump_w || 0) + (p.hot_water_w || 0), working = w > 150;
   const summer = k.season === "estate";
-  $("climhero").className = "hero stag " + (!k.on ? "t-idle" : working ? (summer ? "t-sun" : "t-tert") : "t-night");
+  $("climhero").className = "hero stag " + (!k.on ? "t-idle" : working ? (summer ? "t-cool" : "t-heat") : "t-night");
   $("climwrap").className = "hs-wrap " + (working ? "spin-slow" : "");
   $("climicon").textContent = !k.on ? "mode_off_on" : summer ? "ac_unit" : "mode_heat";
   $("climkw").textContent = kw(w);
+  $("climchiptext").textContent = !k.on ? "Spenta" : working ? (p.hot_water_w > p.heat_pump_w ? "Acqua calda" : summer ? "Raffresca" : "Riscalda") : "In attesa";
+  $("climchip").classList.toggle("pulse", !!(k.on && working));
   $("climkwsub").textContent = p.time ? "assorbiti alle " + p.time.slice(11, 16) : "assorbiti ora";
   $("climtitle").textContent = !k.on ? "Pompa di calore spenta" : working ? (p.hot_water_w > p.heat_pump_w ? "Scalda l'acqua sanitaria" : summer ? "Sta raffrescando" : "Sta riscaldando") : "Accesa, in attesa";
   $("climreason").textContent = "Stagione impostata: " + k.season + (summer ? ", raffrescamento" : ", riscaldamento") + ". Fuori ci sono " + deg(k.outside_temp) + ".";
@@ -1630,7 +1904,7 @@ function renderClimate(k) {
   $("roomsnote").textContent = calling ? calling + (calling === 1 ? " in chiamata" : " in chiamata") : "nessuna in chiamata";
   for (const r of k.rooms) {
     const c = el("div", "room" + (r.calling ? " call" : ""));
-    const head = el("div", ""), v = el("span", "dval", deg(r.temp));
+    const head = el("div", ""), v = el("span", "rt", deg(r.temp));
     head.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:8px";
     head.append(el("span", "t-lm v", r.label));
     if (r.calling) { const g = el("span", "ic f s18", summer ? "ac_unit" : "mode_heat"); g.setAttribute("aria-label", "in chiamata"); head.append(g); }
@@ -1796,8 +2070,9 @@ function render(s) {
   // Se sul server c'è una versione nuova dell'app, la pagina si ricarica da sola
   if (s.version && s.version !== PAGE_VERSION && !state.editing) return location.reload();
   state.status = s;
-  $("clock").textContent = s.time ? "Ultimo aggiornamento " + hhmm(s.time) + " · prossimo " + after(s.time, s.poll_seconds || 150) : "In attesa del primo ciclo";
+  state.clockR = s.time ? "Ultimo aggiornamento " + hhmm(s.time) + " · prossimo " + after(s.time, s.poll_seconds || 150) : "In attesa del primo ciclo";
   $("chipdry").hidden = s.live !== false;
+  drawBarSub();
   $("drybanner").hidden = s.live !== false;
   $("errbanner").hidden = !s.error;
   $("errtext").textContent = s.error || "";
@@ -1811,7 +2086,7 @@ async function refresh() {
     if (r.status === 401) return location.replace("/login");
     if (r.ok) render(await r.json());
   } catch (e) {
-    $("clock").textContent = "Connessione assente";
+    state.clockR = "Connessione assente"; drawBarSub();
   }
 }
 async function refreshHistory() {
@@ -1822,7 +2097,7 @@ async function refreshHistory() {
 }
 function soon() { setTimeout(refresh, 500); setTimeout(refresh, 4000); setTimeout(refresh, 12000); }
 
-placeIndicator();
+drawIdx();
 drawRing(0, 100);
 refresh();
 refreshForecast();
@@ -1830,7 +2105,7 @@ setInterval(refreshForecast, 30 * 60000);
 initPush().catch(() => {});
 setInterval(refresh, 30000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(); if (state.tab === "A") refreshHistory(); if (state.tab === "C") refreshHome(); if (state.tab === "K") refreshClimate(); } });
-document.fonts && document.fonts.ready.then(placeIndicator);
+document.fonts && document.fonts.ready.then(drawIdx);
 </script>
 </body>
 </html>

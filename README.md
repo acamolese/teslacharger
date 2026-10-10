@@ -131,7 +131,7 @@ La cartella `deploy/` contiene i due servizi systemd (ciclo di controllo e firma
 
 ## La webapp
 
-Si installa sulla schermata Home del telefono e ha quattro sezioni:
+Si installa sulla schermata Home del telefono. La veste grafica è quella del progetto in `design/Main.dc.html` (Material 3 Expressive, materiali Tesla): barra con il titolo della sezione e un indice delle sue parti, barra di navigazione in basso, intestazioni di gruppo con un colore per tipo (stato, controlli, archivio) e colori funzionali per sole, batteria di casa, Octopus e clima. Ha quattro sezioni, ciascuna divisa in tre parti:
 
 - **Ricarica**: stato, domanda della sera, consenso, previsione del sole, modalità, carica notturna con i due piani, notifiche e ultime manovre;
 - **Casa**: impianto fotovoltaico e batteria in tempo reale, energia del giorno, storico di 14 giorni, bollette Octopus con stima dei mesi non ancora fatturati;
